@@ -1,0 +1,27 @@
+config/environment-variables/.env.*.dev*
+config/environment-variables/.env.*.prod*
+
+*/dist
+**/node_modules
+*/.env
+*/.env.local
+.vs
+
+*.zip
+
+app/.expo/
+app/npm-debug.*
+app/*.jks
+app/*.p8
+app/*.p12
+app/*.key
+app/*.mobileprovision
+app/*.orig.*
+app/web-build/
+# app android build 
+app/android/
+
+# macOS
+app/.DS_Store
+
+dbml

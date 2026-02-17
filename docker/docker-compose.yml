@@ -1,0 +1,83 @@
+name: Kurts Cykel Shop
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ../backend/
+      dockerfile: Dockerfile
+      target: base
+    expose:
+      - "5000"
+    command: ["npm", "run", "dev"]
+    depends_on:
+      - db
+    env_file:
+      - ../config/environment-variables/.env.backend.dev
+    volumes:
+      - ../backend/src:/usr/src/app/src
+      - ../schemas:/usr/src/app/schemas
+    configs:
+      - source: backend_nodemon
+        target: /usr/src/app/nodemon.json
+    networks:
+      - internal
+      - public
+
+  db:
+    container_name: postgres
+    image: postgres:18-alpine
+    expose:
+      - "5432"
+    ports:
+      - 5432:5432
+    env_file:
+      - ../config/environment-variables/.env.db.dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - public
+      - internal
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    image: nginx:alpine
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+    networks:
+      - internal
+
+  ngrok:
+    container_name: ngrok
+    image: ngrok/ngrok:latest
+    ports:
+      - 4040:4040
+    command: ["http", "http://reverse-proxy:80", "--url=${NGROK_URL}"]
+    env_file:
+      - ../config/environment-variables/.env.grok.dev
+    networks:
+      - public
+      - internal
+
+networks:
+  public:
+    driver: bridge
+  internal:
+    name: internal
+    internal: true
+
+volumes:
+  postgres_data: {}
+
+configs:
+  nginx_config:
+    file: ../config/nginx.conf
+  client_nodemon:
+    file: ../client/nodemon.json
+  backend_nodemon:
+    file: ../backend/nodemon.json

@@ -1,0 +1,31 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/nordcominc/devcontainer-features/android-sdk:1": {},
+    "ghcr.io/casl0/devcontainer-features/android-sdk:1": {
+      "installNdk": true,
+      "installCmake": true,
+      "cmakeVersion": "3.22.1"
+    }
+  },
+
+  "postCreateCommand": "npm i",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "AbianS.prisma-generate-uml",
+        "crystal-spider.jsdoc-generator",
+        "redjue.git-commit-plugin",
+        "expo.vscode-expo-tools",
+        "vitest.explorer",
+        "yoavbls.pretty-ts-errors",
+        "Prisma.prisma",
+        "streetsidesoftware.code-spell-checker",
+        "christian-kohler.path-intellisense",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

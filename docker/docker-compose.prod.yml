@@ -1,0 +1,118 @@
+name: kurts-cykel-shop
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ../backend/
+      dockerfile: Dockerfile.production
+      target: base
+    expose:
+      - "3001"
+    depends_on:
+      - db
+    env_file:
+      - ../config/environment-variables/.env.backend.prod
+    volumes:
+      - ../schemas:/usr/src/app/dist/schemas
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - internal
+
+  client:
+    container_name: client
+    build:
+      context: ../client/
+      dockerfile: Dockerfile.production
+      target: base
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    environment:
+      - BACKEND_URL=http://reverse-proxy/api
+      - NODE_ENV=production
+    volumes:
+      - ../client:/usr/src/app
+    networks:
+      - internal
+
+  admin:
+    container_name: admin
+    build:
+      context: ../admin/
+      dockerfile: Dockerfile.production
+      target: base
+    expose:
+      - "3000"
+    command: ["npm", "run", "start"]
+    depends_on:
+      - backend
+    env_file:
+      - ../config/environment-variables/.env.admin.prod
+    volumes:
+      - ../admin:/usr/src/app
+      - ../admin/node_modules:/usr/src/app/node_modules
+    networks:
+      - public
+      - internal
+
+  db:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    env_file:
+      - ../config/environment-variables/.env.db.prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    build:
+      context: ..
+      dockerfile: docker/nginx.Dockerfile
+
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    volumes:
+      - ../config/nginx.conf:/etc/nginx/nginx.conf
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - internal
+
+  ngrok:
+    container_name: ngrok
+    image: ngrok/ngrok:latest
+    ports:
+      - 4040:4040
+    command: ["http", "http://reverse-proxy:80", "--url=${NGROK_URL}"]
+    env_file:
+      - ../config/environment-variables/.env.grok.prod
+    networks:
+      - public
+      - internal
+
+networks:
+  public:
+    driver: bridge
+  internal:
+    name: internal
+    internal: true
+
+volumes:
+  postgres_data: {}

@@ -1,0 +1,354 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User
+
+model User {
+  id        String  @id @default(uuid()) @db.Uuid
+  firstName String
+  lastName  String
+  initials  String  @unique @db.Char(3)
+  password  String
+  email     String  @unique
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles                 Role[]
+  refreshTokens         RefreshToken[]
+  accessTokens          AccessToken[]
+  assignedOrders        ServiceOrder[]         @relation("AssignedTo")
+  OrdersAssigned        ServiceOrder[]         @relation("AssignedBy")
+  inventoryTransactions InventoryTransaction[]
+  saleLogs              SaleLog[]
+}
+
+model Role {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  code        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles Role[]
+}
+
+model RefreshToken {
+  id        String  @id @default(uuid()) @db.Uuid
+  token     String  @unique
+  userId    String  @db.Uuid
+  sessionId String? @unique
+
+  createdAt DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessTokens AccessToken[]
+}
+
+model AccessToken {
+  id             String  @id @default(uuid()) @db.Uuid
+  token          String  @unique
+  refreshTokenId String? @db.Uuid
+  userId         String  @db.Uuid
+  sessionId      String  @unique
+
+  createdAt DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// Customer
+
+model Customer {
+  id        String  @id @default(uuid()) @db.Uuid
+  firstName String
+  lastName  String
+  email     String  @unique
+  phone     String?
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  customerLogs  CustomerLog[]
+  serviceOrders ServiceOrder[]
+}
+
+model CustomerLog {
+  id            String  @id @default(uuid()) @db.Uuid
+  customerId    String  @db.Uuid
+  tableField    String
+  oldValue      String?
+  newValue      String?
+  changedById   String  @db.Uuid
+  changedByName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+// Service Order
+
+model ServiceOrder {
+  id                  String    @id @default(uuid()) @db.Uuid
+  customerId          String    @db.Uuid
+  description         String
+  estimatedCompletion DateTime
+  completedAt         DateTime?
+  assignedToId        String?   @db.Uuid
+  assignedById        String    @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  assignedTo User?    @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedBy User     @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  serviceOrderInvoice ServiceOrderInvoice?
+  servicePartsUsed    ServicePartsUsed[]
+  serviceOrderLogs    ServiceOrderLog[]
+
+  @@index([customerId, createdAt])
+}
+
+model ServiceOrderInvoice {
+  serviceOrderId String   @id @unique @db.Uuid
+  price          Int
+  issuedAt       DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+}
+
+model ServicePartsUsed {
+  id             String @id @default(uuid()) @db.Uuid
+  serviceOrderId String @db.Uuid
+  itemId         String @db.Uuid
+  quantity       Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  item         Item         @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceOrderId, itemId])
+}
+
+model ServiceOrderLog {
+  id             String  @id @default(uuid()) @db.Uuid
+  serviceOrderId String  @db.Uuid
+  tableField     String
+  oldValue       String?
+  newValue       String?
+  changedById    String  @db.Uuid
+  changedByName  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+}
+
+// Storage
+
+model Item {
+  id              String  @id @default(uuid()) @db.Uuid
+  sku             String  @unique
+  name            String
+  description     String?
+  quantity        Int
+  minSellQuantity Int
+  price           Int // Pris i øre
+  unitId          String  @db.Uuid
+  statusId        String  @db.Uuid
+  locationId      String  @db.Uuid
+  vendorId        String  @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  servicePartsUsed      ServicePartsUsed[]
+  unit                  Unit                   @relation(fields: [unitId], references: [id])
+  itemStatus            ItemStatus             @relation(fields: [statusId], references: [id])
+  location              Location               @relation(fields: [locationId], references: [id])
+  vendor                Vendor                 @relation(fields: [vendorId], references: [id])
+  barcodes              Barcode[]
+  inventoryTransactions InventoryTransaction[]
+  saleLogs              SaleLog[]
+}
+
+model Unit {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items                 Item[]
+  inventoryTransactions InventoryTransaction[]
+  saleLogs              SaleLog[]
+}
+
+model ItemStatus {
+  id          String @id @default(uuid()) @db.Uuid
+  code        String @unique
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items Item[]
+}
+
+model Location {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items                 Item[]
+  inventoryTransactions InventoryTransaction[]
+}
+
+model Vendor {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  address     String?
+  mail        String?
+  phone       String?
+  url         String?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items Item[]
+}
+
+model Barcode {
+  id     String @id @default(uuid()) @db.Uuid
+  code   String @unique
+  itemId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model InventoryTransaction {
+  id              String @id @default(uuid()) @db.Uuid
+  itemId          String @db.Uuid
+  locationId      String @db.Uuid
+  type            String
+  quantityChange  Int
+  unitId          String @db.Uuid
+  referenceTypeId String @db.Uuid
+  referenceId     String
+  performedById   String @db.Uuid
+  performedByName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  performedBy   User          @relation(fields: [performedById], references: [id], onDelete: Cascade)
+  location      Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  unit          Unit          @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  referenceType ReferenceType @relation(fields: [referenceTypeId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+  @@index([performedById, createdAt])
+}
+
+model ReferenceType {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventoryTransactions InventoryTransaction[]
+}
+
+model PriceLog {
+  id            String @id @default(uuid()) @db.Uuid
+  oldPrice      Int
+  newPrice      Int
+  itemId        String @db.Uuid
+  changedById   String @db.Uuid
+  changedByName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LocationLog {
+  id            String @id @default(uuid()) @db.Uuid
+  locationId    String @db.Uuid
+  tableField    String
+  oldLocationId String @db.Uuid
+  newLocationId String @db.Uuid
+  changedById   String @db.Uuid
+  changedByName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SaleLog {
+  id                   String @id @default(uuid()) @db.Uuid
+  itemId               String @db.Uuid
+  salePricePerUnit     Int
+  originalPricePerUnit Int
+  quantity             Int
+  unitId               String @db.Uuid
+  soldById             String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  unit   Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  soldBy User @relation(fields: [soldById], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+  @@index([soldById, createdAt])
+}
