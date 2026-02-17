@@ -1,17 +1,16 @@
 import { faker } from "@faker-js/faker";
-import {
-  Prisma,
-  PrismaClient,
-  RawMaterial,
-  RawMaterial_MenuItem,
-  Table,
-} from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { menuItem } from "@utils/configs";
 import { hash } from "argon2";
 
 // Use crypto to generate random hex strings
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({ adapter });
 
 const permissionGroups = [
   "Administrator",
@@ -20,7 +19,6 @@ const permissionGroups = [
   "Stock",
   "Table",
   "Reservation",
-  "Stripe",
 ] as const;
 type PermissionGroups = (typeof permissionGroups)[number];
 const permissions: {
@@ -77,21 +75,6 @@ const permissions: {
     code: "administrator:dashboard:login",
     group: "Administrator",
     description: "Login to the admin dashboard",
-  },
-  {
-    code: "stripe:terminal:create",
-    group: "Stripe",
-    description: "Create terminal",
-  },
-  {
-    code: "stripe:payment:create",
-    group: "Stripe",
-    description: "Create a payment",
-  },
-  {
-    code: "stripe:payment:check",
-    group: "Stripe",
-    description: "Check if a payment was successful",
   },
   { code: "order:view", group: "Order", description: "View order" },
   { code: "order:create", group: "Order", description: "Create order" },

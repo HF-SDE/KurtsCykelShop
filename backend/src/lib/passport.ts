@@ -43,7 +43,6 @@ passport.use(
       usernameField: "username",
       passwordField: "password",
     },
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (username, password, done) => {
       try {
         // Return success for now to test
@@ -52,7 +51,7 @@ passport.use(
           return done(null, false, { message: "User not found" });
         }
 
-        if (!user.active) {
+        if (!user.isActive) {
           return done(null, false, { message: "User deactivated" });
         }
 

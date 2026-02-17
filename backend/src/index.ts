@@ -1,4 +1,3 @@
-import config from "@config";
 import authRoutes from "@routes/auth.routes";
 import manageRoutes from "@routes/manage.routes";
 import menuRoutes from "@routes/menu.routes";
@@ -11,14 +10,15 @@ import stripeRoutes from "@routes/stripe.routes";
 import tableRoutes from "@routes/table.routes";
 import bodyParser from "body-parser";
 import cors from "cors";
+import express from "express";
 import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
+import config from "lib/config";
 import passport from "passport";
-import express from "express";
+
+import "./lib/passport";
 
 const app = express();
-
-import "./passport";
 
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_RESET_MINUTES * 60 * 1000, // 60 minutes
