@@ -1,23 +1,23 @@
-import { Slot, Stack, usePathname } from "expo-router";
-import * as SplashScreen from 'expo-splash-screen';
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import '@/global.css';
-import { useEffect, useState } from "react";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { Fab, FabIcon } from "@/components/ui/fab";
-import { MoonIcon, SunIcon } from "@/components/ui/icon";
+import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+
+import "@/global.css";
+
+import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  return <RootLayoutNav/>
+  return <RootLayoutNav />;
 }
 
-
 function RootLayoutNav() {
-  const pathname = usePathname();
-  const [colorMode, setColorMode] = useState<'light' | 'dark'>('light');
+  const colorMode = "system";
 
   useEffect(() => {
     // Hide the splash screen once the app is ready
@@ -25,21 +25,12 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <GluestackUIProvider mode={colorMode}>
-      <ThemeProvider value={colorMode === 'dark' ? DarkTheme : DefaultTheme}>
-        <Slot />
-        {pathname === '/' && (
-          <Fab
-            onPress={() =>
-              setColorMode(colorMode === 'dark' ? 'light' : 'dark')
-            }
-            className="m-6"
-            size="lg"
-          >
-            <FabIcon as={colorMode === 'dark' ? MoonIcon : SunIcon} />
-          </Fab>
-        )}
-      </ThemeProvider>
-    </GluestackUIProvider>
+    <SafeAreaProvider>
+      <GluestackUIProvider mode={colorMode}>
+        <ThemeProvider>
+          <Slot />
+        </ThemeProvider>
+      </GluestackUIProvider>
+    </SafeAreaProvider>
   );
 }
