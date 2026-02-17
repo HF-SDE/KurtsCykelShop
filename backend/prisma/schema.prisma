@@ -17,6 +17,7 @@ datasource db {
 
 model User {
   id        String  @id @default(uuid()) @db.Uuid
+  username  String  @unique
   firstName String
   lastName  String
   initials  String  @unique @db.Char(3)
@@ -28,12 +29,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   roles                 Role[]
-  refreshTokens         RefreshToken[]
-  accessTokens          AccessToken[]
   assignedOrders        ServiceOrder[]         @relation("AssignedTo")
   OrdersAssigned        ServiceOrder[]         @relation("AssignedBy")
   inventoryTransactions InventoryTransaction[]
   saleLogs              SaleLog[]
+  sessions              Session[]
+
+  @@unique([firstName, lastName])
 }
 
 model Role {
@@ -59,31 +61,21 @@ model Permission {
   roles Role[]
 }
 
-model RefreshToken {
-  id        String  @id @default(uuid()) @db.Uuid
-  token     String  @unique
-  userId    String  @db.Uuid
-  sessionId String? @unique
-
-  createdAt DateTime @default(now())
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessTokens AccessToken[]
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     Token[]
+  expiresAt DateTime
 }
 
-model AccessToken {
-  id             String  @id @default(uuid()) @db.Uuid
-  token          String  @unique
-  refreshTokenId String? @db.Uuid
-  userId         String  @db.Uuid
-  sessionId      String  @unique
-
-  createdAt DateTime @default(now())
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshToken RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
+model Token {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionId    String   @db.Uuid
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  accessToken  String   @unique
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
 }
 
 // Customer
