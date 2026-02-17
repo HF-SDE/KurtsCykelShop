@@ -13,7 +13,7 @@
     "build": "docker compose -f ./docker/docker-compose.prod.yml build",
     "seed": "cd backend && npx prisma migrate deploy && npx prisma db seed",
     "prisma:generate": "cd backend && npx prisma generate",
-    "create-envs": "cd config/environment-variables && bash create-envs.sh"
+    "create-envs": "node config/environment-variables/copy-env-dev.mjs"
   },
   "author": "Kurt",
   "description": "World best cykel shop",
