@@ -1,4 +1,4 @@
-import { Status } from "@api-types/general.types";
+import { Status } from "@/types/general.types";
 
 /**
  * Returns the HTTP status code for a given Status

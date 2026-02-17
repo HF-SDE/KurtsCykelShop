@@ -2,5 +2,6 @@
   "watch": ["src", "schemas"],
   "ext": "ts,json",
   "ignore": ["src/**/*.spec.ts", "src/tests/**"],
-  "exec": "npx ts-node -T -r tsconfig-paths/register --project tsconfig.build.json ./src/index.ts"
+  "env": { "TS_NODE_PROJECT": "tsconfig.build.json" },
+  "exec": "tsx watch -r tsconfig-paths/register ./src/index.ts"
 }
