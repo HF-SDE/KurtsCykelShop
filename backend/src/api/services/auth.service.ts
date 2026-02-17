@@ -1,17 +1,18 @@
-import { UserToken } from "@api-types/JWTToken";
+//import { JwtPayload } from 'jsonwebtoken';
+import config from "@/lib/config";
+import prisma from "@/lib/prisma";
+import { UserToken } from "@/types/JWTToken";
 import {
   AccessResult,
   LoginAttemptsCache,
   LoginRequestBody,
   RefreshResult,
   TokenRequestBody,
-} from "@api-types/auth.types";
-import { APIResponse, Status } from "@api-types/general.types";
-//import { JwtPayload } from 'jsonwebtoken';
-import config from "@config";
-import prisma from "@prisma-instance";
-import { Session } from "@prisma/client";
-import { LoginSchema, TokenSchema } from "@schemas/auth.schemas";
+} from "@/types/auth.types";
+import { APIResponse, Status } from "@/types/general.types";
+
+import { Session } from "@prisma";
+import { LoginSchema, TokenSchema } from "@schemas/auth.schema";
 import { Mutex } from "async-mutex";
 import jwt from "jsonwebtoken";
 import passport from "passport";
@@ -50,20 +51,14 @@ export async function generateUserTokens(
 ): Promise<AccessResult> {
   const newId = crypto.randomUUID();
 
-  const userPermissions = await prisma.userPermissions.findMany({
-    where: {
-      userId: user.sub,
-    },
-    select: {
-      Permission: {
-        select: {
-          code: true,
-        },
-      },
-    },
+  const userWithRoles = await prisma.user.findFirst({
+    where: { id: user.sub },
+    include: { roles: { include: { permissions: true } } },
   });
 
-  const permissionCodes = userPermissions.map((perm) => perm.Permission.code);
+  const permissionCodes = userWithRoles?.roles.flatMap((role) =>
+    role.permissions.map((perm) => perm.code),
+  );
 
   const newAccessToken = generateToken(
     {
@@ -71,7 +66,7 @@ export async function generateUserTokens(
       sub: user.sub,
       name: user.name,
       username: user.username,
-      permissions: permissionCodes,
+      permissions: permissionCodes || [],
       initials: user.initials,
     },
     ip,
@@ -162,7 +157,9 @@ export async function invalidateAllTokensForUser(
  * @returns {Promise<RefreshResult | null>} A promise that resolves to an object containing the refresh token if valid, or `null` if the access token is invalid or expired.
  * @throws {Error} If there is an error during token verification or database operations.
  */
-export async function getRefreshToken(tokenBody: TokenRequestBody) {
+export async function getRefreshToken(
+  tokenBody: TokenRequestBody,
+): Promise<RefreshResult | null> {
   let user;
 
   try {
@@ -398,7 +395,7 @@ export async function login(
   userData: LoginRequestBody,
 ): Promise<APIResponse<AccessResult>> {
   try {
-    const validate = LoginSchema.validate({
+    const validate = LoginSchema.safeParse({
       username: userData.username,
       password: userData.password,
     });
@@ -442,7 +439,7 @@ export async function login(
               {
                 sub: user.id,
                 username: user.username,
-                name: user.name,
+                name: user.firstName + " " + user.lastName,
                 initials: user.initials,
               },
               userData.ip,
@@ -481,7 +478,7 @@ export async function login(
 export async function logout(token: TokenRequestBody): Promise<APIResponse> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {
@@ -523,7 +520,7 @@ export async function accessToken(
 ): Promise<APIResponse<AccessResult>> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {
@@ -572,7 +569,7 @@ export async function refreshToken(
 ): Promise<APIResponse<RefreshResult>> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {
