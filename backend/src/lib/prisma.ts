@@ -1,16 +1,16 @@
-/* eslint-disable security/detect-object-injection */
-import { IAPIResponse, Status } from "@api-types/general.types";
+import { capitalize } from "@/utils/Utils";
+
+import { IAPIResponse, Status } from "@/types/general.types";
+
 import { Prisma, PrismaClient } from "@prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-
-import { capitalize } from "@utils/Utils";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
 });
 
-const prisma = new PrismaClient({ adapter});
+const prisma = new PrismaClient({ adapter });
 export default prisma;
 
 export type prismaModels = Uncapitalize<Prisma.ModelName>;

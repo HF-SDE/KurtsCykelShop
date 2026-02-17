@@ -1,4 +1,5 @@
-import { Config, NODE_ENV, isPort } from "@api-types/config.types";
+import { Config, NODE_ENV, isPort } from "@/types/config.types";
+
 import * as dotenv from "dotenv";
 import path from "path";
 
@@ -10,7 +11,7 @@ dotenv.config({ path: path.join(__dirname, "../", ".env") });
  */
 const config: Config = {
   NODE_ENV: (process.env.NODE_ENV as NODE_ENV) || "development",
-  PORT: isPort(Number(process.env.PORT)) ? Number(process.env.PORT) : 3001,
+  PORT: isPort(Number(process.env.PORT)) ? Number(process.env.PORT) : 5000,
   RATE_LIMIT_COUNT: Number(process.env.RATE_LIMIT_COUNT) || 500,
   RATE_LIMIT_RESET_MINUTES: Number(process.env.RATE_LIMIT_RESET_MINUTES) || 60,
   ACCESS_TOKEN_SECRET:

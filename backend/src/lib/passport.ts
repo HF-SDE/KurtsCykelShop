@@ -1,6 +1,7 @@
-import { UserToken } from "@api-types/JWTToken";
-import config from "@config";
-import prisma from "@prisma-instance";
+import config from "@/lib/config";
+import prisma from "@/lib/prisma";
+import { UserToken } from "@/types/JWTToken";
+
 import argon2 from "argon2";
 import { Request } from "express";
 import passport from "passport";
