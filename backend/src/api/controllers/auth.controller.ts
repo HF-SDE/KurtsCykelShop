@@ -1,19 +1,19 @@
+import { getHttpStatusCode } from "@/utils/Utils";
+
 import {
   AccessResult,
   GetAccessTokenRequestBody,
   LoginRequestBody,
   LogoutRequestBody,
-} from "@api-types/auth.types";
-import { APIResponse } from "@api-types/general.types";
-import { getHttpStatusCode } from "@utils/Utils";
+} from "@/types/auth.types";
+import { APIResponse } from "@/types/general.types";
+
 import { Request, Response } from "express";
 
 import * as AuthService from "../services/auth.service";
 
 // Utility function to get the client's IP address
-// eslint-disable-next-line func-style
 const getClientIp = (req: any): string => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   return req.headers["x-forwarded-for"] || "";
 };
 
@@ -51,6 +51,7 @@ export async function logout(
   res: Response<APIResponse>,
 ): Promise<void> {
   const { token } = req.body;
+
   const response = await AuthService.logout({
     token,
     ip: getClientIp(req),
@@ -70,6 +71,7 @@ export async function getAccessToken(
   res: Response<APIResponse<AccessResult>>,
 ): Promise<void> {
   const { token } = req.body;
+
   const response = await AuthService.accessToken({
     token,
     ip: getClientIp(req),

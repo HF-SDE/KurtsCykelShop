@@ -1,5 +1,5 @@
 // types.d.ts
-import { User as PrismaUser } from "@prisma/client";
+import { User as PrismaUser } from "@prisma";
 
 declare global {
   namespace Express {

@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Prisma, PrismaClient } from "@prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { menuItem } from "@utils/configs";
 import { hash } from "argon2";
 
 // Use crypto to generate random hex strings
