@@ -10,9 +10,6 @@
     "dev": "nodemon -L",
     "test": "vitest --run"
   },
-  "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register ./src/seed.ts"
-  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
     "@types/express-serve-static-core": "^5.1.1",

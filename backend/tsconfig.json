@@ -23,5 +23,5 @@
     },
     "allowJs": true
   },
-  "include": ["src/**/*", "../schemas/**/*"]
+  "include": ["src/**/*", "../schemas/**/*", "prisma/**/*", "prisma.config.ts"]
 }
