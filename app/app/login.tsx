@@ -1,30 +1,27 @@
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useColorScheme } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
+import { Center } from "@/components/ui/center";
 import {
   FormControl,
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
-  FormControlHelper,
-  FormControlHelperText,
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { AlertCircleIcon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
+import PasswordInput from "@/components/ui/input/password";
+import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+
+import {
+  NotificationFeedbackType,
+  triggerHapticFeedback,
+} from "@/utils/hapticFeedback";
 
 import { router } from "expo-router";
 
@@ -40,22 +37,9 @@ export default function Index() {
   const [errorMessage, setErrorMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isUsernameEmpty, setIsUsernameEmpty] = useState(false);
-  const [isPasswordEmpty, setIsPasswordEmpty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [isInvalid, setIsInvalid] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("12345");
-
-  const handleSubmit = () => {
-    if (inputValue.length < 6) {
-      setIsInvalid(true);
-    } else {
-      setIsInvalid(false);
-    }
-  };
-
-  const colorScheme = useColorScheme();
 
   const handleLogin = async () => {
     const trimmedUsername = username.trim();
@@ -67,24 +51,21 @@ export default function Index() {
     const isUsernameValid = trimmedUsername !== "";
     const isPasswordValid = trimmedPassword !== "";
 
-    setIsUsernameEmpty(!isUsernameValid);
-    setIsPasswordEmpty(!isPasswordValid);
-
     if (isUsernameValid && isPasswordValid) {
       setIsLoading(true);
       const signInResult = await signIn(trimmedUsername, trimmedPassword);
 
       if (signInResult === "authenticated") {
-        // await triggerHapticFeedback(NotificationFeedbackType.Success);
+        await triggerHapticFeedback(NotificationFeedbackType.Success);
         setErrorMessage("");
         // router.replace("/");
       } else {
-        // await triggerHapticFeedback(NotificationFeedbackType.Error);
+        await triggerHapticFeedback(NotificationFeedbackType.Error);
         setErrorMessage(signInResult);
       }
       setIsLoading(false);
     } else {
-      // await triggerHapticFeedback(NotificationFeedbackType.Error);
+      await triggerHapticFeedback(NotificationFeedbackType.Error);
       setErrorMessage("Please fill out username and password");
     }
   };
@@ -96,11 +77,17 @@ export default function Index() {
   }, [username, password]);
 
   return (
-    <>
+    <Center>
       <View style={styles.logoContainer}>
         {/* <Logo width={340} height={340} /> */}
       </View>
-      <VStack>
+      <Text bold={true} size="xl">
+        Medarbejder kan erstattes det.
+      </Text>
+      <Text bold={true} size="xl">
+        Det kan vare ikke.
+      </Text>
+      <VStack style={styles.formContainer}>
         <FormControl
           isInvalid={isInvalid}
           size="md"
@@ -114,69 +101,36 @@ export default function Index() {
           <Input className="my-1" size="md">
             <InputField
               type="text"
-              placeholder="username"
-              value={inputValue}
-              onChangeText={(text) => setInputValue(text)}
+              placeholder="Email"
+              value={username}
+              onChangeText={(text) => setUsername(text)}
             />
           </Input>
-          <FormControlHelper>
-            <FormControlHelperText>
-              Must be at least 6 characters.
-            </FormControlHelperText>
-          </FormControlHelper>
           <FormControlError>
             <FormControlErrorIcon
               as={AlertCircleIcon}
               className="text-red-500"
             />
             <FormControlErrorText className="text-red-500">
-              At least 6 characters are required.
+              {errorMessage}
             </FormControlErrorText>
           </FormControlError>
         </FormControl>
-        <FormControl
+        <PasswordInput
           isInvalid={isInvalid}
-          size="md"
-          isDisabled={false}
-          isReadOnly={false}
-          isRequired={false}
-        >
-          <FormControlLabel>
-            <FormControlLabelText>Password</FormControlLabelText>
-          </FormControlLabel>
-          <Input className="my-1" size="md">
-            <InputField
-              type="password"
-              placeholder="password"
-              value={inputValue}
-              onChangeText={(text) => setInputValue(text)}
-            />
-          </Input>
-          <FormControlHelper>
-            <FormControlHelperText>
-              Must be at least 6 characters.
-            </FormControlHelperText>
-          </FormControlHelper>
-          <FormControlError>
-            <FormControlErrorIcon
-              as={AlertCircleIcon}
-              className="text-red-500"
-            />
-            <FormControlErrorText className="text-red-500">
-              At least 6 characters are required.
-            </FormControlErrorText>
-          </FormControlError>
-        </FormControl>
+          inputValue={password}
+          onChangeText={setPassword}
+        />
         <Button
-          className="mt-4 w-fit self-end"
-          size="sm"
-          variant="outline"
-          onPress={handleSubmit}
+          className="mt-4 w-full self-end"
+          size="md"
+          variant="solid"
+          onPress={handleLogin}
         >
-          <ButtonText>Submit</ButtonText>
+          <ButtonText>Login</ButtonText>
         </Button>
       </VStack>
-    </>
+    </Center>
   );
 }
 
