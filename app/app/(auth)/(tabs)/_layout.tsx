@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
 
 import { Box } from "@/components/ui/box";
+import { Icon } from "@/components/ui/icon";
 
-import {
-  ImpactFeedbackStyle,
-  triggerHapticFeedback,
-} from "@/utils/hapticFeedback";
+import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Tabs } from "expo-router";
+import { BookText, CircleUserRound, Package, UserRoundCog, Wrench } from "lucide-react-native";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [hasOrderPermission, setHasOrderPermission] = useState(true);
-  const [hasReservationPermission, setHasReservationPermission] =
-    useState(true);
+  const [hasReservationPermission, setHasReservationPermission] = useState(true);
   const [hasManagementPermission, setHasManagementPermission] = useState(true);
 
   // const checkPermissions = async () => {
@@ -80,16 +76,7 @@ export default function TabLayout() {
           options={{
             title: "Tab 1",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => (
-              <Entypo
-                name="list"
-                size={42}
-                // color={focused ? colors.accent : colors.secondary}
-                className={
-                  focused ? "!text-typography-800" : "!text-typography-300"
-                }
-              />
-            ),
+            tabBarIcon: ({ focused }) => <Icon as={BookText} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
           }}
         />
       )}
@@ -99,15 +86,27 @@ export default function TabLayout() {
           options={{
             title: "Tab 2",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => (
-              <FontAwesome6
-                name="gear"
-                size={38}
-                className={
-                  focused ? "!text-typography-800" : "!text-typography-300"
-                }
-              />
-            ),
+            tabBarIcon: ({ focused }) => <Icon as={Package} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+          }}
+        />
+      )}
+      {hasManagementPermission && (
+        <Tabs.Screen
+          name="admin"
+          options={{
+            title: "Tab 2",
+            tabBarItemStyle: { display: "flex" },
+            tabBarIcon: ({ focused }) => <Icon as={UserRoundCog} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+          }}
+        />
+      )}
+      {hasManagementPermission && (
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Profile",
+            tabBarItemStyle: { display: "flex" },
+            tabBarIcon: ({ focused }) => <Icon as={CircleUserRound} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
           }}
         />
       )}
