@@ -20,6 +20,7 @@ const permissionGroups = [
   { name: "Administrator" },
   { name: "Medarbejder" },
   { name: "BundenAfFødekæden" },
+  { name: "Storage" },
 ] as const satisfies PermissionGroupCreateInput[];
 
 type PermissionSeed = {
