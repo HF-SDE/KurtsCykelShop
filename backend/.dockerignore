@@ -4,3 +4,4 @@ node_modules
 ./src/tests/**
 package-lock.json
 nodemon.json
+generated
