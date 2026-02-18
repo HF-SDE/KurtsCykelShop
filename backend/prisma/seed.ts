@@ -75,7 +75,7 @@ const permissions: PermissionSeed[] = [
     group: "Administrator",
     description: "Login to the admin dashboard",
   },
-  { code: "storage:view", group: "storage", description: "View storage" },
+  { code: "storage:view", group: "Storage", description: "View storage" },
   {
     code: "storage:create:item",
     group: "Storage",
