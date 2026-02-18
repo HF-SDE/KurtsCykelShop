@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+import { Box } from "@/components/ui/box";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
