@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { useColorScheme } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";

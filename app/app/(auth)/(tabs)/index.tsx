@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Modal, TouchableOpacity, View } from "react-native";
 
-import { useSession } from "@/app/ctx";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 
 // import ResetPasswordModal from "../profile/reset-password";
 // import TemplateLayout from "@/components/TemplateLayout";
 // import LoadingPage from "@/components/LoadingPage";
 // import { useThemeColor } from "@/hooks/useThemeColor";
-// import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfile } from "@/hooks/useUserProfile";
+
+import { useSession } from "@/app/ctx";
+
 // import Button from "@/components/DefaultButton";
 
 export default function UserProfileScreen() {
-  // const { userProfile, isLoading, error } = useUserProfile();
+  const { userProfile, isLoading, error } = useUserProfile();
   const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const { signOut, session } = useSession();
 
@@ -27,45 +31,32 @@ export default function UserProfileScreen() {
     };
   }, []);
 
-  // if (isLoading) {
-  //   return <Text />;
-  // }
+  if (isLoading) return <Text> Loading...</Text>;
 
   return (
     // <TemplateLayout pageName="ProfilePage">
-    <View style={[styles.container, isLandscape && styles.containerLandscape]}>
-      <View style={[styles.contentContainer, isLandscape && styles.contentContainerLandscape]}>
-        <View style={[styles.topContainer, isLandscape && styles.topContainerLandscape]}>
-          {/* <View
-            style={[
-              styles.avatar,
-              {
-                backgroundColor: theme.accent,
-                borderColor: theme.primary,
-              },
-              isLandscape && styles.avatarLandscape,
-            ]}
+    <View className={`bg-background-0 flex-1 items-center justify-between px-5 ${isLandscape ? "flex-row items-start justify-start" : ""}`}>
+      <View className={`w-full max-w-[400px] flex-1 justify-between px-5 ${isLandscape ? "flex-row items-center justify-between" : ""}`}>
+        <View className={`items-center pt-10 ${isLandscape ? "flex-row pr-[50px]" : ""}`}>
+          <View
+            className={`bg-background-100 border-background-200 h-[150px] w-[150px] items-center justify-center rounded-full border-8 ${isLandscape ? "mb-0 mr-5" : "mb-5"}`}
           >
-            <Text style={[styles.avatarText, { color: theme.text }]}>
-              {userProfile?.initials || "?"}
-            </Text>
+            <Text className="text-typography-900 text-[40px] font-bold">{userProfile?.initials || "?"}</Text>
           </View>
-          <View style={styles.textContainer}>
-            <Text style={[styles.nameText, { color: theme.text }]}>
-              Hi, {userProfile?.name || "N/A"}
-            </Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>
-              Email: {userProfile?.email || "N/A"}
-            </Text>
-          </View> */}
+          <View className="w-full">
+            <Text className="text-typography-900 w-full text-left text-2xl font-bold">Hi, {userProfile?.name || "N/A"}</Text>
+            <Text className="text-typography-900 mb-1.5 w-full text-left text-base">Email: {userProfile?.email || "N/A"}</Text>
+          </View>
         </View>
 
-        <View style={[styles.buttonContainer, isLandscape && styles.buttonContainerLandscape]}>
-          {/* <Button
-            title="Change Password"
-            onPress={() => setIsModalVisible(true)}
-          />
-          <Button title={"Log Out"} onPress={signOut} /> */}
+        <View className={`min-h-[180px] justify-center pb-5 pt-10 ${isLandscape ? "min-w-[230px] pb-0" : ""}`}>
+          <Button onPress={() => setIsModalVisible(true)}>
+            <Text className="text-primary-0">Change Password</Text>
+          </Button>
+
+          <Button onPress={signOut}>
+            <Text className="text-primary-0">Sign Out</Text>
+          </Button>
         </View>
       </View>
 
@@ -75,117 +66,13 @@ export default function UserProfileScreen() {
         visible={isModalVisible}
         onRequestClose={() => setIsModalVisible(false)} // Close modal on Android back button
       >
-        <View style={styles.modalOverlay}>
-          {/* <View
-            style={[styles.modalContent, { backgroundColor: theme.primary }]}
-          >
-            <ResetPasswordModal onClose={() => setIsModalVisible(false)} />
-          </View> */}
+        <View className="h-full w-full flex-1 items-center justify-center bg-black/50">
+          <View className="bg-background-0 min-h-[400px] w-[90%] max-w-[400px] rounded-[10px] p-2.5">
+            {/* <ResetPasswordModal onClose={() => setIsModalVisible(false)} /> */}
+          </View>
         </View>
       </Modal>
     </View>
     // </TemplateLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  containerLandscape: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-  },
-  contentContainer: {
-    flex: 1,
-    maxWidth: 400,
-    width: "100%",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-  },
-  contentContainerLandscape: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  topContainer: {
-    alignItems: "center",
-    paddingTop: 40,
-  },
-  topContainerLandscape: {
-    flexDirection: "row",
-    paddingRight: 50,
-  },
-  avatar: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-    borderWidth: 8,
-  },
-  avatarLandscape: {
-    marginBottom: 0,
-    marginRight: 20,
-  },
-  avatarText: {
-    fontSize: 40,
-    fontWeight: "bold",
-  },
-  nameText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "left",
-    width: "100%",
-  },
-  infoText: {
-    fontSize: 16,
-    textAlign: "left",
-    width: "100%",
-    marginBottom: 5,
-  },
-  buttonContainer: {
-    justifyContent: "center",
-    paddingTop: 40,
-
-    paddingBottom: 20,
-    minHeight: 180,
-  },
-  buttonContainerLandscape: {
-    paddingBottom: 0,
-    minWidth: 230,
-  },
-  button: {
-    paddingVertical: 10,
-    alignItems: "center",
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  buttonText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  modalOverlay: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "90%",
-    maxWidth: 400,
-    minHeight: 400,
-    padding: 10,
-    borderRadius: 10,
-  },
-  textContainer: {
-    width: "100%",
-  },
-});
