@@ -19,12 +19,9 @@ import { VStack } from "@/components/ui/vstack";
 
 import { NotificationFeedbackType, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
-import { useSession } from "./ctx";
+import { router } from "expo-router";
 
-// import {
-//   triggerHapticFeedback,
-//   NotificationFeedbackType,
-// } from "@/utils/hapticFeedback";
+import { useSession } from "./ctx";
 
 export default function Index() {
   const { signIn } = useSession();
@@ -49,10 +46,11 @@ export default function Index() {
       setIsLoading(true);
       const signInResult = await signIn(trimmedUsername, trimmedPassword);
 
+      console.log("Sign-in result:", signInResult);
       if (signInResult === "authenticated") {
         await triggerHapticFeedback(NotificationFeedbackType.Success);
         setErrorMessage("");
-        // router.replace("/");
+        router.replace("/");
       } else {
         await triggerHapticFeedback(NotificationFeedbackType.Error);
         setErrorMessage(signInResult);
@@ -74,7 +72,7 @@ export default function Index() {
     <Center>
       <View style={styles.logoContainer}>{/* <Logo width={340} height={340} /> */}</View>
       <Text bold={true} size="xl">
-        Medarbejder kan erstattes det.
+        Medarbejder kan erstattes.
       </Text>
       <Text bold={true} size="xl">
         Det kan vare ikke.
@@ -102,11 +100,6 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   logoContainer: {
     marginBottom: 40,
     alignItems: "center",
@@ -116,47 +109,5 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: 20,
     gap: 10,
-  },
-  input: {
-    height: 50,
-    width: "100%",
-    borderWidth: 2,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-  },
-  button: {
-    height: 50,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  input_block: {
-    flexDirection: "row",
-    alignItems: "center",
-    position: "relative",
-  },
-  icon_container: {
-    padding: 5,
-    position: "absolute",
-    right: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+  }
 });
