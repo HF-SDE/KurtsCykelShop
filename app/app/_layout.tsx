@@ -9,6 +9,7 @@ import "@/global.css";
 
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 export const unstable_settings = {
   initialRouteName: "login",
@@ -33,11 +34,13 @@ function RootLayoutNav() {
     <SessionProvider>
       <SafeAreaProvider>
         <GluestackUIProvider mode={colorMode}>
-          <SafeAreaView className="bg-background-0 flex-1">
-            <ThemeProvider>
-              <Slot />
-            </ThemeProvider>
-          </SafeAreaView>
+          <KeyboardProvider>
+            <SafeAreaView className="bg-background-0 flex-1">
+              <ThemeProvider>
+                <Slot />
+              </ThemeProvider>
+            </SafeAreaView>
+          </KeyboardProvider>
         </GluestackUIProvider>
       </SafeAreaProvider>
     </SessionProvider>
