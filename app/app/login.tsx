@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
-import { AlertCircleIcon } from "@/components/ui/icon";
+import { FormControl, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import PasswordInput from "@/components/ui/input/password";
 import { Text } from "@/components/ui/text";
@@ -21,8 +13,6 @@ import { VStack } from "@/components/ui/vstack";
 import { NotificationFeedbackType, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
 import Logo from "@assets/images/logo.svg";
-import { Actionsheet, ActionsheetContent } from "@components/ui/actionsheet";
-import { Box } from "@components/ui/box";
 import { Spinner } from "@components/ui/spinner";
 import { router } from "expo-router";
 
