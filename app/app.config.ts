@@ -18,9 +18,7 @@ const config: ExpoConfig = {
     package: "com.anonymous.kurtscykelshop",
     adaptiveIcon: {
       backgroundColor: "#E6F4FE",
-      foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
+      foregroundImage: "./assets/images/adaptive-icon.png",
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
@@ -50,8 +48,7 @@ const config: ExpoConfig = {
     reactCompiler: true,
   },
   extra: {
-    EXPO_PUBLIC_API_UR:
-      process.env.EXPO_PUBLIC_API_UR ?? "https://10.130.54.94/api",
+    EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL ?? "https://10.130.54.94/api",
   },
 };
 
