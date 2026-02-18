@@ -1,9 +1,9 @@
 import React from "react";
 
-import { Buffer } from "buffer";
+import { useStorageState } from "@/hooks/useStorageState";
+import apiClient from "@/utils/apiClient";
 
-import { useStorageState } from "../hooks/useStorageState";
-import apiClient from "../utils/apiClient";
+import { Buffer } from "buffer";
 
 const AuthContext = React.createContext<{
   signIn: (username: string, password: string) => Promise<string>;

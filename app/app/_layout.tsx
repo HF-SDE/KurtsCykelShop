@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+import { Box } from "@/components/ui/box";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
@@ -28,7 +29,11 @@ function RootLayoutNav() {
     <SafeAreaProvider>
       <GluestackUIProvider mode={colorMode}>
         <ThemeProvider>
-          <Slot />
+          <Box className="bg-background-0 flex-1">
+            <SafeAreaView style={{ flex: 1 }}>
+              <Slot />
+            </SafeAreaView>
+          </Box>
         </ThemeProvider>
       </GluestackUIProvider>
     </SafeAreaProvider>
