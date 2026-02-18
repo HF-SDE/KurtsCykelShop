@@ -12,8 +12,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { cn } from "@gluestack-ui/utils/nativewind-utils";
 import { Tabs } from "expo-router";
-import { colorTokens } from "@/components/ui/gluestack-ui-provider/config";
-import { useThemeColor } from "@/components/ui/gluestack-ui-provider/useThemeColor";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
