@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
+import SessionProvider from "@/app/ctx";
 import "@/global.css";
 
 import { Slot } from "expo-router";
@@ -25,12 +26,14 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <GluestackUIProvider mode={colorMode}>
-        <ThemeProvider>
-          <Slot />
-        </ThemeProvider>
-      </GluestackUIProvider>
-    </SafeAreaProvider>
+    <SessionProvider>
+      <SafeAreaProvider>
+        <GluestackUIProvider mode={colorMode}>
+          <ThemeProvider>
+            <Slot />
+          </ThemeProvider>
+        </GluestackUIProvider>
+      </SafeAreaProvider>
+    </SessionProvider>
   );
 }
