@@ -17,7 +17,6 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
-
 export default function RootLayout() {
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   return <RootLayoutNav />;
@@ -35,9 +34,13 @@ function RootLayoutNav() {
     <SessionProvider>
       <SafeAreaProvider>
         <GluestackUIProvider mode={colorMode}>
-          <ThemeProvider>
-            <Slot />
-          </ThemeProvider>
+          <Box className="bg-background-0 flex-1">
+            <SafeAreaView style={{ flex: 1 }}>
+              <ThemeProvider>
+                <Slot />
+              </ThemeProvider>
+            </SafeAreaView>
+          </Box>
         </GluestackUIProvider>
       </SafeAreaProvider>
     </SessionProvider>
