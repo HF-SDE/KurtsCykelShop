@@ -41,7 +41,12 @@ const config: ExpoConfig = {
         },
       },
     ],
-    "expo-secure-store",
+    [
+      "expo-secure-store",
+      {
+        configureAndroidBackup: true,
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
