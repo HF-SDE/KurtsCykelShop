@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
+import Logo from "@assets/images/logo.svg";
 import { AlertCircleIcon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
 import PasswordInput from "@/components/ui/input/password";
@@ -70,7 +71,7 @@ export default function Index() {
 
   return (
     <Center>
-      <View style={styles.logoContainer}>{/* <Logo width={340} height={340} /> */}</View>
+      <View style={styles.logoContainer}><Logo width={340} height={340} /></View>
       <Text bold={true} size="xl">
         Medarbejder kan erstattes.
       </Text>
