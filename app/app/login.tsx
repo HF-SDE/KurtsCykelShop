@@ -24,11 +24,6 @@ import { router } from "expo-router";
 
 import { useSession } from "./ctx";
 
-// import {
-//   triggerHapticFeedback,
-//   NotificationFeedbackType,
-// } from "@/utils/hapticFeedback";
-
 export default function Index() {
   const { signIn } = useSession();
   const [errorMessage, setErrorMessage] = useState("");
