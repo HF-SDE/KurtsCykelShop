@@ -73,7 +73,7 @@ export default function Index() {
     <Center>
       <View style={styles.logoContainer}>{/* <Logo width={340} height={340} /> */}</View>
       <Text bold={true} size="xl">
-        Medarbejder kan erstattes det.
+        Medarbejder kan erstattes.
       </Text>
       <Text bold={true} size="xl">
         Det kan vare ikke.
