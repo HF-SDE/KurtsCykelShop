@@ -5,6 +5,7 @@ import { Box } from "@/components/ui/box";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
+import SessionProvider from "@/app/ctx";
 import "@/global.css";
 
 import { Slot } from "expo-router";
@@ -26,16 +27,14 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <GluestackUIProvider mode={colorMode}>
-        <ThemeProvider>
-          <Box className="bg-background-0 flex-1">
-            <SafeAreaView style={{ flex: 1 }}>
-              <Slot />
-            </SafeAreaView>
-          </Box>
-        </ThemeProvider>
-      </GluestackUIProvider>
-    </SafeAreaProvider>
+    <SessionProvider>
+      <SafeAreaProvider>
+        <GluestackUIProvider mode={colorMode}>
+          <ThemeProvider>
+            <Slot />
+          </ThemeProvider>
+        </GluestackUIProvider>
+      </SafeAreaProvider>
+    </SessionProvider>
   );
 }
