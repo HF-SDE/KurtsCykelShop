@@ -63,12 +63,7 @@ export default function SessionProvider(props: React.PropsWithChildren) {
 
             const result = response.data;
 
-            if (
-              !result ||
-              !result.data ||
-              !result.data.accessToken ||
-              !result.data.accessToken.token
-            ) {
+            if (!result || !result.data || !result.data.accessToken || !result.data.accessToken.token) {
               throw new Error("No token found in response");
             }
 
