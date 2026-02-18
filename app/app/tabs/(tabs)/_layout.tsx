@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useColorScheme } from "react-native";
 
 import { Box } from "@/components/ui/box";
 
@@ -11,6 +12,8 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { cn } from "@gluestack-ui/utils/nativewind-utils";
 import { Tabs } from "expo-router";
+import { colorTokens } from "@/components/ui/gluestack-ui-provider/config";
+import { useThemeColor } from "@/components/ui/gluestack-ui-provider/useThemeColor";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -85,7 +88,8 @@ export default function TabLayout() {
               <Entypo
                 name="list"
                 size={42}
-                // style={{ color: focused ? theme.accent : theme.secondary }}
+                // color={focused ? colors.accent : colors.secondary}
+                className={focused ? "!text-typography-800" : "!text-typography-300"  }
               />
             ),
           }}
@@ -101,8 +105,7 @@ export default function TabLayout() {
               <FontAwesome6
                 name="gear"
                 size={38}
-                // color={focused ? theme.accent : theme.secondary}
-                className={cn("text-primary-0")}
+               className={focused ? "!text-typography-800" : "!text-typography-300"}
               />
             ),
           }}
