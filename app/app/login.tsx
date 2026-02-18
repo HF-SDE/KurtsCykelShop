@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { useColorScheme } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
@@ -18,12 +17,7 @@ import PasswordInput from "@/components/ui/input/password";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
-import {
-  NotificationFeedbackType,
-  triggerHapticFeedback,
-} from "@/utils/hapticFeedback";
-
-import { router } from "expo-router";
+import { NotificationFeedbackType, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
 import { useSession } from "./ctx";
 
@@ -78,9 +72,7 @@ export default function Index() {
 
   return (
     <Center>
-      <View style={styles.logoContainer}>
-        {/* <Logo width={340} height={340} /> */}
-      </View>
+      <View style={styles.logoContainer}>{/* <Logo width={340} height={340} /> */}</View>
       <Text bold={true} size="xl">
         Medarbejder kan erstattes det.
       </Text>
@@ -88,45 +80,20 @@ export default function Index() {
         Det kan vare ikke.
       </Text>
       <VStack style={styles.formContainer}>
-        <FormControl
-          isInvalid={isInvalid}
-          size="md"
-          isDisabled={false}
-          isReadOnly={false}
-          isRequired={false}
-        >
+        <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
           <FormControlLabel>
             <FormControlLabelText>Email</FormControlLabelText>
           </FormControlLabel>
           <Input className="my-1" size="md">
-            <InputField
-              type="text"
-              placeholder="Email"
-              value={username}
-              onChangeText={(text) => setUsername(text)}
-            />
+            <InputField type="text" placeholder="Email" value={username} onChangeText={(text) => setUsername(text)} />
           </Input>
           <FormControlError>
-            <FormControlErrorIcon
-              as={AlertCircleIcon}
-              className="text-red-500"
-            />
-            <FormControlErrorText className="text-red-500">
-              {errorMessage}
-            </FormControlErrorText>
+            <FormControlErrorIcon as={AlertCircleIcon} className="text-red-500" />
+            <FormControlErrorText className="text-red-500">{errorMessage}</FormControlErrorText>
           </FormControlError>
         </FormControl>
-        <PasswordInput
-          isInvalid={isInvalid}
-          inputValue={password}
-          onChangeText={setPassword}
-        />
-        <Button
-          className="mt-4 w-full self-end"
-          size="md"
-          variant="solid"
-          onPress={handleLogin}
-        >
+        <PasswordInput isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
+        <Button className="mt-4 w-full self-end" size="md" variant="solid" onPress={handleLogin}>
           <ButtonText>Login</ButtonText>
         </Button>
       </VStack>
