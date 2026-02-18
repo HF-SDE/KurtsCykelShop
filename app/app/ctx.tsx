@@ -74,7 +74,7 @@ export default function SessionProvider(props: React.PropsWithChildren) {
 
             setToken(result.data.accessToken.token);
             return "authenticated";
-          } catch (error) {
+          } catch {
             setToken(null);
             return "Something went wrong on our end. Please contact support";
           }
@@ -88,7 +88,7 @@ export default function SessionProvider(props: React.PropsWithChildren) {
               validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
             });
           } catch (error) {
-            //console.error(error);
+            console.error(error);
           }
           setToken(null);
         },
