@@ -11,7 +11,12 @@ import "@/global.css";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 
+export const unstable_settings = {
+  initialRouteName: "login",
+};
+
 SplashScreen.preventAutoHideAsync();
+
 
 export default function RootLayout() {
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
