@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
-import { Button, ButtonText } from "@/components/ui/button";
+import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
 import { FormControl, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import { VStack } from "@/components/ui/vstack";
 import { NotificationFeedbackType, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
 import Logo from "@assets/images/logo.svg";
-import { Spinner } from "@components/ui/spinner";
 import { router } from "expo-router";
 
 import { useSession } from "./ctx";
@@ -86,17 +85,16 @@ export default function Index() {
             </Input>
           </FormControl>
           <SecretInput errorMessage={errorMessage} isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
-          <Button className="mt-4 w-full self-end" size="lg" variant="solid" onPress={handleLogin}>
-            <ButtonText>
-              {isLoading ? (
-                <>
-                  Logging in <Spinner />
-                </>
-              ) : (
-                "Login"
-              )}
-            </ButtonText>
-          </Button>
+          {isLoading ? (
+            <Button className="mt-4 " size="lg" variant="solid">
+              <ButtonSpinner/>
+              <ButtonText>Please wait...</ButtonText>
+            </Button>
+          ) : (
+            <Button className="mt-4 " size="lg" variant="solid" onPress={handleLogin}>
+              <ButtonText>Login</ButtonText>
+            </Button>
+          )}
         </VStack>
       </Center>
     </KeyboardAvoidingView>
