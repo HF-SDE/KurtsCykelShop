@@ -1,78 +1,213 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Modal, TouchableOpacity, View } from "react-native";
+import { Dimensions, Pressable, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 
-// import ResetPasswordModal from "../profile/reset-password";
-// import TemplateLayout from "@/components/TemplateLayout";
-// import LoadingPage from "@/components/LoadingPage";
-// import { useThemeColor } from "@/hooks/useThemeColor";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 import { useSession } from "@/app/ctx";
 
-// import Button from "@/components/DefaultButton";
+import { Avatar, AvatarFallbackText} from "@components/ui/avatar";
+import { Box } from "@components/ui/box";
+import { Center } from "@components/ui/center";
+import { Heading } from "@components/ui/heading";
+import { CloseIcon, Icon } from "@components/ui/icon";
+import SecretInput from "@components/ui/input/password";
+import { Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader } from "@components/ui/modal";
+import { VStack } from "@components/ui/vstack";
+import { InfoIcon } from "lucide-react-native";
+import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
+import { HStack } from "@components/ui/hstack";
 
 export default function UserProfileScreen() {
-  const { userProfile, isLoading, error } = useUserProfile();
+  const { userProfile, isLoading, resetPassword } = useUserProfile();
   const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const { signOut, session } = useSession();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [againPassword, setAgainPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState<boolean>(false);
+  const [newConfirmPasswordError, setConfirmNewPasswordError] = useState<boolean>(false);
 
-  const [isLandscape, setIsLandscape] = useState(false);
-
-  useEffect(() => {
-    const onChange = ({ window }: { window: any }) => {
-      setIsLandscape(window.height < 600);
-    };
-    Dimensions.addEventListener("change", onChange);
-    return () => {
-      // Dimensions.removeEventListener("change", onChange);
-    };
-  }, []);
+  const toast = useToast();
+  const [toastId, setToastId] = useState("0");
 
   if (isLoading) return <Text> Loading...</Text>;
 
-  return (
-    // <TemplateLayout pageName="ProfilePage">
-    <View className={`bg-background-0 flex-1 items-center justify-between px-5 ${isLandscape ? "flex-row items-start justify-start" : ""}`}>
-      <View className={`w-full max-w-[400px] flex-1 justify-between px-5 ${isLandscape ? "flex-row items-center justify-between" : ""}`}>
-        <View className={`items-center pt-10 ${isLandscape ? "flex-row pr-[50px]" : ""}`}>
-          <View
-            className={`bg-background-100 border-background-200 h-[150px] w-[150px] items-center justify-center rounded-full border-8 ${isLandscape ? "mb-0 mr-5" : "mb-5"}`}
+  async function handleReset() {
+    if (!currentPassword || !password || !againPassword) {
+      setErrorMessage("Please fill out all fields!");
+      setError(true);
+      setConfirmNewPasswordError(false);
+      return;
+    }
+    if (password !== againPassword) {
+      setErrorMessage("Passwords does not match!");
+      setConfirmNewPasswordError(true);
+      return;
+    }
+
+    try {
+      const response = await resetPassword(currentPassword, password);
+      if (response === "success") {
+        setIsModalVisible(false);
+        setError(false);
+        setConfirmNewPasswordError(false);
+        setCurrentPassword("");
+        setPassword("");
+        setAgainPassword("");
+        handleToast();
+      } else {
+        setErrorMessage(JSON.parse(response)[0].message || "An error occurred.");
+        // setErrorMessage(response || "An error occurred.");
+        setConfirmNewPasswordError(false);
+        setError(true);
+      }
+    } catch (error) {
+      console.error(error);
+
+      setErrorMessage("An error occurred while changing password.");
+      setError(true);
+    }
+  }
+
+  function handleToast() {
+    if (!toast.isActive(toastId)) {
+      showNewToast();
+    }
+  }
+
+  function showNewToast() {
+    const newId = Math.random().toString();
+    setToastId(newId);
+    toast.show({
+      id: newId,
+      placement: "top",
+      duration: 3000,
+      render: ({ id }) => {
+        const uniqueToastId = "toast-" + id;
+        return (
+          <Toast
+            action="success"
+            variant="outline"
+            nativeID={uniqueToastId}
+            className="border-success-500 shadow-hard-5 w-full max-w-[443px] flex-row justify-between gap-6 p-4"
           >
-            <Text className="text-typography-900 text-[40px] font-bold">{userProfile?.initials || "?"}</Text>
-          </View>
-          <View className="w-full">
-            <Text className="text-typography-900 w-full text-left text-2xl font-bold">Hi, {userProfile?.name || "N/A"}</Text>
-            <Text className="text-typography-900 mb-1.5 w-full text-left text-base">Email: {userProfile?.email || "N/A"}</Text>
-          </View>
-        </View>
+            <HStack space="md">
+              <Icon as={InfoIcon} className="stroke-success-500 mt-0.5" />
+              <VStack space="xs">
+                <ToastTitle className="text-success-500 font-semibold">Success!</ToastTitle>
+                <ToastDescription size="sm">Password changed successfully.</ToastDescription>
+              </VStack>
+            </HStack>
+            <HStack className="gap-1 min-[450px]:gap-3">
+              <Pressable onPress={() => toast.close(id)}>
+                <Icon as={CloseIcon} />
+              </Pressable>
+            </HStack>
+          </Toast>
+        );
+      },
+    });
+  }
 
-        <View className={`min-h-[180px] justify-center pb-5 pt-10 ${isLandscape ? "min-w-[230px] pb-0" : ""}`}>
-          <Button onPress={() => setIsModalVisible(true)}>
-            <Text className="text-primary-0">Change Password</Text>
-          </Button>
+  return (
+    <Center className={`bg-background-0 flex-1 p-6`}>
+      <VStack className={`flex-1 justify-between px-5`}>
+        <Box className="gap-5">
+          <Avatar size="4xl" className="bg-secondary-500 border-secondary-600 border-8">
+            <AvatarFallbackText size="2xl" className="text-primary-950">
+              {userProfile?.initials
+                ?.split("")
+                .map((name) => name.charAt(0))
+                .join(" ") || "?"}
+            </AvatarFallbackText>
+          </Avatar>
+          <Box>
+            <Text size="2xl" bold>
+              Hi, {userProfile?.firstName || "N/A"} {userProfile?.lastName || ""}
+            </Text>
+            <Text size="md" className="mb-1.5">
+              Email: {userProfile?.email || "N/A"}
+            </Text>
+          </Box>
+        </Box>
 
-          <Button onPress={signOut}>
-            <Text className="text-primary-0">Sign Out</Text>
-          </Button>
-        </View>
-      </View>
+        <Center>
+          <VStack className={"w-full gap-2.5"}>
+            <Button size="xl" onPress={() => setIsModalVisible(true)}>
+              <ButtonText>Reset Password</ButtonText>
+            </Button>
+
+            <Button size="xl" onPress={signOut}>
+              <ButtonText>Sign Out</ButtonText>
+            </Button>
+          </VStack>
+        </Center>
+      </VStack>
 
       <Modal
-        animationType="none"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)} // Close modal on Android back button
+        isOpen={isModalVisible}
+        onClose={() => {
+          setIsModalVisible(false);
+        }}
+        size="md"
       >
-        <View className="h-full w-full flex-1 items-center justify-center bg-black/50">
-          <View className="bg-background-0 min-h-[400px] w-[90%] max-w-[400px] rounded-[10px] p-2.5">
-            {/* <ResetPasswordModal onClose={() => setIsModalVisible(false)} /> */}
-          </View>
-        </View>
+        <ModalBackdrop />
+        <ModalContent>
+          <ModalHeader>
+            <Heading size="lg">Change Password</Heading>
+            <ModalCloseButton>
+              <Icon as={CloseIcon} />
+            </ModalCloseButton>
+          </ModalHeader>
+          <ModalBody>
+            <SecretInput
+              inputValue={currentPassword}
+              onChangeText={setCurrentPassword}
+              isInvalid={error}
+              errorMessage={errorMessage}
+              placeholder="Current Password"
+            />
+            <SecretInput
+              inputValue={password}
+              onChangeText={setPassword}
+              className="mb-2"
+              placeholder="New Password"
+              HelperText="Must be at least 6 characters."
+            />
+            <SecretInput
+              inputValue={againPassword}
+              onChangeText={setAgainPassword}
+              isInvalid={newConfirmPasswordError}
+              errorMessage={errorMessage}
+              placeholder="Confirm New Password"
+              HelperText='Must be the same as "New Password".'
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="outline"
+              action="secondary"
+              className="mr-3"
+              onPress={() => {
+                setIsModalVisible(false);
+              }}
+            >
+              <ButtonText>Cancel</ButtonText>
+            </Button>
+            <Button
+              onPress={() => {
+                handleReset();
+              }}
+            >
+              <ButtonText>Change</ButtonText>
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
-    </View>
-    // </TemplateLayout>
+    </Center>
   );
 }
