@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 
+import apiClient from "@utils/apiClient";
 import { Buffer } from "buffer";
-
-import apiClient from "../utils/apiClient";
 
 interface UserProfile {
   username: string;
   email: string;
   initials: string;
-  name: string;
+  firstName: string;
+  lastName: string;
 }
 
 export function useUserProfile() {
@@ -21,8 +21,6 @@ export function useUserProfile() {
       try {
         setIsLoading(true);
         setError(null);
-
-        //const response = await apiClient.get("/profile");
 
         const response = await apiClient.get("/profile", {
           validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
@@ -39,7 +37,7 @@ export function useUserProfile() {
     fetchUserProfile();
   }, []);
 
-  const resetPassword = async (oldPassword: string, newPassword: string): Promise<string> => {
+  async function resetPassword(oldPassword: string, newPassword: string): Promise<string> {
     const payload = {
       oldPassword: Buffer.from(oldPassword).toString("base64"),
       newPassword: Buffer.from(newPassword).toString("base64"),
@@ -53,6 +51,6 @@ export function useUserProfile() {
     } catch {
       return "Something went wrong on our end. Please contact support";
     }
-  };
+  }
   return { userProfile, isLoading, error, resetPassword };
 }
