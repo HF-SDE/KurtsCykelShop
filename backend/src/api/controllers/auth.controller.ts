@@ -1,12 +1,12 @@
-import { getHttpStatusCode } from "@/utils/Utils";
+import { getHttpStatusCode } from "@utils/Utils";
 
 import {
   AccessResult,
   GetAccessTokenRequestBody,
   LoginRequestBody,
   LogoutRequestBody,
-} from "@/types/auth.types";
-import { APIResponse } from "@/types/general.types";
+} from "@api-types/auth.types";
+import { APIResponse } from "@api-types/general.types";
 
 import { Request, Response } from "express";
 

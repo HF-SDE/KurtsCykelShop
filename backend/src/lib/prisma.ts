@@ -1,6 +1,6 @@
-import { capitalize } from "@/utils/Utils";
+import { capitalize } from "@utils/Utils";
 
-import { IAPIResponse, Status } from "@/types/general.types";
+import { IAPIResponse, Status } from "@api-types/general.types";
 
 import { Prisma, PrismaClient } from "@prisma";
 import { PrismaPg } from "@prisma/adapter-pg";

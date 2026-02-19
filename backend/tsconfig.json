@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "node20",
-    "ignoreDeprecations": "6.0",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -17,9 +16,19 @@
     "rootDir": "../",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
       "@prisma": ["src/generated/prisma/client"],
-      "@schemas/*": ["../schemas/*"]
+      "@schemas/*": ["../schemas/*"],
+      "@routes/*": ["src/api/routes/*"],
+      "@controllers/*": ["src/api/controllers/*"],
+      "@services/*": ["src/api/services/*"],
+      "@api-types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"],
+      "@config": ["src/lib/config"],
+      "@passport": ["src/lib/passport"],
+      "@prisma-instance": ["src/lib/prisma"],
+      "@middlewares/*": ["src/middleware/*"],
+      "@lib/*": ["src/lib/*"]
+      // "@/*": ["src/*"]
     },
     "allowJs": true
   },

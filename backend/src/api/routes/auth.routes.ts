@@ -1,5 +1,5 @@
 // /routes/auth.routes.ts
-import * as authController from "@/api/controllers/auth.controller";
+import * as authController from "@controllers/auth.controller";
 
 import { Router } from "express";
 

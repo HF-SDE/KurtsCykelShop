@@ -77,7 +77,5 @@ volumes:
 configs:
   nginx_config:
     file: ../config/nginx.conf
-  client_nodemon:
-    file: ../client/nodemon.json
   backend_nodemon:
     file: ../backend/nodemon.json
