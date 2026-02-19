@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile.production
       target: base
     expose:
-      - "3001"
+      - "5000"
     depends_on:
       - db
     env_file:
@@ -16,7 +16,7 @@ services:
     volumes:
       - ../schemas:/usr/src/app/dist/schemas
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
