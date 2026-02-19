@@ -1,4 +1,4 @@
-import { Status } from "@/types/general.types";
+import { Status } from "@api-types/general.types";
 
 /**
  * Returns the HTTP status code for a given Status
@@ -42,16 +42,6 @@ export function getHttpStatusCode(status: Status): number {
       return 401;
     case Status.TooManyRequests:
       return 429;
-    case Status.WsUnauthorized:
-      return 1008;
-    case Status.WsClose:
-      return 1000;
-    case Status.WsFailed:
-      return 1011;
-    case Status.WsForbidden:
-      return 1013;
-    case Status.wsInvalidDetails:
-      return 4000;
   }
 }
 
