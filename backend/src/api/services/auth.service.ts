@@ -5,7 +5,7 @@ import { APIResponse, Status } from "@api-types/general.types";
 import config from "@config";
 import { Session } from "@prisma";
 import prisma from "@prisma-instance";
-import { LoginSchema, TokenSchema } from "@schemas/auth.schema";
+import { LoginSchema, TokenSchema } from "@schemas/auth.schemas";
 import { Mutex } from "async-mutex";
 import jwt from "jsonwebtoken";
 import passport from "passport";
