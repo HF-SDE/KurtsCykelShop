@@ -1,15 +1,10 @@
-import config from "@/lib/config";
-import prisma from "@/lib/prisma";
-import { UserToken } from "@/types/JWTToken";
-
+import { UserToken } from "@api-types/JWTToken";
+import config from "@config";
+import prisma from "@prisma-instance";
 import argon2 from "argon2";
 import { Request } from "express";
 import passport from "passport";
-import {
-  ExtractJwt,
-  Strategy as JwtStrategy,
-  StrategyOptionsWithRequest,
-} from "passport-jwt";
+import { ExtractJwt, Strategy as JwtStrategy, StrategyOptionsWithRequest } from "passport-jwt";
 import { Strategy as LocalStrategy } from "passport-local";
 
 const opts: StrategyOptionsWithRequest = {
