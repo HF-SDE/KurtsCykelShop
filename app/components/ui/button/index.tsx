@@ -59,9 +59,9 @@ const buttonStyle = tva({
       md: "px-5 h-10",
       lg: "px-6 h-11",
       xl: "px-7 h-12",
-      "2xl": "px-8 h-14",
-      "3xl": "px-9 h-16",
-      "4xl": "px-10 h-18",
+      "2xl": "px-7 h-12",
+      "3xl": "px-8 h-14",
+      "4xl": "px-8 h-14",
     },
   },
   compoundVariants: [
@@ -128,6 +128,9 @@ const buttonTextStyle = tva({
       md: "text-base",
       lg: "text-lg",
       xl: "text-xl",
+      "2xl": "text-2xl",
+      "3xl": "text-3xl",
+      "4xl": "text-4xl",
     },
   },
   parentCompoundVariants: [
@@ -188,6 +191,9 @@ const buttonIconStyle = tva({
       md: "h-[18px] w-[18px]",
       lg: "h-[18px] w-[18px]",
       xl: "h-5 w-5",
+      "2xl": "h-6 w-6",
+      "3xl": "h-7 w-7",
+      "4xl": "h-8 w-8",
     },
     action: {
       primary: "text-primary-600 data-[hover=true]:text-primary-600 data-[active=true]:text-primary-700",
