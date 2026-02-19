@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Dimensions, Pressable, View } from "react-native";
+import { useState } from "react";
+import { Pressable } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -8,17 +8,17 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 
 import { useSession } from "@/app/ctx";
 
-import { Avatar, AvatarFallbackText} from "@components/ui/avatar";
+import { Avatar, AvatarFallbackText } from "@components/ui/avatar";
 import { Box } from "@components/ui/box";
 import { Center } from "@components/ui/center";
 import { Heading } from "@components/ui/heading";
+import { HStack } from "@components/ui/hstack";
 import { CloseIcon, Icon } from "@components/ui/icon";
 import SecretInput from "@components/ui/input/password";
 import { Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader } from "@components/ui/modal";
+import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { VStack } from "@components/ui/vstack";
 import { InfoIcon } from "lucide-react-native";
-import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
-import { HStack } from "@components/ui/hstack";
 
 export default function UserProfileScreen() {
   const { userProfile, isLoading, resetPassword } = useUserProfile();
