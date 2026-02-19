@@ -6,7 +6,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
 import { FormControl, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
-import PasswordInput from "@/components/ui/input/password";
+import SecretInput from "@/components/ui/input/password";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
@@ -41,7 +41,6 @@ export default function Index() {
       setIsLoading(true);
       const signInResult = await signIn(trimmedUsername, trimmedPassword);
 
-      console.log("Sign-in result:", signInResult);
       if (signInResult === "authenticated") {
         await triggerHapticFeedback(NotificationFeedbackType.Success);
         setErrorMessage("");
@@ -86,7 +85,7 @@ export default function Index() {
               <InputField type="text" placeholder="Email" value={username} onChangeText={(text) => setUsername(text)} />
             </Input>
           </FormControl>
-          <PasswordInput errorMessage={errorMessage} isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
+          <SecretInput errorMessage={errorMessage} isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
           <Button className="mt-4 w-full self-end" size="lg" variant="solid" onPress={handleLogin}>
             <ButtonText>
               {isLoading ? (
