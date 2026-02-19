@@ -74,7 +74,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="cases"
           options={{
-            title: "Tab 1",
+            title: "Sager",
             tabBarItemStyle: { display: "flex" },
             tabBarIcon: ({ focused }) => <Icon as={BookText} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
           }}
