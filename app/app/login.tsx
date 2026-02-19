@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
-import Logo from "@assets/images/logo.svg";
-import { AlertCircleIcon } from "@/components/ui/icon";
+import { FormControl, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import PasswordInput from "@/components/ui/input/password";
 import { Text } from "@/components/ui/text";
@@ -20,6 +12,8 @@ import { VStack } from "@/components/ui/vstack";
 
 import { NotificationFeedbackType, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
+import Logo from "@assets/images/logo.svg";
+import { Spinner } from "@components/ui/spinner";
 import { router } from "expo-router";
 
 import { useSession } from "./ctx";
@@ -55,11 +49,13 @@ export default function Index() {
       } else {
         await triggerHapticFeedback(NotificationFeedbackType.Error);
         setErrorMessage(signInResult);
+        setIsInvalid(true);
       }
       setIsLoading(false);
     } else {
       await triggerHapticFeedback(NotificationFeedbackType.Error);
       setErrorMessage("Please fill out username and password");
+      setIsInvalid(true);
     }
   };
 
@@ -70,33 +66,41 @@ export default function Index() {
   }, [username, password]);
 
   return (
-    <Center>
-      <View style={styles.logoContainer}><Logo width={340} height={340} /></View>
-      <Text bold={true} size="xl">
-        Medarbejder kan erstattes.
-      </Text>
-      <Text bold={true} size="xl">
-        Det kan vare ikke.
-      </Text>
-      <VStack style={styles.formContainer}>
-        <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
-          <FormControlLabel>
-            <FormControlLabelText>Email</FormControlLabelText>
-          </FormControlLabel>
-          <Input className="my-1" size="md">
-            <InputField type="text" placeholder="Email" value={username} onChangeText={(text) => setUsername(text)} />
-          </Input>
-          <FormControlError>
-            <FormControlErrorIcon as={AlertCircleIcon} className="text-red-500" />
-            <FormControlErrorText className="text-red-500">{errorMessage}</FormControlErrorText>
-          </FormControlError>
-        </FormControl>
-        <PasswordInput isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
-        <Button className="mt-4 w-full self-end" size="md" variant="solid" onPress={handleLogin}>
-          <ButtonText>Login</ButtonText>
-        </Button>
-      </VStack>
-    </Center>
+    <KeyboardAvoidingView behavior={"padding"} keyboardVerticalOffset={100}>
+      <Center>
+        <View style={styles.logoContainer}>
+          <Logo width={340} height={340} />
+        </View>
+        <Text bold={true} size="xl">
+          Medarbejder kan erstattes.
+        </Text>
+        <Text bold={true} size="xl">
+          Det kan vare ikke.
+        </Text>
+        <VStack style={styles.formContainer}>
+          <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
+            <FormControlLabel>
+              <FormControlLabelText>Email</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="my-1" size="md">
+              <InputField type="text" placeholder="Email" value={username} onChangeText={(text) => setUsername(text)} />
+            </Input>
+          </FormControl>
+          <PasswordInput errorMessage={errorMessage} isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
+          <Button className="mt-4 w-full self-end" size="lg" variant="solid" onPress={handleLogin}>
+            <ButtonText>
+              {isLoading ? (
+                <>
+                  Logging in <Spinner />
+                </>
+              ) : (
+                "Login"
+              )}
+            </ButtonText>
+          </Button>
+        </VStack>
+      </Center>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -110,5 +114,5 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: 20,
     gap: 10,
-  }
+  },
 });

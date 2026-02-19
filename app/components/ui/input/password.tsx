@@ -1,36 +1,20 @@
 import { useState } from "react";
 
 import { Input, InputField, InputIcon, InputSlot } from ".";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from "../form-control";
+import { FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText, FormControlLabel, FormControlLabelText } from "../form-control";
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "../icon";
 
 interface IPasswordInputProps {
   isInvalid?: boolean;
   inputValue: string;
   onChangeText?: (text: string) => void;
+  errorMessage?: string;
 }
-export default function PasswordInput({
-  isInvalid,
-  inputValue,
-  onChangeText,
-}: IPasswordInputProps) {
+export default function PasswordInput({ isInvalid, inputValue, onChangeText, errorMessage }: IPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <FormControl
-      isInvalid={isInvalid}
-      size="md"
-      isDisabled={false}
-      isReadOnly={false}
-      isRequired={false}
-    >
+    <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
       <FormControlLabel>
         <FormControlLabelText>Password</FormControlLabelText>
       </FormControlLabel>
@@ -47,9 +31,7 @@ export default function PasswordInput({
       </Input>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} className="text-red-500" />
-        <FormControlErrorText className="text-red-500">
-          At least 6 characters are required.
-        </FormControlErrorText>
+        <FormControlErrorText className="text-red-500">{errorMessage}</FormControlErrorText>
       </FormControlError>
     </FormControl>
   );

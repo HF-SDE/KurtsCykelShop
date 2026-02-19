@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
 import { Tabs } from "expo-router";
-import { BookText, CircleUserRound, Package, UserRoundCog, Wrench } from "lucide-react-native";
+import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -82,9 +82,9 @@ export default function TabLayout() {
       )}
       {hasManagementPermission && (
         <Tabs.Screen
-          name="tab2"
+          name="storage"
           options={{
-            title: "Tab 2",
+            title: "Lager",
             tabBarItemStyle: { display: "flex" },
             tabBarIcon: ({ focused }) => <Icon as={Package} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
           }}
@@ -94,7 +94,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="admin"
           options={{
-            title: "Tab 2",
+            title: "Admin",
             tabBarItemStyle: { display: "flex" },
             tabBarIcon: ({ focused }) => <Icon as={UserRoundCog} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
           }}
