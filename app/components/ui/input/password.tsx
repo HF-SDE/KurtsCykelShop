@@ -1,7 +1,16 @@
 import { useState } from "react";
 
 import { Input, InputField, InputIcon, InputSlot } from ".";
-import { FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText, FormControlLabel, FormControlLabelText } from "../form-control";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
+  FormControlHelper,
+  FormControlHelperText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "../form-control";
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "../icon";
 
 interface IPasswordInputProps {
@@ -9,19 +18,22 @@ interface IPasswordInputProps {
   inputValue: string;
   onChangeText?: (text: string) => void;
   errorMessage?: string;
+  placeholder?: string;
+  HelperText?: string;
+  className?: string;
 }
-export default function PasswordInput({ isInvalid, inputValue, onChangeText, errorMessage }: IPasswordInputProps) {
+export default function SecretInput({ isInvalid, inputValue, onChangeText, errorMessage, placeholder, HelperText, className }: IPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
+    <FormControl className={className} isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
       <FormControlLabel>
-        <FormControlLabelText>Password</FormControlLabelText>
+        <FormControlLabelText>{placeholder || "Password"}</FormControlLabelText>
       </FormControlLabel>
       <Input className="my-1" size="md">
         <InputField
           type={showPassword ? "text" : "password"}
-          placeholder="password"
+          placeholder={placeholder || "password"}
           value={inputValue}
           onChangeText={(text) => onChangeText && onChangeText(text)}
         />
@@ -29,9 +41,12 @@ export default function PasswordInput({ isInvalid, inputValue, onChangeText, err
           <InputIcon as={showPassword ? EyeOffIcon : EyeIcon} />
         </InputSlot>
       </Input>
+      <FormControlHelper>
+        <FormControlHelperText>{HelperText}</FormControlHelperText>
+      </FormControlHelper>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} className="text-red-500" />
-        <FormControlErrorText className="text-red-500">{errorMessage}</FormControlErrorText>
+        <FormControlErrorText isTruncated className="w-full text-wrap h-full text-red-500" >{errorMessage}</FormControlErrorText>
       </FormControlError>
     </FormControl>
   );
