@@ -1,16 +1,8 @@
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableData,
-  TableFooter,
-} from '@/components/ui/table';
-export function CasesTable() {
+import { Table, TableBody, TableData, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-    return(
-          <Table className="w-full">
+export function CasesTable() {
+  return (
+    <Table className="w-full">
       <TableHeader>
         <TableRow>
           <TableHead>Customer Name</TableHead>
@@ -19,6 +11,81 @@ export function CasesTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
+        <TableRow>
+          <TableData>Rajesh Kumar</TableData>
+          <TableData>10</TableData>
+          <TableData>$130</TableData>
+        </TableRow>
         <TableRow>
           <TableData>Rajesh Kumar</TableData>
           <TableData>10</TableData>
@@ -38,5 +105,5 @@ export function CasesTable() {
         </TableRow>
       </TableFooter>
     </Table>
-    )
+  );
 }
