@@ -65,7 +65,7 @@ export default function TabLayout() {
     >
       {hasOrderPermission && (
         <Tabs.Screen
-          name="cases"
+          name="case"
           options={{
             title: "Sager",
             tabBarItemStyle: { display: "flex" },

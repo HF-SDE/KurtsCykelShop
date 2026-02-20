@@ -1,0 +1,98 @@
+[
+  {
+    "id": "case-001",
+    "customerName": "Ben Dover",
+    "date": "2025-04-20",
+    "status": "completed",
+    "type": "service",
+    "description": "Standard serviceeftersyn"
+  },
+  {
+    "id": "case-002",
+    "customerName": "Candise N.",
+    "date": "2025-04-23",
+    "status": "cancelled",
+    "type": "repair",
+    "description": "Gear reparation"
+  },
+  {
+    "id": "case-003",
+    "customerName": "Ezekiel",
+    "date": "2025-04-25",
+    "status": "in-progress",
+    "type": "repair",
+    "description": "Bremseskifte"
+  },
+  {
+    "id": "case-004",
+    "customerName": "Anna Hansen",
+    "date": "2025-05-01",
+    "status": "pending",
+    "type": "service",
+    "description": "Årligt eftersyn"
+  },
+  {
+    "id": "case-005",
+    "customerName": "Lars Nielsen",
+    "date": "2025-05-05",
+    "status": "in-progress",
+    "type": "repair",
+    "description": "Kæde og tandhjul"
+  },
+  {
+    "id": "case-006",
+    "customerName": "Maria Pedersen",
+    "date": "2025-05-08",
+    "status": "completed",
+    "type": "repair",
+    "description": "Punktering"
+  },
+  {
+    "id": "case-007",
+    "customerName": "Peter Jensen",
+    "date": "2025-05-12",
+    "status": "pending",
+    "type": "service",
+    "description": "Omfattende serviceeftersyn"
+  },
+  {
+    "id": "case-008",
+    "customerName": "Sophie Andersen",
+    "date": "2025-05-15",
+    "status": "in-progress",
+    "type": "repair",
+    "description": "Hjulskifte"
+  },
+  {
+    "id": "case-009",
+    "customerName": "Michael Sørensen",
+    "date": "2025-01-10",
+    "status": "completed",
+    "type": "service",
+    "description": "Vintereftersyn"
+  },
+  {
+    "id": "case-010",
+    "customerName": "Emma Christiansen",
+    "date": "2025-01-15",
+    "status": "cancelled",
+    "type": "repair",
+    "description": "Ramme reparation"
+  },
+  {
+    "id": "case-011",
+    "customerName": "Thomas Mortensen",
+    "date": "2025-02-20",
+    "status": "completed",
+    "type": "service",
+    "description": "Forårsklargøring"
+  },
+  {
+    "id": "case-012",
+    "customerName": "Isabella Rasmussen",
+    "date": "2025-03-05",
+    "status": "in-progress",
+    "type": "repair",
+    "description": "Elektronik fejl"
+  }
+]
