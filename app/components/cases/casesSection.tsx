@@ -3,11 +3,14 @@ import { ScrollView } from "react-native";
 
 import mockCasesData from "@/data/mockCases.json";
 
+import { ServiceOrderData } from "@/types/serviceOrders/Exstentions/ServiceOrderData";
+
 import { Searchbar } from "@components/search";
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from "@components/ui/button";
 import { HStack } from "@components/ui/hstack";
 import { Text } from "@components/ui/text";
 import { VStack } from "@components/ui/vstack";
+import apiClient from "@utils/apiClient";
 import { router } from "expo-router";
 import { Filter, Plus } from "lucide-react-native";
 
@@ -28,10 +31,36 @@ export interface Case {
   description: string;
 }
 
+interface fetchCasesParams {
+  searchQuery?: string;
+  selectedStatuses?: CaseStatus[];
+  timeRange?: TimeRange;
+}
+async function fetchCases(params: fetchCasesParams): Promise<ServiceOrderData[]> {
+  try {
+    const response = await apiClient.get("/service-orders", {
+      params: {
+        search: params.searchQuery,
+        statuses: params.selectedStatuses,
+        timeRange: params.timeRange,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching cases:", error);
+    return [];
+  }
+}
+
 export function CasesSection() {
   const [showDrawer, setShowDrawer] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<CaseStatus[]>(["completed", "cancelled", "in-progress", "pending"]);
+  const [selectedStatuses, setSelectedStatuses] = useState<CaseStatus[]>([
+    "completed",
+    "cancelled",
+    "in-progress",
+    "pending",
+  ]);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
 
   // Filter cases based on selected filters
@@ -99,7 +128,12 @@ export function CasesSection() {
 
       {/* <CasesActionRow /> */}
       <HStack className="my-6" space="md">
-        <Searchbar placeholder="Søg efter sager..." className=" flex-grow" value={searchQuery} onChangeText={setSearchQuery} />
+        <Searchbar
+          placeholder="Søg efter sager..."
+          className=" flex-grow"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
         <Button
           onPress={() => {
             setShowDrawer(true);
