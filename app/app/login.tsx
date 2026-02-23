@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
@@ -64,40 +65,52 @@ export default function Index() {
   }, [username, password]);
 
   return (
-    <KeyboardAvoidingView behavior={"padding"} keyboardVerticalOffset={100}>
-      <Center>
-        <View style={styles.logoContainer}>
-          <Logo width={340} height={340} />
-        </View>
-        <Text bold={true} size="xl">
-          Medarbejder kan erstattes.
-        </Text>
-        <Text bold={true} size="xl">
-          Det kan vare ikke.
-        </Text>
-        <VStack style={styles.formContainer}>
-          <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
-            <FormControlLabel>
-              <FormControlLabelText>Email</FormControlLabelText>
-            </FormControlLabel>
-            <Input className="my-1" size="md">
-              <InputField type="text" placeholder="Email" value={username} onChangeText={(text) => setUsername(text)} />
-            </Input>
-          </FormControl>
-          <SecretInput errorMessage={errorMessage} isInvalid={isInvalid} inputValue={password} onChangeText={setPassword} />
-          {isLoading ? (
-            <Button className="mt-4 " size="lg" variant="solid">
-              <ButtonSpinner/>
-              <ButtonText>Please wait...</ButtonText>
-            </Button>
-          ) : (
-            <Button className="mt-4 " size="lg" variant="solid" onPress={handleLogin}>
-              <ButtonText>Login</ButtonText>
-            </Button>
-          )}
-        </VStack>
-      </Center>
-    </KeyboardAvoidingView>
+    <SafeAreaView className="bg-background-0 flex-1">
+      <KeyboardAvoidingView behavior={"padding"} keyboardVerticalOffset={100}>
+        <Center>
+          <View style={styles.logoContainer}>
+            <Logo width={340} height={340} />
+          </View>
+          <Text bold={true} size="xl">
+            Medarbejder kan erstattes.
+          </Text>
+          <Text bold={true} size="xl">
+            Det kan vare ikke.
+          </Text>
+          <VStack style={styles.formContainer}>
+            <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
+              <FormControlLabel>
+                <FormControlLabelText>Email</FormControlLabelText>
+              </FormControlLabel>
+              <Input className="my-1" size="md">
+                <InputField
+                  type="text"
+                  placeholder="Email"
+                  value={username}
+                  onChangeText={(text) => setUsername(text)}
+                />
+              </Input>
+            </FormControl>
+            <SecretInput
+              errorMessage={errorMessage}
+              isInvalid={isInvalid}
+              inputValue={password}
+              onChangeText={setPassword}
+            />
+            {isLoading ? (
+              <Button className="mt-4 " size="lg" variant="solid">
+                <ButtonSpinner />
+                <ButtonText>Please wait...</ButtonText>
+              </Button>
+            ) : (
+              <Button className="mt-4 " size="lg" variant="solid" onPress={handleLogin}>
+                <ButtonText>Login</ButtonText>
+              </Button>
+            )}
+          </VStack>
+        </Center>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

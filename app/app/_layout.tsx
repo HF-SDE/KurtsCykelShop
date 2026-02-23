@@ -32,17 +32,13 @@ function RootLayoutNav() {
 
   return (
     <SessionProvider>
-      <SafeAreaProvider>
-          <GluestackUIProvider mode={colorMode}>
-            <KeyboardProvider>
-              <SafeAreaView className="bg-background-0 flex-1">
-                <ThemeProvider>
-                  <Slot />
-                </ThemeProvider>
-              </SafeAreaView>
-            </KeyboardProvider>
-          </GluestackUIProvider>
-      </SafeAreaProvider>
+      <GluestackUIProvider mode={colorMode}>
+        <KeyboardProvider>
+          <ThemeProvider>
+            <Slot />
+          </ThemeProvider>
+        </KeyboardProvider>
+      </GluestackUIProvider>
     </SessionProvider>
   );
 }
