@@ -15,10 +15,19 @@ import { Heading } from "@components/ui/heading";
 import { HStack } from "@components/ui/hstack";
 import { CloseIcon, Icon } from "@components/ui/icon";
 import SecretInput from "@components/ui/input/password";
-import { Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader } from "@components/ui/modal";
+import {
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@components/ui/modal";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { VStack } from "@components/ui/vstack";
 import { InfoIcon } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UserProfileScreen() {
   const { userProfile, isLoading, resetPassword } = useUserProfile();
@@ -114,100 +123,102 @@ export default function UserProfileScreen() {
   }
 
   return (
-    <Center className={`bg-background-0 flex-1 p-6`}>
-      <VStack className={`flex-1 justify-between px-5`}>
-        <Box className="gap-5">
-          <Avatar size="4xl" className="bg-secondary-500 border-secondary-600 border-8">
-            <AvatarFallbackText size="2xl" className="text-primary-950">
-              {userProfile?.initials
-                ?.split("")
-                .map((name) => name.charAt(0))
-                .join(" ") || "?"}
-            </AvatarFallbackText>
-          </Avatar>
-          <Box>
-            <Text size="2xl" bold>
-              Hi, {userProfile?.firstName || "N/A"} {userProfile?.lastName || ""}
-            </Text>
-            <Text size="md" className="mb-1.5">
-              Email: {userProfile?.email || "N/A"}
-            </Text>
+    <SafeAreaView className="bg-background-0 flex-1">
+      <Center className={`bg-background-0 flex-1 p-6`}>
+        <VStack className={`flex-1 justify-between px-5`}>
+          <Box className="gap-5">
+            <Avatar size="4xl" className="bg-secondary-500 border-secondary-600 border-8">
+              <AvatarFallbackText size="2xl" className="text-primary-950">
+                {userProfile?.initials
+                  ?.split("")
+                  .map((name) => name.charAt(0))
+                  .join(" ") || "?"}
+              </AvatarFallbackText>
+            </Avatar>
+            <Box>
+              <Text size="2xl" bold>
+                Hi, {userProfile?.firstName || "N/A"} {userProfile?.lastName || ""}
+              </Text>
+              <Text size="md" className="mb-1.5">
+                Email: {userProfile?.email || "N/A"}
+              </Text>
+            </Box>
           </Box>
-        </Box>
 
-        <Center>
-          <VStack className={"w-full gap-2.5"}>
-            <Button size="xl" onPress={() => setIsModalVisible(true)}>
-              <ButtonText>Reset Password</ButtonText>
-            </Button>
+          <Center>
+            <VStack className={"w-full gap-2.5"}>
+              <Button size="xl" onPress={() => setIsModalVisible(true)}>
+                <ButtonText>Reset Password</ButtonText>
+              </Button>
 
-            <Button size="xl" onPress={signOut}>
-              <ButtonText>Sign Out</ButtonText>
-            </Button>
-          </VStack>
-        </Center>
-      </VStack>
+              <Button size="xl" onPress={signOut}>
+                <ButtonText>Sign Out</ButtonText>
+              </Button>
+            </VStack>
+          </Center>
+        </VStack>
 
-      <Modal
-        isOpen={isModalVisible}
-        onClose={() => {
-          setIsModalVisible(false);
-        }}
-        size="md"
-      >
-        <ModalBackdrop />
-        <ModalContent>
-          <ModalHeader>
-            <Heading size="lg">Change Password</Heading>
-            <ModalCloseButton>
-              <Icon as={CloseIcon} />
-            </ModalCloseButton>
-          </ModalHeader>
-          <ModalBody>
-            <SecretInput
-              inputValue={currentPassword}
-              onChangeText={setCurrentPassword}
-              isInvalid={error}
-              errorMessage={errorMessage}
-              placeholder="Current Password"
-            />
-            <SecretInput
-              inputValue={password}
-              onChangeText={setPassword}
-              className="mb-2"
-              placeholder="New Password"
-              HelperText="Must be at least 6 characters."
-            />
-            <SecretInput
-              inputValue={againPassword}
-              onChangeText={setAgainPassword}
-              isInvalid={newConfirmPasswordError}
-              errorMessage={errorMessage}
-              placeholder="Confirm New Password"
-              HelperText='Must be the same as "New Password".'
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="outline"
-              action="secondary"
-              className="mr-3"
-              onPress={() => {
-                setIsModalVisible(false);
-              }}
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
-            <Button
-              onPress={() => {
-                handleReset();
-              }}
-            >
-              <ButtonText>Change</ButtonText>
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Center>
+        <Modal
+          isOpen={isModalVisible}
+          onClose={() => {
+            setIsModalVisible(false);
+          }}
+          size="md"
+        >
+          <ModalBackdrop />
+          <ModalContent>
+            <ModalHeader>
+              <Heading size="lg">Change Password</Heading>
+              <ModalCloseButton>
+                <Icon as={CloseIcon} />
+              </ModalCloseButton>
+            </ModalHeader>
+            <ModalBody>
+              <SecretInput
+                inputValue={currentPassword}
+                onChangeText={setCurrentPassword}
+                isInvalid={error}
+                errorMessage={errorMessage}
+                placeholder="Current Password"
+              />
+              <SecretInput
+                inputValue={password}
+                onChangeText={setPassword}
+                className="mb-2"
+                placeholder="New Password"
+                HelperText="Must be at least 6 characters."
+              />
+              <SecretInput
+                inputValue={againPassword}
+                onChangeText={setAgainPassword}
+                isInvalid={newConfirmPasswordError}
+                errorMessage={errorMessage}
+                placeholder="Confirm New Password"
+                HelperText='Must be the same as "New Password".'
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                variant="outline"
+                action="secondary"
+                className="mr-3"
+                onPress={() => {
+                  setIsModalVisible(false);
+                }}
+              >
+                <ButtonText>Cancel</ButtonText>
+              </Button>
+              <Button
+                onPress={() => {
+                  handleReset();
+                }}
+              >
+                <ButtonText>Change</ButtonText>
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Center>
+    </SafeAreaView>
   );
 }
