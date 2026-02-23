@@ -1,7 +1,8 @@
 import config from "@config";
-
 import authRoutes from "@routes/auth.routes";
+import itemRoutes from "@routes/item.routes";
 import profileRoutes from "@routes/profile.routes";
+import unitRoutes from "@routes/unit.routes";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
@@ -33,6 +34,8 @@ app.use(limiter);
 //Insert all routes here
 app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
+app.use("/units", unitRoutes);
+app.use("/items", itemRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
