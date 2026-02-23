@@ -8,6 +8,7 @@ const config: ExpoConfig = {
   scheme: "app",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  orientation: "portrait",
   ios: {
     supportsTablet: true,
     config: {

@@ -16,7 +16,7 @@ export function BackButtonLayout() {
         headerBackground: () => <Box className="bg-background-0" />,
         headerLeft: () => (
           <View style={{ marginTop: Platform.OS === "android" ? -20 : 0 }}>
-            <Button onPress={() => router.back()} size="4xl" action="secondary" variant="link" className="h-10 w-10">
+            <Button onPress={() => router.back()} size="4xl" action="secondary" variant="link" className="h-10 w-10 !border-0">
               <ButtonIcon as={ChevronLeft} />
             </Button>
           </View>

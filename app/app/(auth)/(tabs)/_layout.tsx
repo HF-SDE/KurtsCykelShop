@@ -33,11 +33,6 @@ export default function TabLayout() {
   //   setIsLoading(false);
   // };
 
-  const handleTabPress = async () => {
-    // Trigger haptic feedback
-    await triggerHapticFeedback(ImpactFeedbackStyle.Soft);
-  };
-
   useEffect(() => {
     // checkPermissions();
   }, []);
@@ -65,14 +60,12 @@ export default function TabLayout() {
         headerShown: false,
       }}
       screenListeners={{
-        tabPress: async () => {
-          await handleTabPress(); // Ensure handleTabPress is a function and it returns a Promise.
-        },
+        tabPress: () => triggerHapticFeedback(ImpactFeedbackStyle.Soft),
       }}
     >
       {hasOrderPermission && (
         <Tabs.Screen
-          name="cases"
+          name="case"
           options={{
             title: "Sager",
             tabBarItemStyle: { display: "flex" },
