@@ -3,13 +3,14 @@ import { FlatList, Platform, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Box } from "@/components/ui/box";
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 
 import { Searchbar } from "@components/search";
-import { Pencil, Plus } from "lucide-react-native";
+import { Table, TableBody, TableData, TableHead, TableHeader, TableRow } from "@components/ui/table";
+import { ListFilter, Pencil, Plus } from "lucide-react-native";
 
 type Role = { id: string; name: string };
 
@@ -37,24 +38,44 @@ export default function RolesPage() {
 
   return (
     <SafeAreaView className="bg-background-0 flex-1">
-      <Box className="px-5 pt-2" style={{ paddingTop: headerHeight }}>
-        <HStack className="mb-6 mt-2 items-center justify-between">
-          <Button className="h-10 rounded-md px-4">
-            <ButtonText className="font-semibold ">Create</ButtonText>
-            <ButtonIcon as={Plus} />
-          </Button>
-        </HStack>
-
-        <HStack className="mb-3 w-full items-center gap-2">
+      <Box className="px-5" style={{ paddingTop: headerHeight }}>
+        <HStack className="gap-2">
           <Box className="flex-1">
             <Searchbar />
           </Box>
 
-          <Button variant="outline" className="h-11 min-w-[92px] rounded-lg border-[#CFCFCF] bg-[#EFEFEF]">
-            <ButtonText className="text-[#444]">Filter</ButtonText>
-            <ButtonIcon as={Plus} className="text-[#444]" />
-          </Button>
+          <ButtonGroup className="h-full flex-row items-center justify-between">
+            <Button variant="outline" className="h-full">
+              <ButtonIcon as={ListFilter} />
+            </Button>
+
+            <Button variant="outline" className="h-full">
+              <ButtonIcon as={Plus} />
+            </Button>
+          </ButtonGroup>
         </HStack>
+
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {filteredRoles.map((item, i) => (
+              <TableRow key={item.id}>
+                <TableData>{item.name}</TableData>
+                <TableData>
+                  <Button variant="outline" className="!border-0">
+                    <ButtonIcon size="3xl" as={Pencil} />
+                  </Button>
+                </TableData>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Box className="overflow-hidden rounded-xl border border-[#CBCBCB] bg-[#F6F6F6]">
           <HStack className="h-12 items-center justify-between bg-[#EDEDED] px-6">
