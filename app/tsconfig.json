@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@schemas/*": ["../../schemas/*"],
+      "@schemas/*": ["../schemas/*"],
       "@hooks/*": ["./hooks/*"],
       "tailwind.config": ["./tailwind.config.js"],
       "@components/*": ["./components/*"],
