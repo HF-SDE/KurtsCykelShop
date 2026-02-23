@@ -4,7 +4,7 @@ const config: ExpoConfig = {
   name: "Kurts Cykel Shop",
   slug: "kurts-cykel-shop",
   version: "1.0.0",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/icon.png",
   scheme: "app",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
@@ -19,21 +19,21 @@ const config: ExpoConfig = {
     package: "com.anonymous.kurtscykelshop",
     adaptiveIcon: {
       backgroundColor: "#E6F4FE",
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/adaptive-icon.png",
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
   },
   web: {
     output: "static",
-    favicon: "./assets/images/favicon.png",
+    favicon: "./assets/favicon.png",
   },
   plugins: [
     "expo-router",
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/icon.png",
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",
