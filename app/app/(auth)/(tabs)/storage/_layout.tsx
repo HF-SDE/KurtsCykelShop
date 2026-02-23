@@ -1,5 +1,12 @@
 import { BackButtonLayout } from "@components/back-button";
+import { Text } from "@components/ui/text";
+import { Stack } from "expo-router";
 
 export default function StorageLayout() {
-  return <BackButtonLayout />;
+  return (
+    <BackButtonLayout>
+      <Stack.Screen name="new-item" options={{ headerTitle: () => <Text size="2xl">Ny genstand</Text> }} />
+      <Stack.Screen name="[id]/edit-item" options={{ headerTitle: () => <Text size="2xl">Rediger genstand</Text> }} />
+    </BackButtonLayout>
+  );
 }
