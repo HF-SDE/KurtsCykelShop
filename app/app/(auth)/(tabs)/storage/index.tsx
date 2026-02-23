@@ -1,9 +1,11 @@
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Table, TableBody, TableData, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
-import { useRouter } from "expo-router";
 import { ListFilter, Pencil, Plus, ScanText } from "lucide-react-native";
 
 const data = [
@@ -22,27 +24,25 @@ const data = [
 ];
 
 export default function Storage() {
-  const router = useRouter();
-
   return (
-    <Box className="bg-background-0 w-full flex-1 overflow-hidden p-2">
+    <SafeAreaView className="bg-background-0 w-full flex-1 overflow-hidden p-2">
       <Box className="mb-8 w-full flex-row justify-between">
         <Box className="w-1/2 ">
           <Searchbar />
         </Box>
 
         <ButtonGroup className="mb-5 h-full flex-row items-center justify-between gap-2">
-          <Button variant="outline" className="h-full" onPress={() => router.push("/storage/barcode-scanner")}>
-            <ButtonIcon as={ScanText} />
-          </Button>
-
-          <Button variant="outline" className="h-full">
+          <Button variant="outline" action="secondary" className="h-full">
             <ButtonIcon as={ListFilter} />
           </Button>
 
-          <Button variant="outline" className="h-full" onPress={() => router.push("/storage/new-item")}>
+          <NavigationButton variant="outline" action="secondary" className="h-full" href="/storage/barcode-scanner">
+            <ButtonIcon as={ScanText} />
+          </NavigationButton>
+
+          <NavigationButton variant="outline" action="secondary" className="h-full" href="/storage/new-item">
             <ButtonIcon as={Plus} />
-          </Button>
+          </NavigationButton>
         </ButtonGroup>
       </Box>
 
@@ -61,14 +61,19 @@ export default function Storage() {
               <TableData>{item.name}</TableData>
               <TableData>{item.quantity}</TableData>
               <TableData>
-                <Button variant="outline" className="!border-0">
+                <NavigationButton
+                  variant="outline"
+                  action="secondary"
+                  className="!border-0"
+                  href={`/storage/${i}/edit-item`}
+                >
                   <ButtonIcon size="3xl" as={Pencil} />
-                </Button>
+                </NavigationButton>
               </TableData>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </Box>
+    </SafeAreaView>
   );
 }
