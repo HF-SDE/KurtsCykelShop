@@ -212,6 +212,7 @@ model Item {
   quantity        Int
   minSellQuantity Int
   price           Int // Pris i øre
+  purchasePrice   Int // Indkøbspris i øre
   isPublic        Boolean @default(false)
   unitId          String  @db.Uuid
   statusId        String  @db.Uuid
