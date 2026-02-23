@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   KeyboardAvoidingView,
-  KeyboardAwareScrollView,
-  KeyboardExtender,
-  KeyboardToolbar,
 } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
