@@ -5,7 +5,7 @@ import { Button, ButtonIcon } from "@components/ui/button";
 import { Stack, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 
-export function BackButtonLayout() {
+export function BackButtonLayout({ children }: { children?: React.ReactNode }) {
   const router = useRouter();
 
   return (
@@ -31,6 +31,7 @@ export function BackButtonLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      {children}
     </Stack>
   );
 }
