@@ -14,7 +14,7 @@ export function Searchbar({
   onChangeText?: (text: string) => void;
 }) {
   return (
-    <Input className={`h-14 rounded-lg ${className}`}>
+    <Input className={className}>
       <InputSlot className="pl-3">
         <InputIcon as={SearchIcon} />
       </InputSlot>
