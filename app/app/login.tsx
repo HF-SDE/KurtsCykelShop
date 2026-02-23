@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import {
+  KeyboardAvoidingView,
+  KeyboardAwareScrollView,
+  KeyboardExtender,
+  KeyboardToolbar,
+} from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
@@ -66,7 +71,7 @@ export default function Index() {
 
   return (
     <SafeAreaView className="bg-background-0 flex-1">
-      <KeyboardAvoidingView behavior={"padding"} keyboardVerticalOffset={100}>
+      <KeyboardAvoidingView className="flex-1" behavior="padding" keyboardVerticalOffset={320}>
         <Center>
           <View style={styles.logoContainer}>
             <Logo width={340} height={340} />
@@ -80,12 +85,12 @@ export default function Index() {
           <VStack style={styles.formContainer}>
             <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
               <FormControlLabel>
-                <FormControlLabelText>Email</FormControlLabelText>
+                <FormControlLabelText>Brugernavn</FormControlLabelText>
               </FormControlLabel>
               <Input className="my-1" size="md">
                 <InputField
                   type="text"
-                  placeholder="Email"
+                  placeholder="Brugernavn"
                   value={username}
                   onChangeText={(text) => setUsername(text)}
                 />
@@ -115,6 +120,11 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   logoContainer: {
     marginBottom: 40,
     alignItems: "center",

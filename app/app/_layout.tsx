@@ -33,11 +33,13 @@ function RootLayoutNav() {
   return (
     <SessionProvider>
       <GluestackUIProvider mode={colorMode}>
-        <KeyboardProvider>
-          <ThemeProvider>
-            <Slot />
-          </ThemeProvider>
-        </KeyboardProvider>
+        <SafeAreaProvider>
+          <KeyboardProvider>
+            <ThemeProvider>
+              <Slot />
+            </ThemeProvider>
+          </KeyboardProvider>
+        </SafeAreaProvider>
       </GluestackUIProvider>
     </SessionProvider>
   );
