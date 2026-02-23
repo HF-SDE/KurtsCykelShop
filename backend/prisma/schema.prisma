@@ -34,6 +34,7 @@ model User {
   inventoryTransactions InventoryTransaction[]
   saleLogs              SaleLog[]
   sessions              Session[]
+  serviceRepairs        ServiceRepair[]
 
   @@unique([firstName, lastName])
 }
@@ -129,6 +130,7 @@ model ServiceOrder {
   completedAt         DateTime?
   assignedToId        String?   @db.Uuid
   assignedById        String    @db.Uuid
+  status              String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -140,6 +142,7 @@ model ServiceOrder {
   serviceOrderInvoice ServiceOrderInvoice?
   servicePartsUsed    ServicePartsUsed[]
   serviceOrderLogs    ServiceOrderLog[]
+  serviceRepairs      ServiceRepair[]
 
   @@index([customerId, createdAt])
 }
@@ -183,6 +186,20 @@ model ServiceOrderLog {
   updatedAt DateTime @updatedAt
 
   serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+}
+
+model ServiceRepair {
+  id             String @id @default(uuid()) @db.Uuid
+  serviceOrderId String @db.Uuid
+  title          String
+  description    String
+  createdById    String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
 }
 
 // Storage
