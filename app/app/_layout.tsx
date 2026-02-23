@@ -1,6 +1,6 @@
 import { useEffect } from "react";
+import { Keyboard, Pressable } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -35,7 +35,9 @@ function RootLayoutNav() {
       <GluestackUIProvider mode={colorMode}>
         <KeyboardProvider>
           <ThemeProvider>
-            <Slot />
+            <Pressable className="flex-1" onPress={Keyboard.dismiss}>
+              <Slot />
+            </Pressable>
           </ThemeProvider>
         </KeyboardProvider>
       </GluestackUIProvider>
