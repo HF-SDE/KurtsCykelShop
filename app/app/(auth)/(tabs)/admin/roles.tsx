@@ -38,7 +38,7 @@ export default function RolesPage() {
 
   return (
     <SafeAreaView className="bg-background-0 flex-1">
-      <Box className="px-5" style={{ paddingTop: headerHeight }}>
+      <Box className={`overflow-hidden rounded-xl border border-[#CBCBCB] px-5`}>
         <HStack className="gap-2">
           <Box className="flex-1">
             <Searchbar />
