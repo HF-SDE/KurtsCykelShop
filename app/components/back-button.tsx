@@ -1,34 +1,28 @@
-import { Platform, View } from "react-native";
+import { PropsWithChildren } from "react";
 
-import { Box } from "@components/ui/box";
-import { Button, ButtonIcon } from "@components/ui/button";
-import { Stack, useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { colorPalettes } from "@/components/ui/gluestack-ui-provider/config";
 
-export function BackButtonLayout() {
-  const router = useRouter();
+import { Stack } from "expo-router";
+import { useColorScheme } from "nativewind";
+
+export function BackButtonLayout({ children }: PropsWithChildren) {
+  const { colorScheme } = useColorScheme();
+  const effectiveColorScheme = colorScheme === "dark" ? "dark" : "light";
+  const palette = effectiveColorScheme === "dark" ? colorPalettes.dark : colorPalettes.light;
+  const background0 = `rgb(${palette["--color-background-0"]})`;
+  const headerTint = `rgb(${palette["--color-typography-900"]})`;
 
   return (
     <Stack
+      key={effectiveColorScheme}
       screenOptions={{
         headerShown: true,
         headerBackVisible: true,
-        // headerStyle: { backgroundColor: "transparent" },
         headerTitle: "",
-        headerBackground: () => <Box className="bg-background-0 flex-1" style={{ height: "100%" }} />,
-        // headerLeft: () => (
-        //   <View>
-        //     <Button
-        //       onPress={() => router.back()}
-        //       size="4xl"
-        //       action="secondary"
-        //       variant="link"
-        //       className="h-10 w-10 !border-0"
-        //     >
-        //       <ButtonIcon as={ChevronLeft} />
-        //     </Button>
-        //   </View>
-        // ),
+        headerTransparent: false,
+        headerBackButtonDisplayMode: "minimal",
+        headerTintColor: headerTint,
+        headerStyle: { backgroundColor: background0 },
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
