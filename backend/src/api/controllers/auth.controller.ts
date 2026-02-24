@@ -13,6 +13,7 @@ import { Request, Response } from "express";
 import * as AuthService from "../services/auth.service";
 
 // Utility function to get the client's IP address
+// eslint-disable-next-line func-style
 const getClientIp = (req: any): string => {
   return req.headers["x-forwarded-for"] || "";
 };
