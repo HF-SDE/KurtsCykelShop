@@ -53,11 +53,11 @@ export default function NewItem() {
   const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
   const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
 
-  const [isBarcodeDrawerOpen, setIsBarcodeDrawerOpen] = useState(false);
-
   const router = useRouter();
   const navigation = useNavigation();
   const allowNavigationRef = useRef(false);
+
+  const [isBarcodeDrawerOpen, setIsBarcodeDrawerOpen] = useState(false);
 
   function isDifferent(a: unknown, b: unknown): boolean {
     if (Array.isArray(a) && Array.isArray(b)) return JSON.stringify(a) !== JSON.stringify(b);
