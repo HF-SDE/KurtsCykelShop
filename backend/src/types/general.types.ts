@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import e, { NextFunction, Request, Response } from "express";
 import { Query } from "express-serve-static-core";
 
 export enum Status {
@@ -20,11 +20,12 @@ export enum Status {
   InvalidCredentials = "InvalidCredentials",
   TooManyRequests = "TooManyRequests",
 }
-export interface APIResponse<T = null | undefined> {
-  status: Status;
-  message?: string;
-  data?: T | null;
-}
+// export interface APIResponse<T = null | undefined, E = null | undefined> {
+//   status: Status;
+//   message?: string;
+//   data?: T | null;
+//   error?: E | null;
+// }
 
 export interface PaginatedData<T> {
   data: T[];
@@ -33,10 +34,22 @@ export interface PaginatedData<T> {
   hasMore: boolean;
 }
 
-export interface IAPIResponse {
+interface BaseAPIResponse {
   status: Status;
   message?: string;
 }
+
+interface APIResponseWithData<T = null | undefined> extends BaseAPIResponse {
+  data: T;
+  error: never;
+}
+
+interface APIResponseError<E = null | undefined> extends BaseAPIResponse   {
+  data: never;
+  error: E;
+}
+
+export type APIResponse<T = null | undefined, E = null | undefined> = APIResponseWithData<T> | APIResponseError<E> | BaseAPIResponse;
 
 export type ExpressFunction = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
