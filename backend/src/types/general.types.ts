@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from "express";
+import{ NextFunction, Request, Response } from "express";
 import { Query } from "express-serve-static-core";
 
 export enum Status {
@@ -20,12 +20,6 @@ export enum Status {
   InvalidCredentials = "InvalidCredentials",
   TooManyRequests = "TooManyRequests",
 }
-// export interface APIResponse<T = null | undefined, E = null | undefined> {
-//   status: Status;
-//   message?: string;
-//   data?: T | null;
-//   error?: E | null;
-// }
 
 export interface PaginatedData<T> {
   data: T[];
