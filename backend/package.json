@@ -55,7 +55,7 @@
     "eslint-plugin-no-secrets": "^2.2.2",
     "eslint-plugin-security": "^3.0.1",
     "globals": "^17.3.0",
-    "prisma": "^7.4.0",
+    "prisma": "^7.4.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
