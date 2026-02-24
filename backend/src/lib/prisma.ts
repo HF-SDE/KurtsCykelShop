@@ -1,6 +1,6 @@
 import { capitalize } from "@utils/Utils";
 
-import { IAPIResponse, Status } from "@api-types/general.types";
+import { APIResponse, Status } from "@api-types/general.types";
 
 import { Prisma, PrismaClient } from "@prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -19,14 +19,14 @@ export type prismaModels = Uncapitalize<Prisma.ModelName>;
  * @param {PrismaClientKnownRequestError} err - The error object.
  * @param {prismaModels} model - The model that caused the error.
  * @param {keyof typeof Status} operation - The operation that caused the error.
- * @returns {IAPIResponse} An object containing the status and message.
+ * @returns {APIResponse} An object containing the status and message.
  */
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function errorResponse(
   err: PrismaClientKnownRequestError,
   model: prismaModels,
   operation: keyof typeof Status,
-): Promise<IAPIResponse> {
+): Promise<APIResponse> {
   if (err.name == "PrismaClientValidationError") {
     return {
       status: Status.MissingDetails,
