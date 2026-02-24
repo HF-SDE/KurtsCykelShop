@@ -17,14 +17,24 @@ export async function getAllPaginated(page: number = 1, limit: number = 20): Pro
   const skip = (page - 1) * limit;
 
   const [items, total] = await prisma.$transaction([
-    prisma.item.findMany({ skip, take: limit, orderBy: { name: "asc" } }),
+    prisma.item.findMany({
+      skip,
+      take: limit,
+      orderBy: { name: "asc" },
+      include: { barcodes: { select: { code: true } } },
+    }),
     prisma.item.count(),
   ]);
+
+  const mappedItems = items.map((item) => ({
+    ...item,
+    barcodes: item.barcodes.map((b) => b.code),
+  }));
 
   return {
     status: Status.Success,
     message: "Items retrieved successfully",
-    data: { data: items, total, page, hasMore: skip + items.length < total },
+    data: { data: mappedItems, total, page, hasMore: skip + items.length < total },
   };
 }
 
@@ -38,13 +48,16 @@ export async function createOne(data: CreateItemType): Promise<APIResponse<Item>
     };
   }
 
-  const { id: locationId } = await prisma.location.findFirstOrThrow();
-  const { id: statusId } = await prisma.itemStatus.findFirstOrThrow();
-
   const sku = `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
   const newItem = await prisma.item.create({
-    data: { ...validatedData, sku, locationId, statusId },
+    data: {
+      ...validatedData,
+      sku,
+      barcodes: {
+        createMany: { data: validatedData.barcodes?.map((code) => ({ code })) || [] },
+      },
+    },
   });
 
   return {

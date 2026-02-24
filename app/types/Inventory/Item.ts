@@ -14,4 +14,5 @@ export interface Item {
   vendorId: string;
   createdAt: string;
   updatedAt: string;
+  barcodes: string[];
 }
