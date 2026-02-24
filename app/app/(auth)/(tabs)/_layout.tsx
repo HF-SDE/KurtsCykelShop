@@ -41,9 +41,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          height: 88,
+          height: 105,
           paddingTop: 10,
-          borderTopWidth: 0,
           borderBottomWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -53,10 +52,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         headerTitleAlign: "center",
         tabBarItemStyle: { display: "none" },
-        tabBarIconStyle: {
-          height: 50,
-          width: 50,
-        },
+        tabBarIconStyle: { height: 50, width: 50 },
         headerShown: false,
       }}
       screenListeners={{
@@ -69,7 +65,9 @@ export default function TabLayout() {
           options={{
             title: "Sager",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => <Icon as={BookText} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon as={BookText} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />
+            ),
           }}
         />
       )}
@@ -79,7 +77,9 @@ export default function TabLayout() {
           options={{
             title: "Lager",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => <Icon as={Package} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon as={Package} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />
+            ),
           }}
         />
       )}
@@ -89,7 +89,13 @@ export default function TabLayout() {
           options={{
             title: "Admin",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => <Icon as={UserRoundCog} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                as={UserRoundCog}
+                size="4xl"
+                className={focused ? "!text-typography-800" : "!text-typography-300"}
+              />
+            ),
           }}
         />
       )}
@@ -99,7 +105,13 @@ export default function TabLayout() {
           options={{
             title: "Profile",
             tabBarItemStyle: { display: "flex" },
-            tabBarIcon: ({ focused }) => <Icon as={CircleUserRound} size="4xl" className={focused ? "!text-typography-800" : "!text-typography-300"} />,
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                as={CircleUserRound}
+                size="4xl"
+                className={focused ? "!text-typography-800" : "!text-typography-300"}
+              />
+            ),
           }}
         />
       )}
