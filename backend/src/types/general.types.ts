@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Query } from "express-serve-static-core";
 
 import { AppError, EitherDataOrError, ValidationError } from "./error.types";
@@ -21,6 +21,13 @@ export enum Status {
   MissingCredentials = "MissingCredentials",
   InvalidCredentials = "InvalidCredentials",
   TooManyRequests = "TooManyRequests",
+}
+
+export interface PaginatedData<T> {
+  data: T[];
+  total: number;
+  page: number;
+  hasMore: boolean;
 }
 
 // Re-export error types for convenience

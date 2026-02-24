@@ -65,6 +65,21 @@ const permissions: PermissionSeed[] = [
     description: "Create new permission group",
   },
   {
+    code: "administrator:roles:view",
+    group: "Administrator",
+    description: "View roles",
+  },
+  {
+    code: "administrator:roles:create",
+    group: "Administrator",
+    description: "Create new roles",
+  },
+  {
+    code: "administrator:roles:update",
+    group: "Administrator",
+    description: "Update existing roles",
+  },
+  {
     code: "administrator:dashboard:view",
     group: "Administrator",
     description: "View the admin dashboard",
