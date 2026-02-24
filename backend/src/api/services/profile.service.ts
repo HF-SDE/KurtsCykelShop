@@ -12,7 +12,7 @@ import z from "zod";
  * @param {string} oldPassword - The old password for the user.
  * @returns {Promise<APIResponse>} A promise that resolves to an object containing the status and message of the password change.
  */
-export async function changePassword(id: string, newPassword: string, oldPassword: string): Promise<APIResponse> {
+export async function changePassword(id: string, newPassword: string, oldPassword: string): Promise<APIResponse<void>> {
   try {
     // Validate
     const idValidation = await ChangePasswordBase64Schema.safeParseAsync({

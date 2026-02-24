@@ -1,13 +1,6 @@
-import { getHttpStatusCode } from "@utils/Utils";
-
-import {
-  AccessResult,
-  GetAccessTokenRequestBody,
-  LoginRequestBody,
-  LogoutRequestBody,
-} from "@api-types/auth.types";
+import { AccessResult, GetAccessTokenRequestBody, LoginRequestBody, LogoutRequestBody } from "@api-types/auth.types";
 import { APIResponse } from "@api-types/general.types";
-
+import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response } from "express";
 
 import * as AuthService from "../services/auth.service";
@@ -27,6 +20,7 @@ export async function login(
   req: Request<unknown, APIResponse<AccessResult>, LoginRequestBody>,
   res: Response<APIResponse<AccessResult>>,
 ): Promise<void> {
+  console.log("Login request received from IP:", getClientIp(req)); // Log the login attempt with the client's IP
   const { username, password } = req.body;
 
   const userObject: LoginRequestBody = {
@@ -42,13 +36,13 @@ export async function login(
 
 /**
  * Logs out a user by invalidating their session token.
- * @param {Request<unknown, APIResponse, LogoutRequestBody>} req - The request object, containing the token in the body.
- * @param {Response<APIResponse>} res - The response object used to send the response to the client.
+ * @param {Request<unknown, APIResponse<void>, LogoutRequestBody>} req - The request object, containing the token in the body.
+ * @param {Response<APIResponse<void>>} res - The response object used to send the response to the client.
  * @returns {Promise<void>} - A promise that resolves when the logout is complete or rejects if an error occurs.
  */
 export async function logout(
-  req: Request<unknown, APIResponse, LogoutRequestBody>,
-  res: Response<APIResponse>,
+  req: Request<unknown, APIResponse<void>, LogoutRequestBody>,
+  res: Response<APIResponse<void>>,
 ): Promise<void> {
   const { token } = req.body;
 
@@ -86,10 +80,7 @@ export async function getAccessToken(
  * @param {Response} res - The response object used to send the response to the client.
  * @returns {Promise<void>} - A promise that resolves when the refresh token is retrieved or rejects if an error occurs.
  */
-export async function getRefreshToken(
-  req: Request,
-  res: Response,
-): Promise<void> {
+export async function getRefreshToken(req: Request, res: Response): Promise<void> {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     res.status(400).json({

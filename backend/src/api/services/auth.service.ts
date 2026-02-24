@@ -1,6 +1,12 @@
 //import { JwtPayload } from 'jsonwebtoken';
 import { UserToken } from "@api-types/JWTToken";
-import { AccessResult, LoginAttemptsCache, LoginRequestBody, RefreshResult, TokenRequestBody } from "@api-types/auth.types";
+import {
+  AccessResult,
+  LoginAttemptsCache,
+  LoginRequestBody,
+  RefreshResult,
+  TokenRequestBody,
+} from "@api-types/auth.types";
 import { APIResponse, Status } from "@api-types/general.types";
 import config from "@config";
 import { Session } from "@prisma";
@@ -32,7 +38,11 @@ function generateToken(user: UserToken, ip: string | null, expiration: string, s
  * @param {Session} [session] - Optional session to associate the tokens with. If not provided, a new session will be created.
  * @returns {Promise<{ accessToken: { token: string, authType: string } }>} An object containing the new access token.
  */
-export async function generateUserTokens(user: Omit<UserToken, "jti">, ip: string, session?: Session): Promise<AccessResult> {
+export async function generateUserTokens(
+  user: Omit<UserToken, "jti">,
+  ip: string,
+  session?: Session,
+): Promise<AccessResult> {
   const newId = crypto.randomUUID();
 
   const userWithRoles = await prisma.user.findFirst({
@@ -288,7 +298,9 @@ async function addFailedAttempt(username: string, ipAddress: string): Promise<vo
     }
 
     // Filter out old attempts outside the time window
-    loginAttempts[key] = loginAttempts[key].filter((attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000);
+    loginAttempts[key] = loginAttempts[key].filter(
+      (attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+    );
 
     // Add the new failed attempt
     loginAttempts[key].push(now);
@@ -328,7 +340,9 @@ function isAccountLocked(username: string, ipAddress: string): boolean {
   const now = new Date();
   if (Object.prototype.hasOwnProperty.call(loginAttempts, key)) {
     // eslint-disable-next-line security/detect-object-injection
-    loginAttempts[key] = loginAttempts[key].filter((attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000);
+    loginAttempts[key] = loginAttempts[key].filter(
+      (attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+    );
   }
 
   // Check if the number of recent failed attempts exceeds the limit

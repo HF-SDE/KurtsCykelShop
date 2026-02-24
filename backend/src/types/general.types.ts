@@ -1,6 +1,8 @@
 import e, { NextFunction, Request, Response } from "express";
 import { Query } from "express-serve-static-core";
 
+import { AppError, EitherDataOrError, ValidationError } from "./error.types";
+
 export enum Status {
   Unauthorized = "Unauthorized",
   Forbidden = "Forbidden",
@@ -20,34 +22,35 @@ export enum Status {
   InvalidCredentials = "InvalidCredentials",
   TooManyRequests = "TooManyRequests",
 }
-// export interface APIResponse<T = null | undefined, E = null | undefined> {
-//   status: Status;
-//   message?: string;
-//   data?: T | null;
-//   error?: E | null;
-// }
+
+// Re-export error types for convenience
+export type { ValidationError, AppError, EitherDataOrError as Result };
 
 interface BaseAPIResponse {
   status: Status;
   message?: string;
 }
-
-interface APIResponseWithData<T = null | undefined> extends BaseAPIResponse {
+interface APIResponseWithData<T> extends BaseAPIResponse {
   data: T;
-  error: never;
+  errors?: never;
 }
 
-interface APIResponseError<E = null | undefined> extends BaseAPIResponse   {
-  data: never;
-  error: E;
+interface APIResponseWithValidationErrors extends BaseAPIResponse {
+  data?: never;
+  errors: ValidationError; // Field-specific validation errors
 }
 
-export type APIResponse<T = null | undefined, E = null | undefined> = APIResponseWithData<T> | APIResponseError<E> | BaseAPIResponse;
+interface APIResponseWithError extends BaseAPIResponse {
+  data?: never;
+  error: AppError; // General application error
+}
 
-export type ExpressFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => Promise<void> | void;
+export type APIResponse<T> =
+  | APIResponseWithData<T>
+  | APIResponseWithValidationErrors
+  | APIResponseWithError
+  | BaseAPIResponse;
+
+export type ExpressFunction = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
 export type TypedQuery<T> = Partial<T> & Query;

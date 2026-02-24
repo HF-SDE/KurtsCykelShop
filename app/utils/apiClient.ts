@@ -41,7 +41,7 @@ apiClient.interceptors.request.use(
   (error) => {
     // Handle errors in request setup
     return Promise.reject(error);
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
@@ -50,10 +50,7 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     try {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
         const originalRequest = error.config; // The original request that caused the error
 
         // If we haven't already tried to refresh the token
@@ -64,7 +61,7 @@ apiClient.interceptors.response.use(
           if (authHeader) {
             originalRequest.headers["Authorization"] = authHeader;
           }
-        } 
+        }
 
         // If refresh failed, log out the user and clear the token
         await setStorageItemAsync("token", null);
@@ -75,7 +72,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Function to set the Authorization header
@@ -114,9 +111,7 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
-const getNewAccessToken = async (
-  expiredToken: string
-): Promise<string | undefined> => {
+const getNewAccessToken = async (expiredToken: string): Promise<string | undefined> => {
   try {
     // Step 1: Call /refreshToken with the expired token in the Authorization header
     const refreshResponse = await localApiClient.get("/refreshToken", {
