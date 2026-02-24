@@ -21,6 +21,13 @@ export enum Status {
   TooManyRequests = "TooManyRequests",
 }
 
+export interface PaginatedData<T> {
+  data: T[];
+  total: number;
+  page: number;
+  hasMore: boolean;
+}
+
 interface BaseAPIResponse {
   status: Status;
   message?: string;
@@ -38,10 +45,6 @@ interface APIResponseError<E = null | undefined> extends BaseAPIResponse   {
 
 export type APIResponse<T = null | undefined, E = null | undefined> = APIResponseWithData<T> | APIResponseError<E> | BaseAPIResponse;
 
-export type ExpressFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => Promise<void> | void;
+export type ExpressFunction = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
 export type TypedQuery<T> = Partial<T> & Query;
