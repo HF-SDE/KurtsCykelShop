@@ -26,15 +26,18 @@ export interface APIResponse<T = null | undefined> {
   data?: T | null;
 }
 
+export interface PaginatedData<T> {
+  data: T[];
+  total: number;
+  page: number;
+  hasMore: boolean;
+}
+
 export interface IAPIResponse {
   status: Status;
   message?: string;
 }
 
-export type ExpressFunction = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => Promise<void> | void;
+export type ExpressFunction = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
 export type TypedQuery<T> = Partial<T> & Query;
