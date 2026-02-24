@@ -1,6 +1,6 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
-import itemRoutes from "@routes/item.routes";
+import { itemRoutes } from "@routes/item.routes";
 import profileRoutes from "@routes/profile.routes";
 import serviceOrderRoutes from "@routes/serviceOrder.routes";
 import unitRoutes from "@routes/unit.routes";

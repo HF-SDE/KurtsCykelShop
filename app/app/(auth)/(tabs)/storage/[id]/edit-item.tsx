@@ -1,16 +1,15 @@
-import { Item } from "@/types/Inventory/Item";
-
 import { Box } from "@components/ui/box";
 import { Text } from "@components/ui/text";
-import { useData } from "@hooks/useData";
 import { useGlobalSearchParams } from "expo-router";
+
+import { useStorage } from "../ctx";
 
 export default function EditItem() {
   const { id } = useGlobalSearchParams();
 
-  const [[item], , isLoading] = useData<Item>(`/items/${id}`);
+  const { data: items, isLoading } = useStorage();
 
-  console.log(item);
+  const item = items.find((i) => i.id === id);
 
   if (isLoading)
     return (

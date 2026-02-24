@@ -1,16 +1,24 @@
 import { useState } from "react";
+import { Alert } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Grid, GridItem } from "@/components/ui/grid";
 
+import { Item } from "@/types/Inventory/Item";
 import { Unit } from "@/types/Inventory/Unit";
 
 import { StorageField } from "@components/storage/form-fields";
 import { Box } from "@components/ui/box";
+import { Text } from "@components/ui/text";
+import { useToast } from "@components/ui/toast";
 import { useData } from "@hooks/useData";
 import { CreateItemSchema, CreateItemType } from "@schemas/item.schemas";
+import { APIResponse } from "@utils/ApiResponse";
+import apiClient from "@utils/apiClient";
 import { useRouter } from "expo-router";
 import { z } from "zod";
+
+import { useStorage } from "./ctx";
 
 export interface FormStateValue<T> {
   value: T;
@@ -30,13 +38,18 @@ const initialState: CreateItemType = {
   price: 0,
   purchasePrice: 0,
   unitId: "",
+  minSellQuantity: 0,
 };
 
 function toFormState<T>(input: T): FormState<T> {
   const formState = {} as FormState<T>;
 
   for (const key in input) {
-    formState[key] = { value: input[key], fieldType: typeof input[key], errors: [] };
+    formState[key] = {
+      value: input[key],
+      fieldType: typeof input[key],
+      errors: [],
+    };
   }
 
   return formState;
@@ -53,6 +66,9 @@ function toInputValue<T>(formState: FormState<T>): T {
 }
 
 export default function NewItem() {
+  const toast = useToast();
+  const { setData } = useStorage();
+
   const [formState, setFormState] = useState(toFormState(initialState));
   const [units, , unitsLoading] = useData<Unit>("/units", [], { cacheTimeMs: 60 * 60 * 1000 });
 
@@ -66,7 +82,7 @@ export default function NewItem() {
     setFormState((prev) => ({ ...prev, [key]: { ...prev[key], [keyToUpdate]: value } }));
   }
 
-  const handleSubmit = () => {
+  async function handleSubmit() {
     const validationResult = CreateItemSchema.safeParse(toInputValue(formState));
     const errorMap: Record<string, { errors?: string[] }> = validationResult.success
       ? {}
@@ -80,14 +96,53 @@ export default function NewItem() {
     );
 
     if (validationResult.success) {
-      console.log("Form submitted successfully:", validationResult.data);
+      const response = await apiClient.post<APIResponse<Item>>("/items", validationResult.data);
+
+      const newItem = response.data.data;
+
+      if (!newItem) {
+        toast.show({
+          render: ({ id }) => (
+            <Box className="rounded-md bg-red-500 px-4 py-2">
+              <Text className="text-white">Fejl ved oprettelse af vare!</Text>
+            </Box>
+          ),
+        });
+        return;
+      }
+
+      toast.show({
+        render: ({ id }) => (
+          <Box className="rounded-md bg-green-500 px-4 py-2">
+            <Text className="text-white">Vare oprettet!</Text>
+            <Text className="text-green-100" size="sm">
+              ID: {newItem.id}
+            </Text>
+          </Box>
+        ),
+      });
+
+      setData((prev) => {
+        const newList = [...prev, newItem];
+        return newList.sort((a, b) => a.name.localeCompare(b.name));
+      });
+
+      router.back();
     }
-  };
+  }
 
   function handleReset() {
-    setFormState(toFormState(initialState));
+    const currentFormState = toInputValue(formState);
+    const hasChanged = Object.entries(currentFormState).some(
+      ([key, value]) => value !== initialState[key as keyof CreateItemType],
+    );
 
-    router.back();
+    if (hasChanged) {
+      Alert.alert("Bekræft", "Er du sikker på, at du vil annullere? Alle ændringer vil gå tabt.", [
+        { text: "Nej", style: "cancel" },
+        { text: "Ja", style: "destructive", onPress: () => router.back() },
+      ]);
+    } else router.back();
   }
 
   return (
@@ -152,6 +207,15 @@ export default function NewItem() {
           />
         </GridItem>
 
+        <GridItem>
+          <StorageField
+            label="Minimum sælge antal"
+            placeholder="Fx. 5"
+            formStateValue={formState.minSellQuantity}
+            onChange={(minSellQuantity) => setFormStateValue("minSellQuantity", minSellQuantity)}
+          />
+        </GridItem>
+
         <GridItem _extra={{ className: "col-span-2" }}>
           <StorageField
             label="Offentlig"
@@ -162,12 +226,12 @@ export default function NewItem() {
       </Grid>
 
       <Box className="mb-5 mt-auto w-full flex-row items-center justify-center gap-4 px-4">
-        <Button size="2xl" action="primary" onPress={handleSubmit}>
-          <ButtonText>Opret</ButtonText>
+        <Button size="2xl" variant="outline" action="secondary" onPress={handleReset}>
+          <ButtonText>Annuller</ButtonText>
         </Button>
 
-        <Button size="2xl" action="secondary" variant="outline" onPress={handleReset}>
-          <ButtonText>Annuller</ButtonText>
+        <Button size="2xl" action="primary" onPress={handleSubmit}>
+          <ButtonText>Opret</ButtonText>
         </Button>
       </Box>
     </Box>
