@@ -26,6 +26,7 @@ export function BackButtonLayout({ children }: PropsWithChildren) {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      {children}
     </Stack>
   );
 }
