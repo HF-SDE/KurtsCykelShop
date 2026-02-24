@@ -10,7 +10,9 @@ import { Location } from "@/types/Inventory/Location";
 import { Unit } from "@/types/Inventory/Unit";
 import { Vendor } from "@/types/Inventory/Vendor";
 
+import { AddBarcode } from "@components/storage/add-barcode";
 import { FormStateValue, StorageField, toFormState, toInputValue } from "@components/storage/form-fields";
+import { Badge, BadgeText } from "@components/ui/badge";
 import { Box } from "@components/ui/box";
 import { Text } from "@components/ui/text";
 import { useToast } from "@components/ui/toast";
@@ -36,6 +38,7 @@ const initialState: CreateItemType = {
   vendorId: "",
   statusId: "",
   locationId: "",
+  barcodes: [],
 };
 
 const cachedDataOptions = { cacheTimeMs: 60 * 60 * 1000 };
@@ -50,12 +53,19 @@ export default function NewItem() {
   const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
   const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
 
+  const [isBarcodeDrawerOpen, setIsBarcodeDrawerOpen] = useState(false);
+
   const router = useRouter();
   const navigation = useNavigation();
   const allowNavigationRef = useRef(false);
 
-  const hasUnsavedChanges = Object.entries(toInputValue(formState)).some(
-    ([key, value]) => value !== initialState[key as keyof CreateItemType],
+  function isDifferent(a: unknown, b: unknown): boolean {
+    if (Array.isArray(a) && Array.isArray(b)) return JSON.stringify(a) !== JSON.stringify(b);
+    return a !== b;
+  }
+
+  const hasUnsavedChanges = Object.entries(toInputValue(formState)).some(([key, value]) =>
+    isDifferent(value, initialState[key as keyof CreateItemType]),
   );
 
   function confirmDiscard(onConfirm: () => void) {
@@ -242,11 +252,41 @@ export default function NewItem() {
             />
           </GridItem>
 
-          <GridItem _extra={{ className: "col-span-2" }}>
+          <GridItem>
             <StorageField
               label="Offentlig"
               formStateValue={formState.isPublic}
               onChange={(isPublic) => setFormStateValue("isPublic", isPublic)}
+            />
+          </GridItem>
+
+          <GridItem>
+            <Button variant="outline" onPress={() => setIsBarcodeDrawerOpen(true)}>
+              <ButtonText>Stregkoder</ButtonText>
+              {formState.barcodes.value && formState.barcodes.value.length > 0 && (
+                <Badge
+                  size="md"
+                  variant="outline"
+                  action="muted"
+                  className="bg-background-0 absolute right-2 rounded-lg"
+                >
+                  <BadgeText>
+                    {formState.barcodes.value.length > 99 ? "99+" : formState.barcodes.value.length}
+                  </BadgeText>
+                </Badge>
+              )}
+            </Button>
+
+            <AddBarcode
+              isOpen={isBarcodeDrawerOpen}
+              setIsOpen={setIsBarcodeDrawerOpen}
+              barcodes={formState.barcodes.value ?? []}
+              onAddBarcode={(barcode) =>
+                setFormStateValue("barcodes", [...(formState.barcodes.value ?? []), barcode], "value")
+              }
+              onRemoveBarcode={(barcode) =>
+                setFormStateValue("barcodes", formState.barcodes.value?.filter((b) => b !== barcode) ?? [], "value")
+              }
             />
           </GridItem>
         </Grid>

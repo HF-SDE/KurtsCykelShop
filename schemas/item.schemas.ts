@@ -12,6 +12,7 @@ export const CreateItemSchema = z.object({
   vendorId: z.uuid("Leverandør er påkrævet"),
   statusId: z.uuid("Status er påkrævet"),
   locationId: z.uuid("Lokation er påkrævet"),
+  barcodes: z.array(z.string()).optional(),
 });
 
 export const EditItemSchema = CreateItemSchema.partial();
