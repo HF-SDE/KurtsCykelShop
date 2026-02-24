@@ -4,6 +4,7 @@ import { itemRoutes } from "@routes/item.routes";
 import profileRoutes from "@routes/profile.routes";
 import serviceOrderRoutes from "@routes/serviceOrder.routes";
 import unitRoutes from "@routes/unit.routes";
+import { vendorRoutes } from "@routes/vendor.routes";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
@@ -38,6 +39,7 @@ app.use(`/profile`, profileRoutes);
 app.use(`/service-orders`, serviceOrderRoutes);
 app.use("/units", unitRoutes);
 app.use("/items", itemRoutes);
+app.use("/vendors", vendorRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
