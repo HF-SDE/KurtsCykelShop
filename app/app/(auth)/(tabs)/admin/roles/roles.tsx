@@ -1,90 +1,116 @@
 import React, { useMemo, useState } from "react";
+import { FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Box } from "@/components/ui/box";
-import { Button, ButtonGroup, ButtonIcon } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
+import { ListTableColumn } from "@/types/ui/listTable";
+import { Role } from "@/types/users/Role";
 
+import { FoxLoader } from "@components/fox";
 import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
-import { Table, TableBody, TableData, TableHead, TableHeader, TableRow } from "@components/ui/table";
+import { Box } from "@components/ui/box";
+import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@components/ui/button";
+import { ListTableHeader, ListTableRow } from "@components/ui/list-table";
+import { Spinner } from "@components/ui/spinner";
+import { Text } from "@components/ui/text";
+import { useRouter } from "expo-router";
 import { ListFilter, Pencil, Plus } from "lucide-react-native";
 
-type Role = { id: string; name: string };
+import { useRole } from "./ctx";
 
-const ROLES: Role[] = [
-  { id: "1", name: "Admin" },
-  { id: "2", name: "Manager" },
-  { id: "3", name: "Sale" },
-  { id: "4", name: "Marketing" },
-  { id: "5", name: "Vendor Contact" },
-  { id: "6", name: "Marketing Manager" },
-  { id: "7", name: "CSM" },
-  { id: "8", name: "Safe Arch" },
-  { id: "9", name: "Admin Admin" },
-  { id: "9", name: "Admin Admin" },
-  { id: "9", name: "Admin Admin" },
-  { id: "9", name: "Admin Admin" },
-  { id: "9", name: "Admin Admin" },
-  { id: "9", name: "Admin Admin" },
+const roleColumns: ListTableColumn<Role>[] = [
+  {
+    key: "name",
+    header: "Rolle",
+  },
+  {
+    key: "description",
+    header: "Beskrivelse",
+    flexClassName: "flex-[2]",
+  },
 ];
 
 export default function RolesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+  const { data: roles, isLoading, isRefreshing, isLoadingMore, refresh, loadMore } = useRole();
 
   const filteredRoles = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return ROLES;
-    return ROLES.filter((r) => r.name.toLowerCase().includes(q));
-  }, [search]);
+    if (!q) return roles || [];
+    return roles.filter((r) => r.name.toLowerCase().includes(q));
+  }, [roles, search]);
+
+  if (isLoading)
+    return (
+      <SafeAreaView className="bg-background-0 flex-1">
+        <FoxLoader />
+      </SafeAreaView>
+    );
 
   return (
-    <Box className="bg-background-0 w-full flex-1 overflow-hidden p-2">
-      <Box className="mb-8 w-full flex-row justify-between gap-4">
+    <SafeAreaView className="bg-background-0 w-full flex-1 px-2" edges={{ top: "additive" }}>
+      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
         <Searchbar className="h-full flex-1" placeholder="Search roles..." value={search} onChangeText={setSearch} />
 
-        <ButtonGroup className="mb-5 h-full flex-row items-center justify-between gap-2">
-          <Button variant="outline" action="secondary" className="h-full">
+        <ButtonGroup className="h-full flex-row gap-2">
+          <Button variant="outline" className="h-full">
             <ButtonIcon as={ListFilter} />
           </Button>
 
-          <NavigationButton variant="outline" action="secondary" className="h-full" href="/admin/roles/new">
+          <NavigationButton variant="outline" className="h-full" href="/admin/roles/new">
             <ButtonIcon as={Plus} />
           </NavigationButton>
         </ButtonGroup>
       </Box>
 
-      {filteredRoles.length ? (
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredRoles.map((item, i) => (
-              <TableRow key={i}>
-                <TableData>{item.name}</TableData>
-                <TableData>
-                  <NavigationButton
-                    variant="outline"
-                    action="secondary"
-                    className="!border-0"
-                    href={`/admin/roles/${item.id}/edit`}
-                  >
-                    <ButtonIcon size="3xl" as={Pencil} />
-                  </NavigationButton>
-                </TableData>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      {filteredRoles.length > 0 ? (
+        <FlatList
+          style={{ flex: 1 }}
+          data={filteredRoles}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ListTableRow
+              item={item}
+              columns={roleColumns}
+              onPress={() => router.push(`/admin/roles/${item.id}/edit`)}
+              action={
+                <Button variant="outline" action="secondary" className="!border-0">
+                  <ButtonIcon size="3xl" as={Pencil} />
+                </Button>
+              }
+            />
+          )}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="always"
+          canCancelContentTouches
+          directionalLockEnabled
+          ListHeaderComponent={<ListTableHeader columns={roleColumns} action={<Box />} />}
+          stickyHeaderIndices={[0]}
+          onRefresh={refresh}
+          refreshing={isRefreshing}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <Box className="items-center py-4">
+                <Spinner />
+              </Box>
+            ) : null
+          }
+        />
       ) : (
         <Box className="bg-background-0 flex-1 items-center justify-center">
-          <Text size="lg">Error: No roles found</Text>
+          <Text size="lg" className="mb-4">
+            No roles found
+          </Text>
+
+          <NavigationButton href="/admin/roles/new" variant="outline" action="secondary" size="lg">
+            <ButtonIcon as={Plus} />
+            <ButtonText>Add your first role</ButtonText>
+          </NavigationButton>
         </Box>
       )}
-    </Box>
+    </SafeAreaView>
   );
 }

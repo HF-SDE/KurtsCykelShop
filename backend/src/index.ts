@@ -3,6 +3,7 @@ import authRoutes from "@routes/auth.routes";
 import { itemRoutes } from "@routes/item.routes";
 import { itemStatusRoutes } from "@routes/itemStatuses.routes";
 import { locationRoutes } from "@routes/locations.routes";
+import manageRoutes from "@routes/manage.routes";
 import profileRoutes from "@routes/profile.routes";
 // import serviceOrderRoutes from "@routes/serviceOrder.routes";
 import unitRoutes from "@routes/unit.routes";
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 //Insert all routes here
 app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
+app.use(`/manage`, manageRoutes);
 // app.use(`/service-orders`, serviceOrderRoutes);
 app.use("/units", unitRoutes);
 app.use("/items", itemRoutes);
