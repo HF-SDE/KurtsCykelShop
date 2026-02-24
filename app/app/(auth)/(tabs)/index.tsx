@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -8,6 +9,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 
 import { useSession } from "@/app/ctx";
 
+import { NavigationButton } from "@components/navigation-button";
 import { Avatar, AvatarFallbackText } from "@components/ui/avatar";
 import { Box } from "@components/ui/box";
 import { Center } from "@components/ui/center";
@@ -27,7 +29,6 @@ import {
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { VStack } from "@components/ui/vstack";
 import { InfoIcon } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UserProfileScreen() {
   const { userProfile, isLoading, resetPassword } = useUserProfile();
@@ -147,6 +148,10 @@ export default function UserProfileScreen() {
 
           <Center>
             <VStack className={"w-full gap-2.5"}>
+              <NavigationButton href="/(auth)/(tabs)/color-preview" size="xl">
+                <ButtonText>Preview colors</ButtonText>
+              </NavigationButton>
+
               <Button size="xl" onPress={() => setIsModalVisible(true)}>
                 <ButtonText>Reset Password</ButtonText>
               </Button>

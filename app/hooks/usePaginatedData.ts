@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import apiClient from "@/utils/apiClient";
 
 interface PaginatedResponse<T> {
-  items: T[];
+  data: T[];
   total: number;
   page: number;
   hasMore: boolean;
@@ -33,7 +33,9 @@ export function usePaginatedData<T>(url: string, limit: number = 20): UsePaginat
       const response = await apiClient.get<{ data: PaginatedResponse<T> }>(url, {
         params: { page, limit },
       });
-      const { items, hasMore: more } = response.data.data;
+
+      const { data: items, hasMore: more } = response.data.data;
+
       setData((prev) => (append ? [...prev, ...items] : items));
       setHasMore(more);
       currentPage.current = page;

@@ -1,17 +1,21 @@
-import { useState } from "react";
-import { Alert } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, ScrollView } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Grid, GridItem } from "@/components/ui/grid";
 
 import { Item } from "@/types/Inventory/Item";
+import { ItemStatus } from "@/types/Inventory/ItemStatus";
+import { Location } from "@/types/Inventory/Location";
 import { Unit } from "@/types/Inventory/Unit";
+import { Vendor } from "@/types/Inventory/Vendor";
 
-import { StorageField } from "@components/storage/form-fields";
+import { FormStateValue, StorageField, toFormState, toInputValue } from "@components/storage/form-fields";
 import { Box } from "@components/ui/box";
 import { Text } from "@components/ui/text";
 import { useToast } from "@components/ui/toast";
 import { useData } from "@hooks/useData";
+import { useNavigation, usePreventRemove } from "@react-navigation/native";
 import { CreateItemSchema, CreateItemType } from "@schemas/item.schemas";
 import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";
@@ -19,16 +23,6 @@ import { useRouter } from "expo-router";
 import { z } from "zod";
 
 import { useStorage } from "./ctx";
-
-export interface FormStateValue<T> {
-  value: T;
-  fieldType: string;
-  errors?: string[];
-}
-
-type FormState<T> = {
-  [K in keyof T]-?: FormStateValue<T[K]>;
-};
 
 const initialState: CreateItemType = {
   name: "",
@@ -39,40 +33,44 @@ const initialState: CreateItemType = {
   purchasePrice: 0,
   unitId: "",
   minSellQuantity: 0,
+  vendorId: "",
+  statusId: "",
+  locationId: "",
 };
 
-function toFormState<T>(input: T): FormState<T> {
-  const formState = {} as FormState<T>;
-
-  for (const key in input) {
-    formState[key] = {
-      value: input[key],
-      fieldType: typeof input[key],
-      errors: [],
-    };
-  }
-
-  return formState;
-}
-
-function toInputValue<T>(formState: FormState<T>): T {
-  const inputValue = {} as T;
-
-  for (const key in formState) {
-    inputValue[key] = formState[key].value;
-  }
-
-  return inputValue;
-}
+const cachedDataOptions = { cacheTimeMs: 60 * 60 * 1000 };
 
 export default function NewItem() {
   const toast = useToast();
   const { setData } = useStorage();
 
   const [formState, setFormState] = useState(toFormState(initialState));
-  const [units, , unitsLoading] = useData<Unit>("/units", [], { cacheTimeMs: 60 * 60 * 1000 });
+  const [units, , unitsLoading] = useData<Unit>("/units", [], cachedDataOptions);
+  const [vendors, , vendorsLoading] = useData<Vendor>("/vendors", [], cachedDataOptions);
+  const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
+  const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
 
   const router = useRouter();
+  const navigation = useNavigation();
+  const allowNavigationRef = useRef(false);
+
+  const hasUnsavedChanges = Object.entries(toInputValue(formState)).some(
+    ([key, value]) => value !== initialState[key as keyof CreateItemType],
+  );
+
+  function confirmDiscard(onConfirm: () => void) {
+    Alert.alert("Bekræft", "Er du sikker på, at du vil annullere? Alle ændringer vil gå tabt.", [
+      { text: "Nej", style: "cancel" },
+      { text: "Ja", style: "destructive", onPress: onConfirm },
+    ]);
+  }
+
+  usePreventRemove(hasUnsavedChanges && !allowNavigationRef.current, ({ data }) => {
+    confirmDiscard(() => {
+      allowNavigationRef.current = true;
+      navigation.dispatch(data.action);
+    });
+  });
 
   function setFormStateValue<K extends keyof CreateItemType>(
     key: K,
@@ -127,105 +125,134 @@ export default function NewItem() {
         return newList.sort((a, b) => a.name.localeCompare(b.name));
       });
 
+      allowNavigationRef.current = true;
       router.back();
     }
   }
 
   function handleReset() {
-    const currentFormState = toInputValue(formState);
-    const hasChanged = Object.entries(currentFormState).some(
-      ([key, value]) => value !== initialState[key as keyof CreateItemType],
-    );
-
-    if (hasChanged) {
-      Alert.alert("Bekræft", "Er du sikker på, at du vil annullere? Alle ændringer vil gå tabt.", [
-        { text: "Nej", style: "cancel" },
-        { text: "Ja", style: "destructive", onPress: () => router.back() },
-      ]);
-    } else router.back();
+    router.back();
   }
 
   return (
-    <Box className="bg-background-0 flex-1 items-center">
-      <Grid className="gap-4 p-4" _extra={{ className: "grid-cols-2" }}>
-        <GridItem _extra={{ className: "col-span-2" }}>
-          <StorageField
-            label="Navn"
-            placeholder="Fx. Cykel"
-            formStateValue={formState.name}
-            onChange={(name) => setFormStateValue("name", name)}
-          />
-        </GridItem>
+    <Box className="bg-background-0 flex-1">
+      <ScrollView contentContainerClassName="items-center" keyboardShouldPersistTaps="handled">
+        <Grid className="gap-4 p-4" _extra={{ className: "grid-cols-2" }}>
+          <GridItem _extra={{ className: "col-span-2" }}>
+            <StorageField
+              label="Navn"
+              placeholder="Fx. Cykel"
+              formStateValue={formState.name}
+              onChange={(name) => setFormStateValue("name", name)}
+            />
+          </GridItem>
 
-        <GridItem className="rounded-md text-center" _extra={{ className: "col-span-2" }}>
-          <StorageField
-            label="Beskrivelse"
-            placeholder="Beskrivende tekst"
-            formStateValue={formState.description}
-            onChange={(description) => setFormStateValue("description", description)}
-            isRequired={false}
-            isTextArea
-          />
-        </GridItem>
+          <GridItem className="rounded-md text-center" _extra={{ className: "col-span-2" }}>
+            <StorageField
+              label="Beskrivelse"
+              placeholder="Beskrivende tekst"
+              formStateValue={formState.description}
+              onChange={(description) => setFormStateValue("description", description)}
+              isRequired={false}
+              isTextArea
+            />
+          </GridItem>
 
-        <GridItem>
-          <StorageField
-            label="Pris (DKK)"
-            placeholder="Fx. 25"
-            formStateValue={formState.price}
-            onChange={(price) => setFormStateValue("price", price)}
-          />
-        </GridItem>
+          <GridItem>
+            <StorageField
+              label="Pris (DKK)"
+              placeholder="Fx. 25"
+              formStateValue={formState.price}
+              onChange={(price) => setFormStateValue("price", price)}
+            />
+          </GridItem>
 
-        <GridItem>
-          <StorageField
-            label="Indkøbs pris (DKK)"
-            placeholder="Fx. 20"
-            formStateValue={formState.purchasePrice}
-            onChange={(purchasePrice) => setFormStateValue("purchasePrice", purchasePrice)}
-          />
-        </GridItem>
+          <GridItem>
+            <StorageField
+              label="Indkøbs pris (DKK)"
+              placeholder="Fx. 20"
+              formStateValue={formState.purchasePrice}
+              onChange={(purchasePrice) => setFormStateValue("purchasePrice", purchasePrice)}
+            />
+          </GridItem>
 
-        <GridItem>
-          <StorageField
-            label="Antal"
-            placeholder="Fx. 10"
-            formStateValue={formState.quantity}
-            onChange={(quantity) => setFormStateValue("quantity", quantity)}
-          />
-        </GridItem>
+          <GridItem>
+            <StorageField
+              label="Antal"
+              placeholder="Fx. 10"
+              formStateValue={formState.quantity}
+              onChange={(quantity) => setFormStateValue("quantity", quantity)}
+            />
+          </GridItem>
 
-        <GridItem>
-          <StorageField
-            label="Enhed"
-            placeholder="Vælg enhed"
-            formStateValue={formState.unitId}
-            onChange={(id) => setFormStateValue("unitId", id)}
-            fieldType="select"
-            selectOptions={units}
-            isDisabled={unitsLoading}
-          />
-        </GridItem>
+          <GridItem>
+            <StorageField
+              label="Enhed"
+              placeholder="Vælg enhed"
+              formStateValue={formState.unitId}
+              onChange={(id) => setFormStateValue("unitId", id)}
+              fieldType="select"
+              selectOptions={units}
+              isDisabled={unitsLoading}
+            />
+          </GridItem>
 
-        <GridItem>
-          <StorageField
-            label="Minimum sælge antal"
-            placeholder="Fx. 5"
-            formStateValue={formState.minSellQuantity}
-            onChange={(minSellQuantity) => setFormStateValue("minSellQuantity", minSellQuantity)}
-          />
-        </GridItem>
+          <GridItem>
+            <StorageField
+              label="Minimum sælge antal"
+              placeholder="Fx. 5"
+              formStateValue={formState.minSellQuantity}
+              onChange={(minSellQuantity) => setFormStateValue("minSellQuantity", minSellQuantity)}
+            />
+          </GridItem>
 
-        <GridItem _extra={{ className: "col-span-2" }}>
-          <StorageField
-            label="Offentlig"
-            formStateValue={formState.isPublic}
-            onChange={(isPublic) => setFormStateValue("isPublic", isPublic)}
-          />
-        </GridItem>
-      </Grid>
+          <GridItem>
+            <StorageField
+              label="Leverandør"
+              placeholder="Vælg leverandør"
+              formStateValue={formState.vendorId}
+              onChange={(id) => setFormStateValue("vendorId", id)}
+              fieldType="combobox"
+              selectOptions={vendors}
+              isDisabled={vendorsLoading}
+            />
+          </GridItem>
 
-      <Box className="mb-5 mt-auto w-full flex-row items-center justify-center gap-4 px-4">
+          <GridItem>
+            <StorageField
+              label="Status"
+              placeholder="Vælg status"
+              formStateValue={formState.statusId}
+              onChange={(id) => setFormStateValue("statusId", id)}
+              fieldType="combobox"
+              selectOptions={statuses.map((status) => ({ id: status.id, name: status.code }))}
+              isDisabled={statusesLoading}
+            />
+          </GridItem>
+
+          <GridItem>
+            <StorageField
+              label="Lokation"
+              placeholder="Vælg lokation"
+              formStateValue={formState.locationId}
+              onChange={(id) => setFormStateValue("locationId", id)}
+              fieldType="combobox"
+              selectOptions={locations}
+              isDisabled={locationsLoading}
+            />
+          </GridItem>
+
+          <GridItem _extra={{ className: "col-span-2" }}>
+            <StorageField
+              label="Offentlig"
+              formStateValue={formState.isPublic}
+              onChange={(isPublic) => setFormStateValue("isPublic", isPublic)}
+            />
+          </GridItem>
+        </Grid>
+      </ScrollView>
+
+      <Box className="mb-5 w-full flex-row items-center justify-center gap-4 px-4">
         <Button size="2xl" variant="outline" action="secondary" onPress={handleReset}>
           <ButtonText>Annuller</ButtonText>
         </Button>
