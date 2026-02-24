@@ -15,6 +15,7 @@ import * as AuthService from "../services/auth.service";
 // Utility function to get the client's IP address
 // eslint-disable-next-line func-style
 const getClientIp = (req: any): string => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   return req.headers["x-forwarded-for"] || "";
 };
 
