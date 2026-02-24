@@ -464,6 +464,7 @@ async function seedDatabase() {
 
       // Price in øre (cents) - realistic bike part prices
       const price = faker.number.int({ min: 5000, max: 500000 }); // 50-5000 kr
+      const purchasePrice = Math.floor(price * faker.number.float({ min: 0.5, max: 0.9 })); // Purchase price is 50-90% of sale price
 
       items.push({
         sku: `BIKE-${String(i + 1).padStart(5, "0")}`,
@@ -472,6 +473,7 @@ async function seedDatabase() {
         quantity,
         minSellQuantity: faker.number.int({ min: 1, max: 5 }),
         price,
+        purchasePrice,
         isPublic: Math.random() > 0.3, // 70% public
         unitId: faker.helpers.arrayElement(unitIds),
         statusId: quantity === 0 ? statusIds.find((id, idx) => idx === 1) || statusIds[0] : statusIds[0], // OUT_OF_STOCK if quantity is 0
