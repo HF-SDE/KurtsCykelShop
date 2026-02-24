@@ -93,7 +93,7 @@ export async function getAllServiceOrdersPaginated(
 }
 
 interface GetServiceOrderByIdParams {
-  id: string;
+  id?: string;
 }
 interface GetServiceOrderByIdResponse extends ServiceOrder {
   customer: Customer | null;
@@ -104,11 +104,19 @@ interface GetServiceOrderByIdResponse extends ServiceOrder {
 }
 
 export async function getServiceOrderById(
-  req: Request<GetServiceOrderByIdParams>,
+  req: Request<GetServiceOrderByIdParams, APIResponse<GetServiceOrderByIdResponse>, {}, {}>,
   res: Response<APIResponse<GetServiceOrderByIdResponse>>,
 ): Promise<void> {
   try {
     const id = req.params.id;
+
+    if (!id) {
+      res.status(getHttpStatusCode(Status.MissingDetails)).json({
+        status: Status.MissingDetails,
+        message: "Service order ID is required",
+      });
+      return;
+    }
 
     // Get service order by id
     const [data, error] = await ServiceOrderService.GetServiceOrderById(id);
