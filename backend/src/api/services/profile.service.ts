@@ -1,4 +1,4 @@
-import { APIResponse, IAPIResponse, Status } from "@api-types/general.types";
+import { APIResponse, Status } from "@api-types/general.types";
 import { BasicUser } from "@api-types/user.types";
 import prisma from "@prisma-instance";
 import { ChangePasswordBase64Schema, ChangePasswordSchema, jwtTokenSchema } from "@schemas/profile.schemas";
@@ -10,9 +10,9 @@ import z from "zod";
  * @param {string} id - The id of the user to change the password for.
  * @param {string} newPassword - The new password for the user.
  * @param {string} oldPassword - The old password for the user.
- * @returns {Promise<IAPIResponse>} A promise that resolves to an object containing the status and message of the password change.
+ * @returns {Promise<APIResponse>} A promise that resolves to an object containing the status and message of the password change.
  */
-export async function changePassword(id: string, newPassword: string, oldPassword: string): Promise<IAPIResponse> {
+export async function changePassword(id: string, newPassword: string, oldPassword: string): Promise<APIResponse> {
   try {
     // Validate
     const idValidation = await ChangePasswordBase64Schema.safeParseAsync({
