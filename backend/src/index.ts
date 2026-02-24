@@ -1,6 +1,8 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
 import { itemRoutes } from "@routes/item.routes";
+import { itemStatusRoutes } from "@routes/itemStatuses.routes";
+import { locationRoutes } from "@routes/locations.routes";
 import profileRoutes from "@routes/profile.routes";
 // import serviceOrderRoutes from "@routes/serviceOrder.routes";
 import unitRoutes from "@routes/unit.routes";
@@ -33,6 +35,11 @@ app.use(bodyParser.json({}));
 app.use(passport.initialize());
 app.use(limiter);
 
+app.use((req, res, next) => {
+  console.info(`${req.method} ${req.path}`);
+  next();
+});
+
 //Insert all routes here
 app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
@@ -40,6 +47,8 @@ app.use(`/profile`, profileRoutes);
 app.use("/units", unitRoutes);
 app.use("/items", itemRoutes);
 app.use("/vendors", vendorRoutes);
+app.use("/locations", locationRoutes);
+app.use("/item-statuses", itemStatusRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
