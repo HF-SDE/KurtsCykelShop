@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { APIResponse, Status } from '@api-types/general.types';
 import { ChangePasswordRequestBody } from '@api-types/profile.types';
-import { BasicUser, User } from '@api-types/user.types';
+import { BasicUser } from '@api-types/user.types';
 import * as ProfileService from '@services/profile.service';
 import { getHttpStatusCode } from '@utils/Utils';
 
