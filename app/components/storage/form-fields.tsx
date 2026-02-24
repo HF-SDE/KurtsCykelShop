@@ -10,8 +10,7 @@ import {
 import { AlertCircleIcon, CheckIcon, ChevronDownIcon } from "@/components/ui/icon";
 import { Input, InputField } from "@/components/ui/input";
 
-import { FormStateValue } from "@/app/(auth)/(tabs)/storage/new-item";
-
+import { Combobox } from "@components/combobox";
 import {
   Select,
   SelectBackdrop,
@@ -25,6 +24,40 @@ import {
   SelectTrigger,
 } from "@components/ui/select";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
+
+export interface FormStateValue<T> {
+  value: T;
+  fieldType: string;
+  errors?: string[];
+}
+
+export type FormState<T> = {
+  [K in keyof T]-?: FormStateValue<T[K]>;
+};
+
+export function toFormState<T>(input: T): FormState<T> {
+  const formState = {} as FormState<T>;
+
+  for (const key in input) {
+    formState[key] = {
+      value: input[key],
+      fieldType: typeof input[key],
+      errors: [],
+    };
+  }
+
+  return formState;
+}
+
+export function toInputValue<T>(formState: FormState<T>): T {
+  const inputValue = {} as T;
+
+  for (const key in formState) {
+    inputValue[key] = formState[key].value;
+  }
+
+  return inputValue;
+}
 
 interface StorageFieldBaseProps<T> {
   label: string;
@@ -109,7 +142,11 @@ export function StorageField<T>({
           <CheckboxLabel>{label}</CheckboxLabel>
         </Checkbox>
       ) : fieldType === "select" ? (
-        <Select onValueChange={(id) => onChange(id as T)} isDisabled={isDisabled}>
+        <Select
+          onValueChange={(id) => onChange(id as T)}
+          isDisabled={isDisabled}
+          selectedLabel={selectOptions?.find((option) => option.id === value)?.name || ""}
+        >
           <SelectTrigger variant="outline" size="md">
             <SelectInput placeholder={placeholder} />
             <SelectIcon className="ml-auto mr-2" as={ChevronDownIcon} />
@@ -124,6 +161,15 @@ export function StorageField<T>({
             </SelectContent>
           </SelectPortal>
         </Select>
+      ) : fieldType === "combobox" ? (
+        <Combobox
+          label={label}
+          placeholder={placeholder}
+          options={selectOptions || []}
+          value={value as string}
+          onChange={(id) => onChange(id as T)}
+          isDisabled={isDisabled}
+        />
       ) : null}
 
       <FormControlError>

@@ -1,7 +1,7 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import { Item } from "@prisma";
 import prisma from "@prisma-instance";
-import { CreateItemSchema, CreateItemType } from "@schemas/item.schemas";
+import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
   const items = await prisma.item.findMany();
@@ -51,5 +51,33 @@ export async function createOne(data: CreateItemType): Promise<APIResponse<Item>
     status: Status.Success,
     message: "Item created successfully",
     data: newItem,
+  };
+}
+
+export async function updateOne(id: string, data: Partial<EditItemType>): Promise<APIResponse<Item>> {
+  const existingItem = await prisma.item.findUnique({ where: { id } });
+
+  if (!existingItem) {
+    return {
+      status: Status.NotFound,
+      message: "Item not found",
+    };
+  }
+
+  const { data: validatedData, error } = EditItemSchema.safeParse(data);
+
+  if (error) {
+    return {
+      status: Status.UpdateFailed,
+      message: error.message,
+    };
+  }
+
+  const updatedItem = await prisma.item.update({ where: { id }, data: validatedData });
+
+  return {
+    status: Status.Success,
+    message: "Item updated successfully",
+    data: updatedItem,
   };
 }

@@ -8,7 +8,10 @@ export default function StorageLayout() {
   return (
     <StorageProvider>
       <BackButtonLayout>
-        <Stack.Screen name="new-item" options={{ headerTitle: () => <Text size="2xl">Ny genstand</Text> }} />
+        <Stack.Screen
+          name="new-item"
+          options={{ headerTitle: () => <Text size="2xl">Ny genstand</Text>, headerBackButtonMenuEnabled: false }}
+        />
         <Stack.Screen name="[id]/edit-item" options={{ headerTitle: () => <Text size="2xl">Rediger genstand</Text> }} />
       </BackButtonLayout>
     </StorageProvider>

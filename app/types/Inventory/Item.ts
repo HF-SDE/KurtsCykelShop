@@ -6,6 +6,7 @@ export interface Item {
   quantity: number;
   minSellQuantity: number;
   price: number;
+  purchasePrice: number;
   isPublic: boolean;
   unitId: string;
   statusId: string;
