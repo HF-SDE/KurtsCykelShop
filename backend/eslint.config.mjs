@@ -60,9 +60,6 @@ export default [
         project: "./tsconfig.eslint.json",
         sourceTypo: "module",
         tsconfigRootDir: __dirname,
-        projectService: {
-          defaultProject: "./tsconfig.eslint.json",
-        },
       },
     },
 
@@ -85,15 +82,7 @@ export default [
       "jsdoc/empty-tags": "error",
       "jsdoc/require-param-type": "error",
 
-      "id-denylist": [
-        "error",
-        "any",
-        "Number",
-        "String",
-        "Boolean",
-        "Undefined",
-        "Null",
-      ],
+      "id-denylist": ["error", "any", "Number", "String", "Boolean", "Undefined", "Null"],
 
       "@typescript-eslint/typedef": "off",
       "@typescript-eslint/unified-signatures": "error",
@@ -116,14 +105,12 @@ export default [
             },
 
             Function: {
-              message:
-                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
+              message: "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
               fixWith: "function",
             },
 
             Boolean: {
-              message:
-                "Avoid using the `Boolean` type. Did you mean `boolean`?",
+              message: "Avoid using the `Boolean` type. Did you mean `boolean`?",
               fixWith: "boolean",
             },
 
@@ -160,10 +147,7 @@ export default [
         },
       ],
 
-      "@typescript-eslint/promise-function-async": [
-        "error",
-        { allowAny: false },
-      ],
+      "@typescript-eslint/promise-function-async": ["error", { allowAny: false }],
       "@typescript-eslint/no-empty-function": "error",
       "@typescript-eslint/no-empty-interface": "error",
       "@typescript-eslint/no-explicit-any": "off",
