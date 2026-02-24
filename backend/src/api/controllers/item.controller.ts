@@ -1,5 +1,6 @@
 import { APIResponse, PaginatedData, TypedQuery } from "@api-types/general.types";
 import { Item } from "@prisma";
+import { EditItemType } from "@schemas/item.schemas";
 import * as ItemService from "@services/item.service";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response } from "express";
@@ -28,9 +29,12 @@ export async function createOne(req: Request, res: Response<APIResponse<Item>>) 
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
 
-// export async function updateOne(req: Request, res: Response<APIResponse<Item>>) {
-//   const { id } = req.params;
-//   const response = await ItemService.updateOne(id, req.body);
+export async function updateOne(
+  req: Request<{ id: string }, APIResponse<Item>, EditItemType>,
+  res: Response<APIResponse<Item>>,
+) {
+  const { id } = req.params;
+  const response = await ItemService.updateOne(id, req.body);
 
-//   res.status(getHttpStatusCode(response.status)).json(response).end();
-// }
+  res.status(getHttpStatusCode(response.status)).json(response).end();
+}

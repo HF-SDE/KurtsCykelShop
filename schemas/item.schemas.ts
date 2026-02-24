@@ -1,14 +1,20 @@
 import { z } from "zod";
 
 export const CreateItemSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Navn er påkrævet"),
   description: z.string().optional(),
-  quantity: z.coerce.number().int().positive("Quantity must be a positive integer"),
-  unitId: z.uuid(),
-  minSellQuantity: z.coerce.number().int().positive("Minimum sell quantity must be a positive integer"),
+  quantity: z.coerce.number().int().positive("Antal skal være et positivt heltal"),
+  unitId: z.uuid("Enhed er påkrævet"),
+  minSellQuantity: z.coerce.number().int().positive("Minimums salgsantal skal være et positivt heltal"),
   isPublic: z.boolean(),
-  price: z.coerce.number().positive("Price must be a positive number"),
-  purchasePrice: z.coerce.number().positive("Purchase price must be a positive number"),
+  price: z.coerce.number().positive("Pris skal være et positivt tal"),
+  purchasePrice: z.coerce.number().positive("Indkøbspris skal være et positivt tal"),
+  vendorId: z.uuid("Leverandør er påkrævet"),
+  statusId: z.uuid("Status er påkrævet"),
+  locationId: z.uuid("Lokation er påkrævet"),
 });
 
+export const EditItemSchema = CreateItemSchema.partial();
+
 export type CreateItemType = z.infer<typeof CreateItemSchema>;
+export type EditItemType = z.infer<typeof EditItemSchema>;
