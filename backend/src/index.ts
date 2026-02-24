@@ -1,6 +1,7 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
 import { itemRoutes } from "@routes/item.routes";
+import manageRoutes from "@routes/manage.routes";
 import profileRoutes from "@routes/profile.routes";
 // import serviceOrderRoutes from "@routes/serviceOrder.routes";
 import unitRoutes from "@routes/unit.routes";
@@ -35,6 +36,7 @@ app.use(limiter);
 //Insert all routes here
 app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
+app.use(`/manage`, manageRoutes);
 // app.use(`/service-orders`, serviceOrderRoutes);
 app.use("/units", unitRoutes);
 app.use("/items", itemRoutes);
