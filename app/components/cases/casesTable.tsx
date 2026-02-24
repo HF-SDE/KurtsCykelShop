@@ -2,14 +2,14 @@ import { Pressable } from "react-native";
 
 import { Table, TableBody, TableData, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderData";
+
 import { Badge, BadgeText } from "@components/ui/badge";
 import { Text } from "@components/ui/text";
 import { useRouter } from "expo-router";
 
-import type { Case } from "./casesSection";
-
 interface CasesTableProps {
-  cases: Case[];
+  serviceOrders: ServiceOrderData[];
 }
 
 const statusConfig: Record<string, { action: "success" | "warning" | "info" | "error"; label: string }> = {
@@ -28,27 +28,31 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export function CasesTable({ cases }: CasesTableProps) {
+export function CasesTable({ serviceOrders }: CasesTableProps) {
   const router = useRouter();
 
-  if (cases.length === 0) {
+  if (serviceOrders.length === 0) {
     return <Text className="text-typography-500 py-8 text-center">Ingen sager fundet med de valgte filtre</Text>;
   }
 
   return (
     <Table className="w-full">
       <TableBody>
-        {cases.map((caseItem) => {
-          const statusInfo = statusConfig[caseItem.status] || {
+        {serviceOrders.map((serviceOrder) => {
+          const statusInfo = statusConfig[serviceOrder.status] || {
             action: "info" as const,
-            label: caseItem.status,
+            label: serviceOrder.status,
           };
 
           return (
-            <Pressable key={caseItem.id} onPress={() => router.push(`/case/${caseItem.id}`)}>
+            <Pressable key={serviceOrder.id} onPress={() => router.push(`/case/${serviceOrder.id}`)}>
               <TableRow>
-                <TableData>{caseItem.customerName}</TableData>
-                <TableData>{formatDate(caseItem.date)}</TableData>
+                <TableData>
+                  {serviceOrder.customer
+                    ? `${serviceOrder.customer.firstName} ${serviceOrder.customer.lastName}`
+                    : "Ukendt kunde"}
+                </TableData>
+                <TableData>{formatDate(serviceOrder.createdAt)}</TableData>
                 <TableData>
                   <Badge action={statusInfo.action}>
                     <BadgeText>{statusInfo.label}</BadgeText>

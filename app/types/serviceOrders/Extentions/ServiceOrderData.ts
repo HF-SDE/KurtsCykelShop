@@ -10,4 +10,5 @@ export interface ServiceOrderData extends ServiceOrder {
   assignedTo: User;
   servicePartsUsed: ServicePartsUsed[];
   serviceRepairs: ServiceRepair[];
+  assignedBy: User;
 }

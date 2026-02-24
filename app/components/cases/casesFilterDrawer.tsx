@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Checkbox, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from "@/components/ui/checkbox";
-import { Drawer, DrawerBackdrop, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerBackdrop,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+} from "@/components/ui/drawer";
 
 import { Heading } from "@components/ui/heading";
 import { HStack } from "@components/ui/hstack";
@@ -11,7 +19,7 @@ import { Text } from "@components/ui/text";
 import { VStack } from "@components/ui/vstack";
 import { CheckIcon, Filter, GlobeIcon, Play, PlusIcon, XIcon } from "lucide-react-native";
 
-import type { CaseStatus, TimeRange } from "./casesSection";
+import { CaseStatus, TimeRange } from "./case.types";
 
 interface CasesFilterDrawerProps {
   showDrawer: boolean;
@@ -27,7 +35,7 @@ const statusOptions: { value: CaseStatus; label: string; color: string }[] = [
   { value: "in-progress", label: "I gang", color: "info" },
   { value: "pending", label: "Afventer", color: "warning" },
   { value: "cancelled", label: "Annuleret", color: "error" },
-];
+] as const;
 
 const timeRangeOptions: { value: TimeRange; label: string }[] = [
   { value: "all", label: "Alle" },
@@ -36,9 +44,16 @@ const timeRangeOptions: { value: TimeRange; label: string }[] = [
   { value: "month", label: "Sidste måned" },
   { value: "quarter", label: "Sidste kvartal" },
   { value: "year", label: "Sidste år" },
-];
+] as const;
 
-export function CasesFilterDrawer({ showDrawer, setShowDrawer, selectedStatuses, setSelectedStatuses, timeRange, setTimeRange }: CasesFilterDrawerProps) {
+export function CasesFilterDrawer({
+  showDrawer,
+  setShowDrawer,
+  selectedStatuses,
+  setSelectedStatuses,
+  timeRange,
+  setTimeRange,
+}: CasesFilterDrawerProps) {
   // Local state for filter selections (only applied when "Anvend" is clicked)
   const [localStatuses, setLocalStatuses] = useState<CaseStatus[]>(selectedStatuses);
   const [localTimeRange, setLocalTimeRange] = useState<TimeRange>(timeRange);

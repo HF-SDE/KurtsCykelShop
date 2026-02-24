@@ -1,111 +1,179 @@
-import { useMemo, useState } from "react";
-import { ScrollView } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FlatList, Pressable } from "react-native";
 
-import mockCasesData from "@/data/mockCases.json";
+import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderData";
 
-import { ServiceOrderData } from "@/types/serviceOrders/Exstentions/ServiceOrderData";
-
+import FoxLoader from "@components/fox";
 import { Searchbar } from "@components/search";
-import { Button, ButtonIcon, ButtonSpinner, ButtonText } from "@components/ui/button";
+import { Badge, BadgeText } from "@components/ui/badge";
+import { Box } from "@components/ui/box";
+import { Button, ButtonIcon, ButtonText } from "@components/ui/button";
+import { Center } from "@components/ui/center";
 import { HStack } from "@components/ui/hstack";
+import { Spinner } from "@components/ui/spinner";
 import { Text } from "@components/ui/text";
-import { VStack } from "@components/ui/vstack";
+import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { Filter, Plus } from "lucide-react-native";
 
-import { CasesActionRow } from "./casesActionRow";
+import { CaseStatus, CaseStatusValues, PaginatedResponse, TimeRange } from "./case.types";
 import { CasesFilterDrawer } from "./casesFilterDrawer";
-import { CasesTable } from "./casesTable";
-import { NewCase } from "./new/newCase";
 
-export type CaseStatus = "completed" | "cancelled" | "in-progress" | "pending";
-export type TimeRange = "all" | "today" | "week" | "month" | "quarter" | "year";
+const statusConfig: Record<string, { action: "success" | "warning" | "info" | "error"; label: string }> = {
+  completed: { action: "success", label: "Afsluttet" },
+  cancelled: { action: "error", label: "Annuleret" },
+  "in-progress": { action: "info", label: "I gang" },
+  pending: { action: "warning", label: "Afventer" },
+};
 
-export interface Case {
-  id: string;
-  customerName: string;
-  date: string;
-  status: CaseStatus;
-  type: string;
-  description: string;
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("da-DK", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+function TableHeader() {
+  return (
+    <Box className="border-outline-200 bg-background-0 flex-row border-b">
+      <Text className="text-typography-800 flex-[2] px-6 py-[14px] text-left text-[16px] font-bold leading-[22px]">
+        Kunde
+      </Text>
+      <Text className="text-typography-800 flex-1 px-6 py-[14px] text-left text-[16px] font-bold leading-[22px]">
+        Dato
+      </Text>
+      <Text className="text-typography-800 flex-1 px-6 py-[14px] text-left text-[16px] font-bold leading-[22px]">
+        Status
+      </Text>
+    </Box>
+  );
 }
 
-interface fetchCasesParams {
-  searchQuery?: string;
-  selectedStatuses?: CaseStatus[];
-  timeRange?: TimeRange;
-}
-async function fetchCases(params: fetchCasesParams): Promise<ServiceOrderData[]> {
-  try {
-    const response = await apiClient.get("/service-orders", {
-      params: {
-        search: params.searchQuery,
-        statuses: params.selectedStatuses,
-        timeRange: params.timeRange,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching cases:", error);
-    return [];
-  }
+function CaseRow({ caseItem, onPress }: { caseItem: ServiceOrderData; onPress: () => void }) {
+  const statusInfo = statusConfig[caseItem.status] || {
+    action: "info" as const,
+    label: caseItem.status,
+  };
+
+  return (
+    <Pressable onPress={onPress}>
+      {({ hovered, pressed }) => (
+        <Box
+          className={`border-outline-200 flex-row border-b ${pressed ? "bg-background-100" : hovered ? "bg-background-50" : "bg-background-0"}`}
+        >
+          <Box className="flex-[2] justify-center" pointerEvents="none">
+            <Text className="text-typography-800 px-6 py-[14px] text-left text-[16px] font-medium leading-[22px]">
+              {caseItem.customer ? `${caseItem.customer.firstName} ${caseItem.customer.lastName}` : "Ukendt kunde"}
+            </Text>
+          </Box>
+          <Box className="flex-1 justify-center" pointerEvents="none">
+            <Text className="text-typography-800 px-6 py-[14px] text-left text-[16px] font-medium leading-[22px]">
+              {formatDate(caseItem.createdAt)}
+            </Text>
+          </Box>
+          <Box className="flex-1 items-start justify-center px-6 py-[7px]">
+            <Badge action={statusInfo.action}>
+              <BadgeText>{statusInfo.label}</BadgeText>
+            </Badge>
+          </Box>
+        </Box>
+      )}
+    </Pressable>
+  );
 }
 
 export function CasesSection() {
+  const routerNav = useRouter();
   const [showDrawer, setShowDrawer] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<CaseStatus[]>([
-    "completed",
-    "cancelled",
-    "in-progress",
-    "pending",
-  ]);
+  const [selectedStatuses, setSelectedStatuses] = useState<CaseStatus[]>(CaseStatusValues);
   const [timeRange, setTimeRange] = useState<TimeRange>("all");
 
-  // Filter cases based on selected filters
-  const filteredCases = useMemo(() => {
-    let filtered = mockCasesData as Case[];
+  // Pagination state
+  const [cases, setCases] = useState<ServiceOrderData[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const currentPage = useRef(1);
+  const isFirstLoad = useRef(true);
 
-    // Filter by status
-    filtered = filtered.filter((c) => selectedStatuses.includes(c.status as CaseStatus));
+  const fetchPage = useCallback(
+    async (page: number, append: boolean) => {
+      try {
+        const response = await apiClient.get<APIResponse<PaginatedResponse>>("/service-orders/paginated", {
+          params: {
+            page,
+            limit: 20,
+            search: searchQuery || undefined,
+            statuses: selectedStatuses.join(","),
+            timeRange,
+          },
+        });
+        console.log("API Response:", response);
 
-    // Filter by time range
-    const now = new Date();
-    filtered = filtered.filter((c) => {
-      const caseDate = new Date(c.date);
-      switch (timeRange) {
-        case "today":
-          return caseDate.toDateString() === now.toDateString();
-        case "week":
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          return caseDate >= weekAgo;
-        case "month":
-          const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-          return caseDate >= monthAgo;
-        case "quarter":
-          const quarterAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-          return caseDate >= quarterAgo;
-        case "year":
-          const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-          return caseDate >= yearAgo;
-        default:
-          return true;
+        if (response.data?.data) {
+          const { items, hasMore: more, total: totalCount } = response.data.data;
+          setCases((prev) => (append ? [...prev, ...items] : items));
+          setHasMore(more);
+          setTotal(totalCount);
+          currentPage.current = page;
+        }
+      } catch (err) {
+        console.error("Error fetching cases:", err);
       }
-    });
+    },
+    [searchQuery, selectedStatuses, timeRange],
+  );
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (c) =>
-          c.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.description.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  const load = useCallback(async () => {
+    if (isFirstLoad.current) {
+      setIsLoading(true);
     }
+    try {
+      await fetchPage(1, false);
+    } finally {
+      setIsLoading(false);
+      isFirstLoad.current = false;
+    }
+  }, [fetchPage]);
 
-    return filtered;
-  }, [selectedStatuses, timeRange, searchQuery]);
+  const refresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchPage(1, false);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [fetchPage]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      await fetchPage(currentPage.current + 1, true);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [fetchPage, hasMore, isLoadingMore]);
+
+  // Load data on mount and when filters change
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Show loading spinner only on first page visit
+  if (isLoading && isFirstLoad.current) {
+    return (
+      <Center className="flex-1">
+        <FoxLoader />
+      </Center>
+    );
+  }
 
   return (
     <>
@@ -126,7 +194,6 @@ export function CasesSection() {
         </Button>
       </HStack>
 
-      {/* <CasesActionRow /> */}
       <HStack className="my-6" space="md">
         <Searchbar
           placeholder="Søg efter sager..."
@@ -156,17 +223,44 @@ export function CasesSection() {
       <HStack space="xs" className="mb-4">
         <Text>Viser</Text>
         <Text bold className="text-primary-500">
-          {filteredCases.length}
+          {cases.length}
         </Text>
         <Text>af</Text>
         <Text bold className="text-primary-500">
-          {mockCasesData.length}
+          {total}
         </Text>
         <Text>sager</Text>
       </HStack>
-      <ScrollView>
-        <CasesTable cases={filteredCases} />
-      </ScrollView>
+
+      {cases.length > 0 ? (
+        <FlatList
+          style={{ flex: 1 }}
+          data={cases}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <CaseRow caseItem={item} onPress={() => routerNav.push(`/case/${item.id}`)} />}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="always"
+          ListHeaderComponent={<TableHeader />}
+          stickyHeaderIndices={[0]}
+          onRefresh={refresh}
+          refreshing={isRefreshing}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <Box className="items-center py-4">
+                <Spinner />
+              </Box>
+            ) : null
+          }
+        />
+      ) : (
+        <Box className="bg-background-0 flex-1 items-center justify-center">
+          <Text size="lg" className="text-typography-500 mb-4">
+            Ingen sager fundet med de valgte filtre
+          </Text>
+        </Box>
+      )}
     </>
   );
 }
