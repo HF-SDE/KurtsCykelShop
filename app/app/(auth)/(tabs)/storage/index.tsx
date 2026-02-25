@@ -31,19 +31,13 @@ const itemColumns: ListTableColumn<Item>[] = [
 
 export default function Storage() {
   const router = useRouter();
-  const { data: items, isLoading, isRefreshing, isLoadingMore, refresh, loadMore } = useStorage();
 
-  if (isLoading)
-    return (
-      <SafeAreaView className="bg-background-0 flex-1">
-        <FoxLoader />
-      </SafeAreaView>
-    );
+  const { data: items, search, setSearch, isLoading, isRefreshing, isLoadingMore, refresh, loadMore } = useStorage();
 
   return (
     <SafeAreaView className="bg-background-0 w-full flex-1 px-2" edges={{ top: "additive" }}>
       <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
-        <Searchbar className="h-full flex-1" />
+        <Searchbar className="h-full flex-1" placeholder="Søg i lager..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full">
@@ -60,7 +54,9 @@ export default function Storage() {
         </ButtonGroup>
       </Box>
 
-      {items.length > 0 ? (
+      {isLoading ? (
+        <FoxLoader />
+      ) : items.length > 0 ? (
         <FlatList
           style={{ flex: 1 }}
           data={items}
@@ -98,12 +94,12 @@ export default function Storage() {
       ) : (
         <Box className="bg-background-0 flex-1 items-center justify-center">
           <Text size="lg" className="mb-4">
-            No items found
+            Ingen genstande fundet
           </Text>
 
           <NavigationButton href="/storage/new-item" variant="outline" action="secondary" size="lg">
             <ButtonIcon as={Plus} />
-            <ButtonText>Add your first item</ButtonText>
+            <ButtonText>Tilføj genstand</ButtonText>
           </NavigationButton>
         </Box>
       )}

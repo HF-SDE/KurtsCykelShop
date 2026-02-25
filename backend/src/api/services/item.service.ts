@@ -1,6 +1,7 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
+import { ItemWhereInput } from "@prisma/models";
 import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
@@ -13,8 +14,23 @@ export async function getAll(): Promise<APIResponse<Item[]>> {
   };
 }
 
-export async function getAllPaginated(page: number = 1, limit: number = 20): Promise<APIResponse<PaginatedData<Item>>> {
+export async function getAllPaginated(
+  page: number = 1,
+  limit: number = 20,
+  search: string | undefined = undefined,
+): Promise<APIResponse<PaginatedData<Item>>> {
   const skip = (page - 1) * limit;
+  const normalizedSearch = search?.trim();
+  const where: ItemWhereInput | undefined = normalizedSearch
+    ? {
+        OR: [
+          { name: { contains: normalizedSearch, mode: "insensitive" } },
+          { description: { contains: normalizedSearch, mode: "insensitive" } },
+          { sku: { contains: normalizedSearch, mode: "insensitive" } },
+          { barcodes: { some: { code: { contains: normalizedSearch, mode: "insensitive" } } } },
+        ],
+      }
+    : undefined;
 
   const [items, total] = await prisma.$transaction([
     prisma.item.findMany({
@@ -22,8 +38,9 @@ export async function getAllPaginated(page: number = 1, limit: number = 20): Pro
       take: limit,
       orderBy: { name: "asc" },
       include: { barcodes: { select: { code: true } } },
+      where,
     }),
-    prisma.item.count(),
+    prisma.item.count({ where }),
   ]);
 
   const mappedItems = items.map((item) => ({
