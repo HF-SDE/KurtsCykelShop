@@ -1,5 +1,6 @@
 import { ExpressFunction, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
+import { PermissionGetPayload } from "@prisma/models";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Response } from "express";
 
@@ -10,16 +11,16 @@ import { Response } from "express";
  */
 export function isAllowed(permissions: string[]): ExpressFunction {
   return async (req, res: Response, next) => {
-    const user = req.user;
+    const user = req.user as { id: string } | undefined;
 
-    if (!user) {
+    if (!user || !user.id) {
       res.status(getHttpStatusCode(Status.Unauthorized)).json({
         status: "Unauthorized",
         message: "Unauthorized",
       });
       return;
     }
-
+    
     const Permissions = await prisma.permission.findMany({
       where: {
         code: {
@@ -38,7 +39,7 @@ export function isAllowed(permissions: string[]): ExpressFunction {
       include: {
         roles: true,
       },
-    });
+    }) as PermissionGetPayload<{ include: { roles: true } }>[];
 
     if (Permissions.length) return next();
     res.status(getHttpStatusCode(Status.Forbidden)).json({
