@@ -1,9 +1,10 @@
 // types.d.ts
-import { User as PrismaUser } from "@prisma/client";
+import { User as PrismaUser, Role } from "@prisma/client";
 
 declare global {
   namespace Express {
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-empty-interface
-    interface User extends PrismaUser {}
+    interface User extends PrismaUser {
+      roles: (Role | { permissions: [] })[];
+    }
   }
 }

@@ -25,7 +25,7 @@ export async function errorResponse(
   model: prismaModels,
   operation: keyof typeof Status,
 ): Promise<APIResponse> {
-  if (err) {
+  if (err.name == "PrismaClientValidationError") {
     return {
       status: Status.MissingDetails,
       message: "Invalid input",

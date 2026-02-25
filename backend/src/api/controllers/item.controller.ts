@@ -1,5 +1,5 @@
 import { APIResponse, PaginatedData, TypedQuery } from "@api-types/general.types";
-import { Item } from "@prisma/client/client";
+import { Item } from "@prisma/client";
 import { EditItemType } from "@schemas/item.schemas";
 import * as ItemService from "@services/item.service";
 import { getHttpStatusCode } from "@utils/Utils";
@@ -11,14 +11,30 @@ export async function getAll(req: Request, res: Response<APIResponse<Item[]>>) {
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
 
+type GetAllPaginatedQuery = TypedQuery<{
+  page?: string;
+  limit?: string;
+  search?: string;
+}>;
+
+function firstQueryValue(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
 export async function getAllPaginated(
-  req: Request<{}, APIResponse<PaginatedData<Item>>, {}, TypedQuery<{ page: string; limit: string }>>,
+  req: Request<{}, APIResponse<PaginatedData<Item>>, {}, GetAllPaginatedQuery>,
   res: Response<APIResponse<PaginatedData<Item>>>,
 ) {
-  const page = Math.max(1, parseInt(req.query.page || "1", 10));
-  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "20", 10)));
+  const pageParam = firstQueryValue(req.query.page);
+  const limitParam = firstQueryValue(req.query.limit);
+  const searchParam = firstQueryValue(req.query.search);
 
-  const response = await ItemService.getAllPaginated(page, limit);
+  const page = Math.max(1, parseInt(pageParam || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(limitParam || "20", 10)));
+  const search = searchParam?.trim() || undefined;
+
+  const response = await ItemService.getAllPaginated(page, limit, search);
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }

@@ -12,6 +12,8 @@ export interface PaginatedResponse<T> {
 export interface UsePaginatedDataResult<T> {
   data: T[];
   setData: React.Dispatch<React.SetStateAction<T[]>>;
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
   isLoading: boolean;
   isRefreshing: boolean;
   isLoadingMore: boolean;
@@ -20,19 +22,44 @@ export interface UsePaginatedDataResult<T> {
   loadMore: () => Promise<void>;
 }
 
-export function usePaginatedData<T>(url: string, limit: number = 20): UsePaginatedDataResult<T> {
+export interface UsePaginatedDataOptions {
+  limit?: number;
+  searchParam?: string;
+  initialSearch?: string;
+  searchDebounceMs?: number;
+}
+
+export function usePaginatedData<T>(url: string, options: UsePaginatedDataOptions = {}): UsePaginatedDataResult<T> {
+  const { limit = 20, searchParam = "search", searchDebounceMs = 300 } = options;
+
   const [data, setData] = useState<T[]>([]);
+  const [search, setSearch] = useState(options.initialSearch ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(options.initialSearch ?? "");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const currentPage = useRef(1);
+  const latestRequestId = useRef(0);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, searchDebounceMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [search, searchDebounceMs]);
 
   const fetchPage = useCallback(
     async (page: number, append: boolean) => {
-      const response = await apiClient.get<{ data: PaginatedResponse<T> }>(url, {
-        params: { page, limit },
-      });
+      const requestId = ++latestRequestId.current;
+      const trimmedSearch = debouncedSearch.trim();
+      const params: Record<string, string | number> = { page, limit };
+      if (trimmedSearch.length > 0) params[searchParam] = trimmedSearch;
+
+      const response = await apiClient.get<{ data: PaginatedResponse<T> }>(url, { params });
+
+      if (requestId !== latestRequestId.current) return;
 
       const { data: items, hasMore: more } = response.data.data;
 
@@ -40,7 +67,7 @@ export function usePaginatedData<T>(url: string, limit: number = 20): UsePaginat
       setHasMore(more);
       currentPage.current = page;
     },
-    [url, limit],
+    [debouncedSearch, limit, searchParam, url],
   );
 
   const load = useCallback(async () => {
@@ -81,5 +108,16 @@ export function usePaginatedData<T>(url: string, limit: number = 20): UsePaginat
     load();
   }, [load]);
 
-  return { data, setData, isLoading, isRefreshing, isLoadingMore, hasMore, refresh, loadMore };
+  return {
+    data,
+    setData,
+    search,
+    setSearch,
+    isLoading,
+    isRefreshing,
+    isLoadingMore,
+    hasMore,
+    refresh,
+    loadMore,
+  };
 }
