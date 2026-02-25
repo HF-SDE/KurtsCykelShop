@@ -188,29 +188,51 @@ export async function updateRole(id: string | undefined, body: UpdateRoleInput):
   }
 
   try {
-    const data = await prisma.role.update({
+    for (const permission of body.permissions || []) {
+      if (!permission) continue;
+
+      const existingPermission = await prisma.permission.findUnique({
+        where: { id: permission },
+      });
+
+      if (!existingPermission) {
+        return {
+          status: Status.InvalidDetails,
+          message: `Permission with ID ${permission} does not exist`,
+        };
+      }
+
+      await prisma.permission.update({
+        where: { id: permission },
+        data: { roles: { connect: { id } } },
+      });
+    }
+
+    const updatedRole = await prisma.role.findUnique({
+      where: { id },
+      include: {
+        permissions: {
+          where: { id: { notIn: body.permissions || [] } },
+        },
+      },
+    });
+
+    console.log("Updated role with disconnected permissions:", updatedRole);
+
+    await prisma.role.update({
       where: { id },
       data: {
         name: validation.data.name,
-        description: validation.data.description,
-        permissions: validation.data.permissions
-          ? {
-              set: validation.data.permissions.map((permId) => ({
-                id: permId,
-              })),
-            }
-          : undefined,
-      },
-      include: {
-        permissions: true,
-        users: true,
+        description: validation.data.description || null,
+        permissions: {
+          disconnect: updatedRole?.permissions.map((p) => ({ id: p.id })) || [],
+        },
       },
     });
 
     return {
       status: Status.Updated,
       message: "Role updated successfully",
-      data,
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
