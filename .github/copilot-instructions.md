@@ -234,18 +234,18 @@ When generating commit messages, always follow Angular-style Conventional Commit
 
 ### Required emoji mapping
 
-- `🎉 init`
-- `✨ feat`
-- `🐞 fix`
-- `📃 docs`
-- `🌈 style`
-- `🦄 refactor`
-- `🎈 perf`
-- `🧪 test`
-- `🔧 build`
-- `🐎 ci`
-- `🐳 chore`
-- `↩ revert`
+- `🎉 init:`
+- `✨ feat:`
+- `🐞 fix:`
+- `📃 docs:`
+- `🌈 style:`
+- `🦄 refactor:`
+- `🎈 perf:`
+- `🧪 test:`
+- `🔧 build:`
+- `🐎 ci:`
+- `🐳 chore:`
+- `↩ revert:`
 
 Always use the exact emoji that matches the commit `type`.
 
