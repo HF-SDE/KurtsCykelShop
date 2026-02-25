@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, Pressable } from "react-native";
 
 import apiClient from "@/utils/apiClient";
 
@@ -77,6 +77,7 @@ function EditRolePageContent() {
   }, [permissions, search]);
 
   function togglePermission(id: string) {
+    console.log("Toggling permission with ID:", id);
     setSelectedPermissions((prev) => ({ ...prev, [id]: !(prev[id] ?? false) }));
   }
 
@@ -170,28 +171,30 @@ function EditRolePageContent() {
           data={filteredPermissions}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <Box className="border-outline-200 bg-background-0 flex-row items-center border-b px-4 py-3">
-              <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
-                {item.name}
-              </Text>
-              <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
-                {item.description}
-              </Text>
+            <Pressable onPress={() => togglePermission(item.id)}>
+              <Box className="border-outline-200 bg-background-0 flex-row items-center gap-2 border-b px-4 py-3">
+                <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
+                  {item.name}
+                </Text>
+                <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
+                  {item.description}
+                </Text>
 
-              <Box className="w-16 items-center">
+                {/* <Box className="w-16 items-center"> */}
                 <Checkbox
                   size="md"
                   value={item.id}
-                  className="justify-center"
+                  className="items-center justify-center"
                   isChecked={selectedPermissions[item.id] ?? false}
-                  onChange={() => togglePermission(item.id)}
+                  // onChange={() => togglePermission(item.id)}
                 >
                   <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
                     <CheckboxIcon as={CheckIcon} />
                   </CheckboxIndicator>
                 </Checkbox>
+                {/* </Box> */}
               </Box>
-            </Box>
+            </Pressable>
           )}
         />
       </Box>

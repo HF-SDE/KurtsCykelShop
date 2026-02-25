@@ -52,6 +52,7 @@ export function RolePermissionProvider({ id, children }: { id: string; children:
     `/manage/role/${id}?withPermissions=true&withAllPermissions=true`,
     [],
     {
+      useCache: false,
       select: (raw) => {
         if (!raw) return [];
 
