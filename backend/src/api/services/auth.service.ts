@@ -438,7 +438,7 @@ export async function login(userData: LoginRequestBody): Promise<APIResponse<Acc
  * @returns {Promise<APIResponse>} A promise that resolves to an API response object containing the result of the logout operation.
  * @throws {Error} Throws an error if something goes wrong during the process, logging the issue and returning a generic error message.
  */
-export async function logout(token: TokenRequestBody): Promise<APIResponse> {
+export async function logout(token: TokenRequestBody): Promise<APIResponse<void>> {
   try {
     // Validate the token using TokenSchema
     const validate = TokenSchema.safeParse({ token: token.token });

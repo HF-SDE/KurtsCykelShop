@@ -56,7 +56,11 @@ export async function getAllServiceOrdersPaginated(
       res.status(getHttpStatusCode(Status.InvalidDetails)).json({
         status: Status.InvalidDetails,
         message: parseResult.error.message,
-        errors: z.flattenError(parseResult.error).fieldErrors,
+        errors: {
+          code: "VALIDATION_ERROR",
+          message: parseResult.error.message,
+          fieldErrors: z.flattenError(parseResult.error).fieldErrors,
+        },
       });
       return;
     }
