@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { hash } from "argon2";
+import { PrismaClient } from "@prisma/client";
 import { PermissionGroupCreateInput, UserCreateInput } from "@prisma/models";
+import { hash } from "argon2";
 
 // Note: Faker will use default locale. For Danish-specific data, we use faker methods that support localization
 // The Danish locale (da) is available in faker for names, addresses, phone numbers etc.
@@ -39,7 +39,7 @@ const permissions: PermissionSeed[] = [
     description: "Update users information",
   },
   {
-    code: "administrator:users:create",
+    code: "administrator:user:create",
     group: "Administrator",
     description: "Create new users",
   },
@@ -64,17 +64,17 @@ const permissions: PermissionSeed[] = [
     description: "Create new permission group",
   },
   {
-    code: "administrator:roles:view",
+    code: "administrator:role:view",
     group: "Administrator",
     description: "View roles",
   },
   {
-    code: "administrator:roles:create",
+    code: "administrator:role:create",
     group: "Administrator",
     description: "Create new roles",
   },
   {
-    code: "administrator:roles:update",
+    code: "administrator:role:update",
     group: "Administrator",
     description: "Update existing roles",
   },
@@ -180,17 +180,15 @@ async function seedDatabase() {
   );
 
   // Insert permissions if not existing
-  const existingPermissions = await prisma.permission.count();
-  if (existingPermissions === 0) {
-    await prisma.permission.createMany({
-      data: permissions.map(({ code, group, description }) => ({
-        code,
-        description,
-        permissionGroupId: permissionGroupsMap[group],
-      })),
-      skipDuplicates: true,
-    });
-  }
+
+  await prisma.permission.createMany({
+    data: permissions.map(({ code, group, description }) => ({
+      code,
+      description,
+      permissionGroupId: permissionGroupsMap[group],
+    })),
+    skipDuplicates: true,
+  });
 
   // Insert roles if not existing
   const existingRoles = await prisma.role.count();
