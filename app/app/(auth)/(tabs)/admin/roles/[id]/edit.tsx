@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList } from "react-native";
+
+import apiClient from "@/utils/apiClient";
 
 import { FoxLoader } from "@components/fox";
 import { Searchbar } from "@components/search";
@@ -10,8 +12,9 @@ import { Heading } from "@components/ui/heading";
 import { CheckIcon } from "@components/ui/icon";
 import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
-import { useLocalSearchParams } from "expo-router";
-import { Plus } from "lucide-react-native";
+import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Plus, Save } from "lucide-react-native";
 
 import { RolePermissionProvider, useRolePermissions } from "../ctx";
 
@@ -37,9 +40,13 @@ export default function EditRolePage() {
 }
 
 function EditRolePageContent() {
-  const { data: role, isLoading } = useRolePermissions();
+  const { data: role } = useRolePermissions();
+  const router = useRouter();
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, boolean>>({});
+  const [description, setDescription] = useState(role?.description || "");
+  const [isSaving, setIsSaving] = useState(false);
 
   const permissions = useMemo<RolePermission[]>(
     () =>
@@ -56,6 +63,10 @@ function EditRolePageContent() {
     setSelectedPermissions(Object.fromEntries(permissions.map((item) => [item.id, item.isAssigned])));
   }, [permissions]);
 
+  useEffect(() => {
+    setDescription(role?.description || "");
+  }, [role?.description]);
+
   const filteredPermissions = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return permissions;
@@ -65,22 +76,79 @@ function EditRolePageContent() {
     );
   }, [permissions, search]);
 
-  function togglePermission(id: string, isChecked: boolean) {
-    setSelectedPermissions((prev) => ({ ...prev, [id]: isChecked }));
+  function togglePermission(id: string) {
+    setSelectedPermissions((prev) => ({ ...prev, [id]: !(prev[id] ?? false) }));
   }
 
-  if (isLoading) {
+  const handleSave = useCallback(async () => {
+    if (!role || isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      const permissionIds = Object.entries(selectedPermissions)
+        .filter(([, isChecked]) => isChecked)
+        .map(([permissionId]) => permissionId);
+      console.log("Selected permission IDs:", permissionIds);
+
+      await apiClient.put(`/manage/role/${role.id}`, {
+        name: role.name,
+        description,
+        permissions: permissionIds,
+      });
+
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="success" variant="solid">
+            <ToastTitle>Rollen er opdateret</ToastTitle>
+            <ToastDescription>Dine ændringer er gemt</ToastDescription>
+          </Toast>
+        ),
+      });
+
+      router.back();
+    } catch (error) {
+      console.error("Error while updating role:", error);
+
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>Kunne ikke gemme rolle</ToastTitle>
+            <ToastDescription>Prøv igen om et øjeblik</ToastDescription>
+          </Toast>
+        ),
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [description, isSaving, role, router, selectedPermissions, toast]);
+
+  if (!role) {
     return <FoxLoader />;
   }
 
   return (
     <Box className="bg-background-0 w-full flex-1 px-4 pt-2">
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Button variant="link" action="secondary" className="px-0" onPress={handleSave} isDisabled={isSaving}>
+              <ButtonIcon as={Save} size="xl" />
+            </Button>
+          ),
+        }}
+      />
+
       <Heading bold size="4xl" className="mb-4 text-center">
-        {role?.name || "NULL"}
+        {role.name || "Null"}
       </Heading>
 
       <Textarea className="mb-4 w-full">
-        <TextareaInput placeholder="Description" />
+        <TextareaInput placeholder="Description" value={description} onChangeText={setDescription} />
       </Textarea>
 
       <Box className="mb-3 flex-row items-center gap-3">
@@ -116,7 +184,7 @@ function EditRolePageContent() {
                   value={item.id}
                   className="justify-center"
                   isChecked={selectedPermissions[item.id] ?? false}
-                  onChange={(isChecked) => togglePermission(item.id, isChecked)}
+                  onChange={() => togglePermission(item.id)}
                 >
                   <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
                     <CheckboxIcon as={CheckIcon} />
