@@ -1,5 +1,5 @@
 import { APIResponse } from "@api-types/general.types";
-import { Unit } from "@prisma";
+import { Unit } from "@prisma/client";
 import * as UnitService from "@services/unit.service";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response } from "express";

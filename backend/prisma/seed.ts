@@ -1,9 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { PrismaClient } from "@prisma";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "argon2";
-// ! Kenni: ved ikke om jeg importer rigtigt her men for mig ligger det i src.
-import { PermissionGroupCreateInput, UserCreateInput } from "src/generated/prisma/models";
+import { PermissionGroupCreateInput, UserCreateInput } from "@prisma/models";
 
 // Note: Faker will use default locale. For Danish-specific data, we use faker methods that support localization
 // The Danish locale (da) is available in faker for names, addresses, phone numbers etc.

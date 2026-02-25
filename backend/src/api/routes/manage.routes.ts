@@ -29,9 +29,9 @@ router.post("/user", isAllowed(["administrator:users:create"]), createUser);
 router.put("/user/:id", isAllowed(["administrator:users:update"]), updateUser);
 router.patch("/user/:id", isAllowed(["administrator:users:update"]), patchUser);
 
-router.get("/roles", isAllowed(["administrator:roles:view"]), getRoles);
-router.get("/roles/:id", isAllowed(["administrator:roles:view"]), validateParams, getRole);
-router.post("/roles", isAllowed(["administrator:roles:create"]), createRole);
-router.put("/roles/:id", isAllowed(["administrator:roles:update"]), updateRole);
+router.get("/role", isAllowed(["administrator:role:view"]), getRoles);
+router.get("/role/:id", isAllowed(["administrator:role:view"]), validateParams, getRole);
+router.post("/role", isAllowed(["administrator:role:create"]), createRole);
+router.put("/role/:id", isAllowed(["administrator:role:update"]), updateRole);
 
 export default router;

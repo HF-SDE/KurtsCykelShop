@@ -1,6 +1,6 @@
 import { APIResponse, Status } from "@api-types/general.types";
-import { Permission, PermissionGroup, Prisma, User } from "@prisma";
 import prisma from "@prisma-instance";
+import { Permission, PermissionGroup, Prisma, User } from "@prisma/client";
 import { getPermissionSchema } from "@schemas/permission.schemas";
 import { getPermissionGroupsSchema } from "@schemas/permissionGroups.schemas";
 import { createUserSchema, getUserSchema, patchUserSchema, updateUserSchema } from "@schemas/user.schemas";

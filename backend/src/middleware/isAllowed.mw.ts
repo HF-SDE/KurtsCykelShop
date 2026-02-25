@@ -22,6 +22,9 @@ export function isAllowed(permissions: string[]): ExpressFunction {
 
     const Permissions = await prisma.permission.findMany({
       where: {
+        code: {
+          in: permissions,
+        },
         roles: {
           some: {
             users: {
@@ -31,6 +34,9 @@ export function isAllowed(permissions: string[]): ExpressFunction {
             },
           },
         },
+      },
+      include: {
+        roles: true,
       },
     });
 
