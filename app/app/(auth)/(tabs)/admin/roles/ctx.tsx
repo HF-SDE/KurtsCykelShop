@@ -2,9 +2,9 @@ import { createContext, useContext } from "react";
 
 import { Role } from "@/types/users/Role";
 
-import { UsePaginatedDataResult, usePaginatedData } from "@hooks/usePaginatedData";
+import { useData } from "@hooks/useData";
 
-export const RoleContext = createContext<UsePaginatedDataResult<Role>>({} as UsePaginatedDataResult<Role>);
+export const RoleContext = createContext<{data: Role[], setData: (data: Role[]) => void, isLoading: boolean}>({data: [], setData: () => {}, isLoading: false});
 
 export function useRole() {
   const context = useContext(RoleContext);
@@ -17,7 +17,7 @@ export function useRole() {
 }
 
 export default function RoleProvider({ children }: { children: React.ReactNode }) {
-  const paginatedData = usePaginatedData<Role>("/roles/paginated");
+  const [data, setData, isLoading] = useData<Role>("/roles");
 
-  return <RoleContext.Provider value={paginatedData}>{children}</RoleContext.Provider>;
+  return <RoleContext.Provider value={{data, setData, isLoading}}>{children}</RoleContext.Provider>;
 }
