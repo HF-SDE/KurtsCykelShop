@@ -3,7 +3,6 @@ import { BasicUser } from "@api-types/user.types";
 import prisma from "@prisma-instance";
 import { ChangePasswordBase64Schema, ChangePasswordSchema, jwtTokenSchema } from "@schemas/profile.schemas";
 import { hash, verify } from "argon2";
-import z from "zod";
 
 /**
  * Service to change a user's password
