@@ -245,11 +245,10 @@ async function seedDatabase() {
     (await prisma.role.findMany({ select: { id: true, name: true } })).map((role) => [role.name, role.id]),
   );
 
-  // await assignRoles(usersMap, "admin", rolesMap["Admin"]);
-  // await assignRoles(usersMap, "kok", rolesMap["Kok"]);
-  // await assignRoles(usersMap, "tjener", rolesMap["Tjener"]);
-  // await assignRoles(usersMap, "administration", rolesMap["Administration"]);
-  // todo: assign the right roles to users
+  await assignRoles(usersMap, "admin", rolesMap["Admin"]);
+  await assignRoles(usersMap, "kurt", rolesMap["Kurt"]);
+  await assignRoles(usersMap, "medarbejder", rolesMap["Medarbejder"]);
+  await assignRoles(usersMap, "elev", rolesMap["BundenAfFødekæden"]);
 
   async function assignRoles(usersMap: { [k: string]: string }, username: string, roleId: string | undefined) {
     const userId = usersMap[username];
