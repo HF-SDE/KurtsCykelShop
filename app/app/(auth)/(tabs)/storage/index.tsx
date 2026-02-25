@@ -56,7 +56,7 @@ export default function Storage() {
 
       {isLoading ? (
         <FoxLoader />
-      ) : items.length > 0 ? (
+      ) : items?.length > 0 ? (
         <FlatList
           style={{ flex: 1 }}
           data={items}
