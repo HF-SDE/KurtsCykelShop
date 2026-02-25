@@ -1,6 +1,6 @@
 import { APIResponse, TypedQuery } from "@api-types/general.types";
 import { RoleWithPermissions } from "@api-types/role.types";
-import { Role } from "@prisma";
+import { Role } from "@prisma/client";
 import { CreateRoleSchema, GetRoleSchema, UpdateRoleSchema } from "@schemas/role.schemas";
 import * as RoleService from "@services/role.service";
 import { getHttpStatusCode } from "@utils/Utils";
