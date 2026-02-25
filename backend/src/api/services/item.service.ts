@@ -1,3 +1,4 @@
+import { AppError, EitherDataOrError } from "@api-types/error.types";
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
@@ -110,4 +111,76 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
     message: "Item updated successfully",
     data: mappedItem,
   };
+}
+
+export async function getById({ id }: { id: string }): Promise<EitherDataOrError<Item, AppError>> {
+  try {
+    const item = await prisma.item.findUnique({
+      where: { id },
+      include: { barcodes: { select: { code: true } } },
+    });
+
+    if (!item) {
+      return [
+        null,
+        {
+          code: Status.NotFound,
+          message: "Item not found",
+        },
+      ];
+    }
+
+    const mappedItem = {
+      ...item,
+      barcodes: item.barcodes.map((b) => b.code),
+    };
+
+    return [mappedItem, null];
+  } catch (error) {
+    console.error("Error fetching item by ID:", error);
+    return [
+      null,
+      {
+        code: Status.Failed,
+        message: "Failed to fetch item by ID",
+        details: error instanceof Error ? error.message : String(error),
+      },
+    ];
+  }
+}
+
+export async function getByBarcode(barcode: string): Promise<EitherDataOrError<Item, AppError>> {
+  try {
+    const item = await prisma.item.findFirst({
+      where: { barcodes: { some: { code: barcode } } },
+      include: { barcodes: { select: { code: true } } },
+    });
+
+    if (!item) {
+      return [
+        null,
+        {
+          code: Status.NotFound,
+          message: "Item not found for the given barcode",
+        },
+      ];
+    }
+
+    const mappedItem = {
+      ...item,
+      barcodes: item.barcodes.map((b) => b.code),
+    };
+
+    return [mappedItem, null];
+  } catch (error) {
+    console.error("Error fetching item by barcode:", error);
+    return [
+      null,
+      {
+        code: Status.Failed,
+        message: "Failed to fetch item by barcode",
+        details: error instanceof Error ? error.message : String(error),
+      },
+    ];
+  }
 }

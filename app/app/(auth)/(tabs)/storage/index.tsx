@@ -60,7 +60,7 @@ export default function Storage() {
         </ButtonGroup>
       </Box>
 
-      {items.length > 0 ? (
+      {items?.length > 0 ? (
         <FlatList
           style={{ flex: 1 }}
           data={items}
