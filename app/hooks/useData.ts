@@ -7,6 +7,7 @@ type SetData<T> = React.Dispatch<React.SetStateAction<T[]>>;
 type UseDataOptions = {
   useCache?: boolean;
   cacheTimeMs?: number;
+  select?: (data: unknown) => unknown[];
 };
 
 type CacheEntry = {
@@ -23,7 +24,7 @@ export function useData<T>(
   defaultData: T[] = [],
   options: UseDataOptions = {},
 ): [T[], SetData<T>, boolean, () => void] {
-  const { useCache = true, cacheTimeMs = DEFAULT_CACHE_TIME_MS } = options;
+  const { useCache = true, cacheTimeMs = DEFAULT_CACHE_TIME_MS, select } = options;
   const [data, setData] = useState<T[]>(defaultData);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,7 +44,8 @@ export function useData<T>(
       try {
         const response = await apiClient.get(url);
 
-        const fetchedData = response.data.data as T[];
+        const rawData = response.data.data;
+        const fetchedData = (select ? select(rawData) : rawData) as T[];
         setData(fetchedData);
 
         if (useCache) {
@@ -55,7 +57,7 @@ export function useData<T>(
         setIsLoading(false);
       }
     },
-    [cacheTimeMs, url, useCache],
+    [cacheTimeMs, select, url, useCache],
   );
 
   const refresh = useCallback(() => {

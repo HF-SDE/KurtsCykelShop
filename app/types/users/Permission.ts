@@ -5,4 +5,5 @@ export interface Permission {
   permissionGroupId: string;
   createdAt: string;
   updatedAt: string;
+  isAssigned?: boolean;
 }
