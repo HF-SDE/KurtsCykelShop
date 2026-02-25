@@ -12,13 +12,13 @@ import { Center } from "@components/ui/center";
 import { HStack } from "@components/ui/hstack";
 import { Spinner } from "@components/ui/spinner";
 import { Text } from "@components/ui/text";
+import { PaginatedResponse } from "@hooks/usePaginatedData";
 import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";
 import { router, useRouter } from "expo-router";
 import { Filter, Plus } from "lucide-react-native";
 
-import { CaseStatus, CaseStatusValues, PaginatedResponse, TimeRange } from "./case.types";
-import { CasesFilterDrawer } from "./casesFilterDrawer";
+import { CaseStatus, CaseStatusValues, CasesFilterDrawer, TimeRange } from "./casesFilterDrawer";
 
 const statusConfig: Record<string, { action: "success" | "warning" | "info" | "error"; label: string }> = {
   completed: { action: "success", label: "Afsluttet" },
@@ -105,19 +105,21 @@ export function CasesSection() {
   const fetchPage = useCallback(
     async (page: number, append: boolean) => {
       try {
-        const response = await apiClient.get<APIResponse<PaginatedResponse>>("/service-orders/paginated", {
-          params: {
-            page,
-            limit: 20,
-            search: searchQuery || undefined,
-            statuses: selectedStatuses.join(","),
-            timeRange,
+        const response = await apiClient.get<APIResponse<PaginatedResponse<ServiceOrderData>>>(
+          "/service-orders/paginated",
+          {
+            params: {
+              page,
+              limit: 20,
+              search: searchQuery || undefined,
+              statuses: selectedStatuses.join(","),
+              timeRange,
+            },
           },
-        });
-        console.log("API Response:", response);
+        );
 
         if (response.data?.data) {
-          const { items, hasMore: more, total: totalCount } = response.data.data;
+          const { data: items, hasMore: more, total: totalCount } = response.data.data;
           setCases((prev) => (append ? [...prev, ...items] : items));
           setHasMore(more);
           setTotal(totalCount);

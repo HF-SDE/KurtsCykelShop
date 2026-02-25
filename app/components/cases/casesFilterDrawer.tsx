@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { Checkbox, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from "@/components/ui/checkbox";
 import {
   Drawer,
@@ -17,9 +17,7 @@ import { HStack } from "@components/ui/hstack";
 import { Icon } from "@components/ui/icon";
 import { Text } from "@components/ui/text";
 import { VStack } from "@components/ui/vstack";
-import { CheckIcon, Filter, GlobeIcon, Play, PlusIcon, XIcon } from "lucide-react-native";
-
-import { CaseStatus, TimeRange } from "./case.types";
+import { CheckIcon, XIcon } from "lucide-react-native";
 
 interface CasesFilterDrawerProps {
   showDrawer: boolean;
@@ -30,14 +28,18 @@ interface CasesFilterDrawerProps {
   setTimeRange: (range: TimeRange) => void;
 }
 
-const statusOptions: { value: CaseStatus; label: string; color: string }[] = [
+const statusOptions = [
   { value: "completed", label: "Afsluttet", color: "success" },
   { value: "in-progress", label: "I gang", color: "info" },
   { value: "pending", label: "Afventer", color: "warning" },
   { value: "cancelled", label: "Annuleret", color: "error" },
 ] as const;
 
-const timeRangeOptions: { value: TimeRange; label: string }[] = [
+export type CaseStatus = (typeof statusOptions)[number]["value"];
+
+export const CaseStatusValues: CaseStatus[] = statusOptions.map((option) => option.value);
+
+const timeRangeOptions = [
   { value: "all", label: "Alle" },
   { value: "today", label: "I dag" },
   { value: "week", label: "Sidste uge" },
@@ -45,6 +47,8 @@ const timeRangeOptions: { value: TimeRange; label: string }[] = [
   { value: "quarter", label: "Sidste kvartal" },
   { value: "year", label: "Sidste år" },
 ] as const;
+
+export type TimeRange = (typeof timeRangeOptions)[number]["value"];
 
 export function CasesFilterDrawer({
   showDrawer,
@@ -75,7 +79,7 @@ export function CasesFilterDrawer({
   };
 
   const handleReset = () => {
-    setLocalStatuses(["completed", "cancelled", "in-progress", "pending"]);
+    setLocalStatuses(CaseStatusValues);
     setLocalTimeRange("all");
   };
 
