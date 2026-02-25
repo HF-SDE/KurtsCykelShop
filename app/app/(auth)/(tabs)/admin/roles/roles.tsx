@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ListTableColumn } from "@/types/ui/listTable";
@@ -9,9 +9,8 @@ import { FoxLoader } from "@components/fox";
 import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
-import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@components/ui/button";
+import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
 import { ListTableHeader, ListTableRow } from "@components/ui/list-table";
-import { Spinner } from "@components/ui/spinner";
 import { Text } from "@components/ui/text";
 import { useRouter } from "expo-router";
 import { ListFilter, Pencil, Plus } from "lucide-react-native";
