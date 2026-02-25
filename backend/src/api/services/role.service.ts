@@ -1,4 +1,5 @@
 import { APIResponse, Status } from "@api-types/general.types";
+import { PermissionWithAssignment, RoleWithPermissions } from "@api-types/role.types";
 import prisma from "@prisma-instance";
 import { Prisma, Role } from "@prisma/client";
 import { CreateRoleSchema, GetRoleSchema, UpdateRoleSchema } from "@schemas/role.schemas";
@@ -54,9 +55,18 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
 /**
  * Retrieves a single role by ID.
  * @param {string | undefined} id - Role ID.
- * @returns {Promise<APIResponse<Role>>} Role response.
+ * @param {GetRoleInput} query - Query string filters.
+ * @returns {Promise<APIResponse<RoleWithPermissions>>} Role response.
  */
-export async function getRole(id: string | undefined): Promise<APIResponse<Role>> {
+export async function getRole(id: string | undefined, query: GetRoleInput): Promise<APIResponse<RoleWithPermissions>> {
+  const validation = GetRoleSchema.safeParse(query);
+  if (!validation.success) {
+    return {
+      status: Status.InvalidDetails,
+      message: validation.error.message,
+    };
+  }
+
   if (!id) {
     return {
       status: Status.MissingDetails,
@@ -64,10 +74,12 @@ export async function getRole(id: string | undefined): Promise<APIResponse<Role>
     };
   }
 
+  const { withPermissions, withAllPermissions } = validation.data;
+
   const data = await prisma.role.findUnique({
     where: { id },
     include: {
-      permissions: true,
+      permissions: withPermissions,
     },
   });
 
@@ -78,10 +90,27 @@ export async function getRole(id: string | undefined): Promise<APIResponse<Role>
     };
   }
 
+  const permissions: PermissionWithAssignment[] = [];
+
+  if (withAllPermissions) {
+    const allPermissions = await prisma.permission.findMany();
+    permissions.push(
+      ...allPermissions.map((permission) => ({
+        ...permission,
+        isAssigned: data?.permissions?.some((p) => p.id === permission.id) || false,
+      })),
+    );
+  }
+
+  const response = {
+    ...data,
+    permissions: withAllPermissions ? permissions : data?.permissions,
+  };
+
   return {
     status: Status.Success,
     message: "Role retrieved successfully",
-    data,
+    data: response,
   };
 }
 

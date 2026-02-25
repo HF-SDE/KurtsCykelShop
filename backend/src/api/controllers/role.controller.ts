@@ -1,5 +1,6 @@
-import { APIResponse } from "@api-types/general.types";
-import { Role } from "@prisma/client";
+import { APIResponse, TypedQuery } from "@api-types/general.types";
+import { RoleWithPermissions } from "@api-types/role.types";
+import { Role } from "@prisma";
 import { CreateRoleSchema, GetRoleSchema, UpdateRoleSchema } from "@schemas/role.schemas";
 import * as RoleService from "@services/role.service";
 import { getHttpStatusCode } from "@utils/Utils";
@@ -32,10 +33,10 @@ export async function getRoles(
  * @returns {Promise<void>} No return value.
  */
 export async function getRole(
-  req: Request<{ id?: string }, unknown, APIResponse<Role>, GetRoleInput>,
+  req: Request<{ id?: string }, unknown, APIResponse<RoleWithPermissions>, TypedQuery<GetRoleInput>>,
   res: Response,
 ): Promise<void> {
-  const response = await RoleService.getRole(typeof req.params.id === "string" ? req.params.id : undefined);
+  const response = await RoleService.getRole(typeof req.params.id === "string" ? req.params.id : undefined, req.query);
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
