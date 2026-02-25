@@ -37,7 +37,7 @@ export default function EditItem() {
 
   const item = items.find((i) => i.id === id);
 
-  if (isLoading) return <FoxLoader />;
+  if (!id || isLoading) return <FoxLoader />;
 
   if (!item) {
     Alert.alert("Genstand ikke fundet", "Den genstand du prøver at redigere kunne ikke findes.", [
