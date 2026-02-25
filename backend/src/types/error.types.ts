@@ -1,6 +1,10 @@
 // For validation errors with field-specific messages
 export interface ValidationError {
-  [field: string]: string[];
+  code: string;
+  message: string;
+  fieldErrors: {
+    [field: string]: string[];
+  };
 }
 
 // For general application errors
