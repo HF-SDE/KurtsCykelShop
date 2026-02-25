@@ -47,13 +47,13 @@ export default function EditItem() {
     return null;
   }
 
-  return <Edit2 initialState={item} />;
+  return <EditRender initialState={item} />;
 }
 interface EditItemProps {
   initialState: Item;
 }
 
-function Edit2({ initialState }: EditItemProps) {
+function EditRender({ initialState }: EditItemProps) {
   const toast = useToast();
   const { setData } = useStorage();
 

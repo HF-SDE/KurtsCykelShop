@@ -86,11 +86,28 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
     };
   }
 
-  const updatedItem = await prisma.item.update({ where: { id }, data: validatedData });
+  const updatedItem = await prisma.item.update({
+    where: { id },
+    data: {
+      ...validatedData,
+      barcodes: validatedData.barcodes
+        ? {
+            deleteMany: { itemId: id },
+            createMany: { data: validatedData.barcodes.map((code) => ({ code })) },
+          }
+        : undefined,
+    },
+    include: { barcodes: { select: { code: true } } },
+  });
+
+  const mappedItem = {
+    ...updatedItem,
+    barcodes: updatedItem.barcodes.map((b) => b.code),
+  };
 
   return {
     status: Status.Success,
     message: "Item updated successfully",
-    data: updatedItem,
+    data: mappedItem,
   };
 }
