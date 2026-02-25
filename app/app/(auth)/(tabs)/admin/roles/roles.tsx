@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ListTableColumn } from "@/types/ui/listTable";
@@ -33,13 +33,13 @@ const roleColumns: ListTableColumn<Role>[] = [
 export default function RolesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data: roles, isLoading, isRefreshing, isLoadingMore, refresh, loadMore } = useRole();
+  const { data, isLoading } = useRole();
 
   const filteredRoles = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return roles || [];
-    return roles.filter((r) => r.name.toLowerCase().includes(q));
-  }, [roles, search]);
+    if (!q) return data || [];
+    return data.filter((r) => r.name.toLowerCase().includes(q));
+  }, [data, search]);
 
   if (isLoading)
     return (
@@ -49,7 +49,7 @@ export default function RolesPage() {
     );
 
   return (
-    <SafeAreaView className="bg-background-0 w-full flex-1 px-2" edges={{ top: "additive" }}>
+    <Box className="bg-background-0 w-full flex-1 px-2">
       <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
         <Searchbar className="h-full flex-1" placeholder="Search roles..." value={search} onChangeText={setSearch} />
 
@@ -87,30 +87,15 @@ export default function RolesPage() {
           directionalLockEnabled
           ListHeaderComponent={<ListTableHeader columns={roleColumns} action={<Box />} />}
           stickyHeaderIndices={[0]}
-          onRefresh={refresh}
-          refreshing={isRefreshing}
-          onEndReached={loadMore}
           onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <Box className="items-center py-4">
-                <Spinner />
-              </Box>
-            ) : null
-          }
         />
       ) : (
         <Box className="bg-background-0 flex-1 items-center justify-center">
           <Text size="lg" className="mb-4">
             No roles found
           </Text>
-
-          <NavigationButton href="/admin/roles/new" variant="outline" action="secondary" size="lg">
-            <ButtonIcon as={Plus} />
-            <ButtonText>Add your first role</ButtonText>
-          </NavigationButton>
         </Box>
       )}
-    </SafeAreaView>
+    </Box>
   );
 }
