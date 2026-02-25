@@ -214,3 +214,62 @@ npx prisma studio                            # GUI database browser
 - Prisma Studio: `cd backend && npx prisma studio` (opens GUI on port 5555)
 - Ngrok dashboard: http://localhost:4040 (when ngrok container running)
 - Reset database: `docker compose down -v` (removes volumes)
+
+## Commit Messages (Angular Conventional Commits)
+
+When generating commit messages, always follow Angular-style Conventional Commits.
+
+### Header format
+
+`<emoji> <type>(<scope>): <subject>`
+
+- `type` is required and must be one of:
+  - `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`, `init`
+- `scope` is optional but preferred (examples: `backend`, `app`, `auth`, `prisma`, `cases`, `docker`)
+- `subject` is required and must:
+  - be imperative ("add", "fix", "refactor")
+  - start with lowercase
+  - have no trailing period
+  - be concise (ideally <= 72 chars)
+
+### Required emoji mapping
+
+- `🎉 init:`
+- `✨ feat:`
+- `🐞 fix:`
+- `📃 docs:`
+- `🌈 style:`
+- `🦄 refactor:`
+- `🎈 perf:`
+- `🧪 test:`
+- `🔧 build:`
+- `🐎 ci:`
+- `🐳 chore:`
+- `↩ revert:`
+
+Always use the exact emoji that matches the commit `type`.
+
+### Body and footer rules
+
+- Use a body only when context is needed (what and why, not how)
+- Wrap body lines around 72 characters
+- For breaking changes, add footer:
+  - `BREAKING CHANGE: <description>`
+- For issue references, use footers such as:
+  - `Closes #123`
+  - `Refs #456`
+
+### Output constraints for Copilot
+
+- Return only the commit message text (no markdown, no quotes, no explanations)
+- Prefer one logical change per commit message
+- Avoid generic subjects like "update code" or "fix stuff"
+- Always include the emoji prefix before the type
+
+### Examples
+
+- `✨ feat(auth): add refresh token rotation`
+- `🐞 fix(cases): handle empty customer name in table`
+- `🦄 refactor(prisma): centralize session cleanup logic`
+- `🐳 chore(docker): align compose service names`
+- `🎉 init(app): create expo bootstrap setup`

@@ -1,5 +1,5 @@
 import { APIResponse, PaginatedData, TypedQuery } from "@api-types/general.types";
-import { Location } from "@prisma";
+import { Location } from "@prisma/client";
 import * as LocationService from "@services/location.service";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response } from "express";

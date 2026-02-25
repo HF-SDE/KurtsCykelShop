@@ -1,14 +1,9 @@
 import { AppError, EitherDataOrError } from "@api-types/error.types";
-import { APIResponse, Status } from "@api-types/general.types";
-import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma";
+import { PaginatedData } from "@api-types/general.types";
 import prisma from "@prisma-instance";
+import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 
-export interface PaginatedServiceOrders {
-  items: ServiceOrderWithRelations[];
-  total: number;
-  page: number;
-  hasMore: boolean;
-}
+export type PaginatedServiceOrders = PaginatedData<ServiceOrderWithRelations>;
 
 type ServiceOrderWithRelations = Prisma.ServiceOrderGetPayload<{
   include: {
@@ -30,7 +25,7 @@ interface GetAllServiceOrdersPaginatedParams {
 /**
  * Get paginated service orders with optional filters
  * @param {GetAllServiceOrdersPaginatedParams} params - The filter and pagination parameters
- * @returns {Promise<EitherDataOrError<PaginatedServiceOrders, AppError>>} Tuple of [data, error] for clean destructuring
+ * @returns {Promise<EitherDataOrError<PaginatedData, AppError>>} Tuple of [data, error] for clean destructuring
  */
 export async function GetAllServiceOrdersPaginated(
   params: GetAllServiceOrdersPaginatedParams,
@@ -127,7 +122,7 @@ export async function GetAllServiceOrdersPaginated(
 
     return [
       {
-        items: serviceOrders,
+        data: serviceOrders,
         total,
         page,
         hasMore: skip + serviceOrders.length < total,

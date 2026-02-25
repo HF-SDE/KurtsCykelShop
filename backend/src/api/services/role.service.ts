@@ -1,6 +1,6 @@
 import { APIResponse, Status } from "@api-types/general.types";
-import { Prisma, Role } from "@prisma";
 import prisma from "@prisma-instance";
+import { Prisma, Role } from "@prisma/client";
 import { CreateRoleSchema, GetRoleSchema, UpdateRoleSchema } from "@schemas/role.schemas";
 import { z } from "zod";
 

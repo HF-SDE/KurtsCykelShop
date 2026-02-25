@@ -16,7 +16,7 @@
     "rootDir": "../",
     "baseUrl": ".",
     "paths": {
-      "@prisma": ["src/generated/prisma/client"],
+      "@prisma/*": ["src/generated/prisma/*"],
       "@schemas/*": ["../schemas/*"],
       "@routes/*": ["src/api/routes/*"],
       "@controllers/*": ["src/api/controllers/*"],

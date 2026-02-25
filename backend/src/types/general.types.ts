@@ -52,7 +52,7 @@ interface APIResponseWithError extends BaseAPIResponse {
   error: AppError; // General application error
 }
 
-export type APIResponse<T> =
+export type APIResponse<T = null | undefined> =
   | APIResponseWithData<T>
   | APIResponseWithValidationErrors
   | APIResponseWithError

@@ -1,6 +1,6 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
-import { Location } from "@prisma";
 import prisma from "@prisma-instance";
+import { Location } from "@prisma/client";
 
 export async function getAll(): Promise<APIResponse<Location[]>> {
   const locations = await prisma.location.findMany({ orderBy: { name: "asc" } });
