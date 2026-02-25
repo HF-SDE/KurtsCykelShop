@@ -17,7 +17,7 @@ export function useRole() {
 }
 
 export default function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData, isLoading] = useData<Role>("/roles");
+  const [data, setData, isLoading] = useData<Role>("/manage/role");
 
   return <RoleContext.Provider value={{data, setData, isLoading}}>{children}</RoleContext.Provider>;
 }
