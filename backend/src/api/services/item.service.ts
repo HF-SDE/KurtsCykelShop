@@ -1,6 +1,8 @@
+import { AppError, EitherDataOrError } from "@api-types/error.types";
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
+import { ItemWhereInput } from "@prisma/models";
 import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
@@ -13,8 +15,23 @@ export async function getAll(): Promise<APIResponse<Item[]>> {
   };
 }
 
-export async function getAllPaginated(page: number = 1, limit: number = 20): Promise<APIResponse<PaginatedData<Item>>> {
+export async function getAllPaginated(
+  page: number = 1,
+  limit: number = 20,
+  search: string | undefined = undefined,
+): Promise<APIResponse<PaginatedData<Item>>> {
   const skip = (page - 1) * limit;
+  const normalizedSearch = search?.trim();
+  const where: ItemWhereInput | undefined = normalizedSearch
+    ? {
+        OR: [
+          { name: { contains: normalizedSearch, mode: "insensitive" } },
+          { description: { contains: normalizedSearch, mode: "insensitive" } },
+          { sku: { contains: normalizedSearch, mode: "insensitive" } },
+          { barcodes: { some: { code: { contains: normalizedSearch, mode: "insensitive" } } } },
+        ],
+      }
+    : undefined;
 
   const [items, total] = await prisma.$transaction([
     prisma.item.findMany({
@@ -22,8 +39,9 @@ export async function getAllPaginated(page: number = 1, limit: number = 20): Pro
       take: limit,
       orderBy: { name: "asc" },
       include: { barcodes: { select: { code: true } } },
+      where,
     }),
-    prisma.item.count(),
+    prisma.item.count({ where }),
   ]);
 
   const mappedItems = items.map((item) => ({
@@ -110,4 +128,76 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
     message: "Item updated successfully",
     data: mappedItem,
   };
+}
+
+export async function getById({ id }: { id: string }): Promise<EitherDataOrError<Item, AppError>> {
+  try {
+    const item = await prisma.item.findUnique({
+      where: { id },
+      include: { barcodes: { select: { code: true } } },
+    });
+
+    if (!item) {
+      return [
+        null,
+        {
+          code: Status.NotFound,
+          message: "Item not found",
+        },
+      ];
+    }
+
+    const mappedItem = {
+      ...item,
+      barcodes: item.barcodes.map((b) => b.code),
+    };
+
+    return [mappedItem, null];
+  } catch (error) {
+    console.error("Error fetching item by ID:", error);
+    return [
+      null,
+      {
+        code: Status.Failed,
+        message: "Failed to fetch item by ID",
+        details: error instanceof Error ? error.message : String(error),
+      },
+    ];
+  }
+}
+
+export async function getByBarcode(barcode: string): Promise<EitherDataOrError<Item, AppError>> {
+  try {
+    const item = await prisma.item.findFirst({
+      where: { barcodes: { some: { code: barcode } } },
+      include: { barcodes: { select: { code: true } } },
+    });
+
+    if (!item) {
+      return [
+        null,
+        {
+          code: Status.NotFound,
+          message: "Item not found for the given barcode",
+        },
+      ];
+    }
+
+    const mappedItem = {
+      ...item,
+      barcodes: item.barcodes.map((b) => b.code),
+    };
+
+    return [mappedItem, null];
+  } catch (error) {
+    console.error("Error fetching item by barcode:", error);
+    return [
+      null,
+      {
+        code: Status.Failed,
+        message: "Failed to fetch item by barcode",
+        details: error instanceof Error ? error.message : String(error),
+      },
+    ];
+  }
 }
