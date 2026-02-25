@@ -1,5 +1,5 @@
 import { APIResponse, Status, TypedQuery } from "@api-types/general.types";
-import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma";
+import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response, response } from "express";
 import z from "zod";

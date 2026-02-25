@@ -1,6 +1,6 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
-import { Vendor } from "@prisma";
 import prisma from "@prisma-instance";
+import { Vendor } from "@prisma/client";
 
 export async function getAll(): Promise<APIResponse<Vendor[]>> {
   const vendors = await prisma.vendor.findMany({ orderBy: { name: "asc" } });

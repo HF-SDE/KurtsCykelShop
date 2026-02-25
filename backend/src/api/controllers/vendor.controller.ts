@@ -1,5 +1,5 @@
 import { APIResponse, PaginatedData, TypedQuery } from "@api-types/general.types";
-import { Vendor } from "@prisma";
+import { Vendor } from "@prisma/client";
 import * as VendorService from "@services/vendor.service";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response } from "express";

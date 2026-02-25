@@ -1,7 +1,7 @@
 import { AppError, EitherDataOrError } from "@api-types/error.types";
 import { APIResponse, Status } from "@api-types/general.types";
-import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma";
 import prisma from "@prisma-instance";
+import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 
 export interface PaginatedServiceOrders {
   items: ServiceOrderWithRelations[];

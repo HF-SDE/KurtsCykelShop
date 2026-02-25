@@ -9,8 +9,8 @@ import {
 } from "@api-types/auth.types";
 import { APIResponse, Status } from "@api-types/general.types";
 import config from "@config";
-import { Session } from "@prisma";
 import prisma from "@prisma-instance";
+import { Session } from "@prisma/client";
 import { LoginSchema, TokenSchema } from "@schemas/auth.schemas";
 import { Mutex } from "async-mutex";
 import jwt from "jsonwebtoken";

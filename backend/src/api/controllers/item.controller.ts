@@ -1,5 +1,5 @@
 import { APIResponse, PaginatedData, TypedQuery } from "@api-types/general.types";
-import { Item } from "@prisma";
+import { Item } from "@prisma/client/client";
 import { EditItemType } from "@schemas/item.schemas";
 import * as ItemService from "@services/item.service";
 import { getHttpStatusCode } from "@utils/Utils";

@@ -1,10 +1,8 @@
-import { capitalize } from "@utils/Utils";
-
 import { APIResponse, Status } from "@api-types/general.types";
-
-import { Prisma, PrismaClient } from "@prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/internal/prismaNamespace";
+import { capitalize } from "@utils/Utils";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -27,17 +25,15 @@ export async function errorResponse(
   model: prismaModels,
   operation: keyof typeof Status,
 ): Promise<APIResponse> {
-  if (err.name == "PrismaClientValidationError") {
+  if (err) {
     return {
       status: Status.MissingDetails,
       message: "Invalid input",
     };
   }
 
-  if (
-    err instanceof Prisma.PrismaClientKnownRequestError &&
-    operation in Status
-  ) {
+  if (err instanceof PrismaClientKnownRequestError && operation in Status) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     switch (err.code) {
       case "P2002":
         return {

@@ -1,6 +1,6 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
-import { Item } from "@prisma";
 import prisma from "@prisma-instance";
+import { Item } from "@prisma/client";
 import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {

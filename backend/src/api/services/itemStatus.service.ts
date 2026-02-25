@@ -1,6 +1,6 @@
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
-import { ItemStatus } from "@prisma";
 import prisma from "@prisma-instance";
+import { ItemStatus } from "@prisma/client";
 
 export async function getAll(): Promise<APIResponse<ItemStatus[]>> {
   const itemStatuses = await prisma.itemStatus.findMany();
