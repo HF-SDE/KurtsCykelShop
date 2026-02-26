@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { PasswordSchema } from "./password.schemas";
 
 export const ChangePasswordBase64Schema = z.object({
@@ -18,7 +19,4 @@ export const ChangePasswordSchema = z
 
 export const jwtTokenSchema = z
   .string()
-  .regex(
-    /^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/,
-    "Invalid JWT token format",
-  );
+  .regex(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/, "Invalid JWT token format");

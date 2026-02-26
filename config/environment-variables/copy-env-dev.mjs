@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 async function main() {
-  const cwd = process.cwd()+"/config/environment-variables";
+  const cwd = process.cwd() + "/config/environment-variables";
   const entries = await fs.readdir(cwd, { withFileTypes: true });
 
   const matches = entries

@@ -3,6 +3,7 @@ import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
 import { ItemWhereInput } from "@prisma/models";
+import { UuidSchema } from "@schemas/general.schemas";
 import {
   CreateItemSchema,
   CreateItemType,
@@ -157,35 +158,20 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
 }
 
 export async function deleteOne(id: string): Promise<APIResponse> {
-  const idValidation = z.uuid().safeParse(id);
-  if (!idValidation.success) {
-    return {
-      status: Status.InvalidDetails,
-      message: "Invalid item ID",
-    };
-  }
+  const idValidation = UuidSchema.safeParse(id);
+  if (!idValidation.success) return { status: Status.InvalidDetails, message: "Invalid item ID" };
 
   const existingItem = await prisma.item.findUnique({ where: { id: idValidation.data } });
-  if (!existingItem) {
-    return {
-      status: Status.NotFound,
-      message: "Item not found",
-    };
-  }
+  if (!existingItem) return { status: Status.NotFound, message: "Item not found" };
 
   try {
     await prisma.item.delete({ where: { id: idValidation.data } });
 
-    return {
-      status: Status.Deleted,
-      message: "Item deleted successfully",
-    };
+    return { status: Status.Deleted, message: "Item deleted successfully" };
   } catch (error) {
     console.error("Error deleting item:", error);
-    return {
-      status: Status.DeleteFailed,
-      message: "Failed to delete item",
-    };
+
+    return { status: Status.DeleteFailed, message: "Failed to delete item" };
   }
 }
 

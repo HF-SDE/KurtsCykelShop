@@ -15,13 +15,13 @@ export function isAllowed(permissions: string[]): ExpressFunction {
 
     if (!user || !user.id) {
       res.status(getHttpStatusCode(Status.Unauthorized)).json({
-        status: "Unauthorized",
-        message: "Unauthorized",
+        status: Status.Unauthorized,
+        message: Status.Unauthorized,
       });
       return;
     }
-    
-    const Permissions = await prisma.permission.findMany({
+
+    const Permissions = (await prisma.permission.findMany({
       where: {
         code: {
           in: permissions,
@@ -39,12 +39,12 @@ export function isAllowed(permissions: string[]): ExpressFunction {
       include: {
         roles: true,
       },
-    }) as PermissionGetPayload<{ include: { roles: true } }>[];
+    })) as PermissionGetPayload<{ include: { roles: true } }>[];
 
     if (Permissions.length) return next();
     res.status(getHttpStatusCode(Status.Forbidden)).json({
-      status: "Forbidden",
-      message: "Forbidden",
+      status: Status.Forbidden,
+      message: Status.Forbidden,
     });
 
     return;

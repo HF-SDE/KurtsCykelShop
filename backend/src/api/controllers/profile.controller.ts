@@ -1,10 +1,9 @@
-import { Request, Response } from 'express';
-
-import { APIResponse, Status } from '@api-types/general.types';
-import { ChangePasswordRequestBody } from '@api-types/profile.types';
-import { BasicUser } from '@api-types/user.types';
-import * as ProfileService from '@services/profile.service';
-import { getHttpStatusCode } from '@utils/Utils';
+import { APIResponse, Status } from "@api-types/general.types";
+import { ChangePasswordRequestBody } from "@api-types/profile.types";
+import { BasicUser } from "@api-types/user.types";
+import * as ProfileService from "@services/profile.service";
+import { getHttpStatusCode } from "@utils/Utils";
+import { Request, Response } from "express";
 
 // eslint-disable-next-line no-secrets/no-secrets
 /**
@@ -21,17 +20,13 @@ export async function changePassword(
   if (!req.user) {
     res.status(401).json({
       status: Status.MissingDetails,
-      message: 'User not authenticated',
+      message: "User not authenticated",
     });
     return;
   }
   const { id } = req.user;
 
-  const response = await ProfileService.changePassword(
-    id,
-    newPassword,
-    oldPassword,
-  );
+  const response = await ProfileService.changePassword(id, newPassword, oldPassword);
 
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
@@ -50,17 +45,17 @@ export async function getProfile(
   if (!authHeader) {
     res.status(400).json({
       status: Status.MissingDetails,
-      message: 'Missing authentication',
+      message: "Missing authentication",
     });
     return;
   }
 
   // Ensure it is a bearer token
-  const tokenParts = authHeader.split(' ');
-  if (tokenParts.length !== 2 || tokenParts[0].toLowerCase() !== 'bearer') {
+  const tokenParts = authHeader.split(" ");
+  if (tokenParts.length !== 2 || tokenParts[0].toLowerCase() !== "bearer") {
     res.status(400).json({
       status: Status.MissingDetails,
-      message: 'Missing authentication',
+      message: "Missing authentication",
     });
     return;
   }

@@ -77,7 +77,7 @@ const permissions: PermissionSeed[] = [
     description: "Update existing roles",
   },
   {
-    code: "storage:view",
+    code: "storage:item:view",
     group: "Storage",
     description: "View storage",
   },
@@ -172,6 +172,11 @@ const permissions: PermissionSeed[] = [
     description: "Update case",
   },
   {
+    code: "case:update:items",
+    group: "Case",
+    description: "Update case",
+  },
+  {
     code: "case:delete",
     group: "Case",
     description: "Delete case",
@@ -186,18 +191,18 @@ const permissions: PermissionSeed[] = [
 const roles = [
   {
     name: "Admin",
-    description: "Full access",
+    description: "Full access - Han er ham ham - Forstår du det? - Ja, han er ham",
     permissionCodes: permissions.map((permission) => permission.code),
   },
   {
     name: "Kurt",
     description: "Han er ham",
-    permissionCodes: ["storage:view", "storage:create:item"],
+    permissionCodes: permissions.map((permission) => permission.code),
   },
   {
     name: "Medarbejder",
     description: "Almindelig medarbejder",
-    permissionCodes: ["storage:view"],
+    permissionCodes: ["storage:item:view"],
   },
   {
     name: "BundenAfFødekæden",
