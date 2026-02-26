@@ -8,15 +8,15 @@ import { Role } from "@/types/users/Role";
 import { FoxLoader } from "@components/fox";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
-import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@components/ui/button";
+import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
 import { Checkbox, CheckboxIcon, CheckboxIndicator } from "@components/ui/checkbox";
 import { Heading } from "@components/ui/heading";
-import { CheckIcon } from "@components/ui/icon";
+import { CheckIcon, Icon } from "@components/ui/icon";
 import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ListFilter, Plus, Save } from "lucide-react-native";
+import { ListFilter, Save } from "lucide-react-native";
 
 import { useRole } from "../ctx";
 
@@ -98,7 +98,6 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
       const permissionIds = Object.entries(selectedPermissions)
         .filter(([, isChecked]) => isChecked)
         .map(([permissionId]) => permissionId);
-      console.log("Selected permission IDs:", permissionIds);
 
       await apiClient.put(`/manage/role/${role.id}`, {
         name: role.name,
@@ -160,9 +159,20 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Button variant="link" action="secondary" className="px-0" onPress={handleSave} isDisabled={isSaving}>
-              <ButtonIcon as={Save} size="xl" />
-            </Button>
+            <Pressable
+              onPress={handleSave}
+              disabled={isSaving}
+              hitSlop={8}
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: isSaving ? 0.5 : 1,
+              }}
+            >
+              <Icon as={Save} size="xl" className="text-typography-500" />
+            </Pressable>
           ),
         }}
       />
