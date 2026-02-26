@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView } from "react-native";
+import { Pressable, ScrollView } from "react-native";
 
 import apiClient from "@/utils/apiClient";
 
@@ -80,6 +80,13 @@ function EditRolePageContent() {
       (item) => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
     );
   }, [permissions, search]);
+
+  function togglePermission(id: string) {
+    setSelectedPermissions((prev) => ({
+      ...prev,
+      [id]: !(prev[id] ?? false),
+    }));
+  }
 
   const handleSave = useCallback(async () => {
     if (!role || isSaving) {
@@ -169,34 +176,30 @@ function EditRolePageContent() {
 
         <ScrollView keyboardShouldPersistTaps="handled">
           {filteredPermissions.map((item) => (
-            <Box
-              key={item.id}
-              className="border-outline-200 bg-background-0 flex-row items-center gap-2 border-b px-4 py-3"
-            >
-              <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
-                {item.name}
-              </Text>
-              <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
-                {item.description}
-              </Text>
+            <Pressable key={item.id} onPress={() => togglePermission(item.id)}>
+              <Box className="border-outline-200 bg-background-0 flex-row items-center gap-2 border-b px-4 py-3">
+                <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
+                  {item.name}
+                </Text>
+                <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
+                  {item.description}
+                </Text>
 
-              <Checkbox
-                size="md"
-                value={item.id}
-                className="items-center justify-center"
-                isChecked={selectedPermissions[item.id] ?? false}
-                onChange={(isChecked) =>
-                  setSelectedPermissions((prev) => ({
-                    ...prev,
-                    [item.id]: Boolean(isChecked),
-                  }))
-                }
-              >
-                <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
-                  <CheckboxIcon as={CheckIcon} />
-                </CheckboxIndicator>
-              </Checkbox>
-            </Box>
+                <Box pointerEvents="none">
+                  <Checkbox
+                    size="md"
+                    value={item.id}
+                    className="items-center justify-center"
+                    isChecked={selectedPermissions[item.id] ?? false}
+                    onChange={undefined}
+                  >
+                    <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
+                      <CheckboxIcon as={CheckIcon} />
+                    </CheckboxIndicator>
+                  </Checkbox>
+                </Box>
+              </Box>
+            </Pressable>
           ))}
         </ScrollView>
       </Box>
