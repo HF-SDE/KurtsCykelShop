@@ -12,6 +12,7 @@ type GetPermissionGroupsInput = z.input<typeof getPermissionGroupsSchema>;
 type CreateUserInput = z.input<typeof createUserSchema>;
 type UpdateUserInput = z.input<typeof updateUserSchema>;
 type PatchUserInput = z.input<typeof patchUserSchema>;
+type ResetUserPasswordInput = { password: string };
 
 /**
  * Returns users with roles and permissions.
@@ -96,6 +97,24 @@ export async function updateUser(
  */
 export async function patchUser(req: Request<{ id?: string }, unknown, PatchUserInput>, res: Response): Promise<void> {
   const response = await ManageService.patchUser(
+    typeof req.params.id === "string" ? req.params.id : undefined,
+    req.body,
+  );
+
+  res.status(getHttpStatusCode(response.status)).json(response).end();
+}
+
+/**
+ * Resets a user's password.
+ * @param {Request<{ id?: string }, unknown, ResetUserPasswordInput>} req - Express request.
+ * @param {Response} res - Express response.
+ * @returns {Promise<void>} No return value.
+ */
+export async function resetUserPassword(
+  req: Request<{ id?: string }, unknown, ResetUserPasswordInput>,
+  res: Response,
+): Promise<void> {
+  const response = await ManageService.resetUserPassword(
     typeof req.params.id === "string" ? req.params.id : undefined,
     req.body,
   );
