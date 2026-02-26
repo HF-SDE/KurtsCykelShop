@@ -98,7 +98,6 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
       const permissionIds = Object.entries(selectedPermissions)
         .filter(([, isChecked]) => isChecked)
         .map(([permissionId]) => permissionId);
-      console.log("Selected permission IDs:", permissionIds);
 
       await apiClient.put(`/manage/role/${role.id}`, {
         name: role.name,
