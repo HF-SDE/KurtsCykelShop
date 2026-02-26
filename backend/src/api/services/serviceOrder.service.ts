@@ -1,37 +1,51 @@
-import { AppError, EitherDataOrError } from "@api-types/error.types";
-import { PaginatedData } from "@api-types/general.types";
+import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
+import { PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
-
-export type PaginatedServiceOrders = PaginatedData<ServiceOrderWithRelations>;
-
-type ServiceOrderWithRelations = Prisma.ServiceOrderGetPayload<{
-  include: {
-    customer: true;
-    assignedTo: true;
-    servicePartsUsed: true;
-    serviceRepairs: true;
-  };
-}>;
+import { StringOrNumberSchema, UuidSchema } from "@schemas/general.schemas";
+import { ServiceOrderUpdateSchema, ServiceOrdersPaginatedSchema } from "@schemas/serviceOrder.schemas";
+import z from "zod";
 
 interface GetAllServiceOrdersPaginatedParams {
-  search?: string;
-  statuses?: Array<"completed" | "cancelled" | "in-progress" | "pending">;
-  timeRange?: "all" | "today" | "week" | "month" | "quarter" | "year";
-  page?: number;
-  limit?: number;
+  search?: any;
+  statuses?: any;
+  timeRange?: any;
+  page?: any;
+  limit?: any;
 }
 
-/**
- * Get paginated service orders with optional filters
- * @param {GetAllServiceOrdersPaginatedParams} params - The filter and pagination parameters
- * @returns {Promise<EitherDataOrError<PaginatedData, AppError>>} Tuple of [data, error] for clean destructuring
- */
+export interface ServiceOrdersData extends ServiceOrder {
+  customer: Customer;
+  assignedTo: Omit<User, "password"> | null;
+  assignedBy: Omit<User, "password"> | null;
+  servicePartsUsed: ServicePartsUsed[];
+  serviceRepairs: ServiceRepair[];
+}
+
 export async function GetAllServiceOrdersPaginated(
   params: GetAllServiceOrdersPaginatedParams,
-): Promise<EitherDataOrError<PaginatedServiceOrders>> {
+): Promise<EitherDataOrError<PaginatedData<ServiceOrdersData>, AppError | ValidationError>> {
+  // convert params.statuses to array
+  if (params.statuses && typeof params.statuses === "string") {
+    params.statuses = params.statuses.split(",").map((s: string) => s.trim());
+  }
+
+  const parseResult = ServiceOrdersPaginatedSchema.safeParse({ ...params });
+
+  if (!parseResult.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: parseResult.error.message,
+        fieldErrors: z.flattenError(parseResult.error).fieldErrors,
+      },
+    ];
+  }
+
+  const { search, statuses, timeRange, page = 1, limit = 20 } = parseResult.data;
+
   try {
-    const { search, statuses, timeRange, page = 1, limit = 20 } = params;
     const skip = (page - 1) * limit;
 
     // Build where query with filters
@@ -112,6 +126,7 @@ export async function GetAllServiceOrdersPaginated(
         orderBy: { createdAt: "desc" },
         include: {
           customer: true,
+          assignedBy: true,
           assignedTo: true,
           servicePartsUsed: true,
           serviceRepairs: true,
@@ -134,7 +149,7 @@ export async function GetAllServiceOrdersPaginated(
     return [
       null,
       {
-        code: "DATABASE_ERROR",
+        status: Status.Failed,
         message: "Failed to fetch paginated service orders",
         details: error,
       },
@@ -155,9 +170,19 @@ export interface GetServiceOrderByIdResponse extends ServiceOrder {
  * @param {string} id - The service order ID (UUID)
  * @returns {Promise<EitherDataOrError<GetServiceOrderByIdResponse, AppError>>} Tuple of [data, error] for clean destructuring
  */
-export async function GetServiceOrderById(
-  id: string,
-): Promise<EitherDataOrError<GetServiceOrderByIdResponse, AppError>> {
+export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<GetServiceOrderByIdResponse, AppError>> {
+  const parseResult = z.uuid().safeParse(id);
+
+  if (!parseResult.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid service order ID",
+      },
+    ];
+  }
+
   try {
     const serviceOrder = await prisma.serviceOrder.findUnique({
       where: { id },
@@ -174,7 +199,7 @@ export async function GetServiceOrderById(
       return [
         null,
         {
-          code: "NOT_FOUND",
+          status: Status.NotFound,
           message: "Service order not found",
         },
       ];
@@ -196,8 +221,201 @@ export async function GetServiceOrderById(
     return [
       null,
       {
-        code: "DATABASE_ERROR",
+        status: Status.Failed,
         message: "Failed to fetch service order from db- " + (error instanceof Error ? error.message : String(error)),
+        details: error,
+      },
+    ];
+  }
+}
+
+/**
+ * Update a service order
+ * @param {any} id - The service order ID (UUID)
+ * @param {any} data - The update data
+ * @param {any} userId - The ID of the user making the change
+ * @returns {Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>>} Tuple of [data, error] for clean destructuring
+ */
+export async function UpdateServiceOrder(
+  id: any,
+  data: any,
+  userId: any,
+): Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>> {
+  // Validate id
+  const idValidation = UuidSchema.safeParse(id);
+  if (!idValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid service order ID",
+      },
+    ];
+  }
+
+  // Validate userId
+  const userIdValidation = UuidSchema.safeParse(userId);
+  if (!userIdValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid user ID",
+      },
+    ];
+  }
+
+  // Validate update data
+  const validation = ServiceOrderUpdateSchema.safeParse(data);
+  if (!validation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid update data",
+        fieldErrors: z.flattenError(validation.error).fieldErrors,
+      },
+    ];
+  }
+
+  try {
+    // Check if the service order exists
+    const existingServiceOrder = await prisma.serviceOrder.findUnique({
+      where: { id: idValidation.data },
+    });
+
+    if (!existingServiceOrder) {
+      return [
+        null,
+        {
+          status: Status.NotFound,
+          message: "Service order not found",
+        },
+      ];
+    }
+
+    // Get the user making the change for logging
+    const changingUser = await prisma.user.findUnique({
+      where: { id: userIdValidation.data },
+      select: { firstName: true, lastName: true },
+    });
+
+    if (!changingUser) {
+      return [
+        null,
+        {
+          status: Status.NotFound,
+          message: "User not found",
+        },
+      ];
+    }
+
+    const changedByName = `${changingUser.firstName} ${changingUser.lastName}`;
+
+    // If assignedToId is provided, verify the user exists
+    if (validation.data.assignedToId !== undefined && validation.data.assignedToId !== null) {
+      const user = await prisma.user.findUnique({
+        where: { id: validation.data.assignedToId },
+      });
+
+      if (!user) {
+        return [
+          null,
+          {
+            status: Status.NotFound,
+            message: "Assigned user not found",
+          },
+        ];
+      }
+    }
+
+    // Prepare update data and log entries
+    const updateData: any = {};
+    const logEntries: Array<{
+      tableField: string;
+      oldValue: string | null;
+      newValue: string | null;
+    }> = [];
+
+    if (validation.data.description !== undefined) {
+      updateData.description = validation.data.description;
+      logEntries.push({
+        tableField: "description",
+        oldValue: existingServiceOrder.description,
+        newValue: validation.data.description,
+      });
+    }
+
+    if (validation.data.status !== undefined) {
+      updateData.status = validation.data.status;
+      logEntries.push({
+        tableField: "status",
+        oldValue: existingServiceOrder.status,
+        newValue: validation.data.status,
+      });
+
+      // Auto-set completedAt when status changes to completed
+      if (validation.data.status === "completed" && !existingServiceOrder.completedAt) {
+        updateData.completedAt = new Date();
+        logEntries.push({
+          tableField: "completedAt",
+          oldValue: null,
+          newValue: updateData.completedAt.toISOString(),
+        });
+      }
+    }
+
+    if (validation.data.estimatedCompletion !== undefined) {
+      updateData.estimatedCompletion = new Date(validation.data.estimatedCompletion);
+      logEntries.push({
+        tableField: "estimatedCompletion",
+        oldValue: existingServiceOrder.estimatedCompletion.toISOString(),
+        newValue: updateData.estimatedCompletion.toISOString(),
+      });
+    }
+
+    if (validation.data.assignedToId !== undefined) {
+      updateData.assignedToId = validation.data.assignedToId;
+      logEntries.push({
+        tableField: "assignedToId",
+        oldValue: existingServiceOrder.assignedToId ?? null,
+        newValue: validation.data.assignedToId ?? null,
+      });
+    }
+
+    // Update the service order and create logs in a transaction
+    const updatedServiceOrder = await prisma.$transaction(async (tx) => {
+      // Update the service order
+      const updated = await tx.serviceOrder.update({
+        where: { id: idValidation.data },
+        data: updateData,
+      });
+
+      // Create log entries for each changed field
+      if (logEntries.length > 0) {
+        await tx.serviceOrderLog.createMany({
+          data: logEntries.map((entry) => ({
+            serviceOrderId: idValidation.data,
+            tableField: entry.tableField,
+            oldValue: entry.oldValue,
+            newValue: entry.newValue,
+            changedById: userIdValidation.data,
+            changedByName,
+          })),
+        });
+      }
+
+      return updated;
+    });
+
+    return [updatedServiceOrder, null];
+  } catch (error) {
+    console.error("Error updating service order:", error);
+    return [
+      null,
+      {
+        status: Status.Failed,
+        message: "Failed to update service order",
         details: error,
       },
     ];

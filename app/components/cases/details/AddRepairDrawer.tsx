@@ -13,7 +13,10 @@ import { Input, InputField } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import { Toast, ToastDescription, ToastTitle, useToast } from "@/components/ui/toast";
 import { VStack } from "@/components/ui/vstack";
+
+import apiClient from "@/utils/apiClient";
 
 import { cn } from "tailwind-variants";
 
@@ -28,6 +31,7 @@ export function AddRepairDrawer({ isOpen, onClose, serviceOrderId, onRepairAdded
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (!isOpen) {
@@ -45,17 +49,34 @@ export function AddRepairDrawer({ isOpen, onClose, serviceOrderId, onRepairAdded
 
     setLoading(true);
     try {
-      // TODO: Call API to add repair
-      // await apiClient.post(`/service-orders/${serviceOrderId}/repairs`, { title, description });
-      console.log("Adding repair:", { serviceOrderId, title, description });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await apiClient.post(`/service-orders/${serviceOrderId}/repairs`, {
+        title: title.trim(),
+        description: description.trim(),
+      });
+      console.log("Repair added:", { title, description });
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="success" variant="solid">
+            <ToastTitle>Reparation tilføjet</ToastTitle>
+            <ToastDescription>Reparationen er blevet tilføjet til servicen</ToastDescription>
+          </Toast>
+        ),
+      });
 
       onRepairAdded();
       onClose();
     } catch (error) {
       console.error("Error adding repair:", error);
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>Fejl</ToastTitle>
+            <ToastDescription>Kunne ikke tilføje reparation</ToastDescription>
+          </Toast>
+        ),
+      });
     } finally {
       setLoading(false);
     }

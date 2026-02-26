@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { AddRepairDrawer } from "@/components/cases/AddRepairDrawer";
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +16,7 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
+import { AddRepairDrawer } from "@components/cases/details/AddRepairDrawer";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react-native";
 
 interface Repair {
