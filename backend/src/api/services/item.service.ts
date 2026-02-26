@@ -3,8 +3,14 @@ import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
 import { ItemWhereInput } from "@prisma/models";
-import { UuidSchema } from "@schemas/general.schemas";
-import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
+import {
+  CreateItemSchema,
+  CreateItemType,
+  EditItemSchema,
+  EditItemType,
+  ItemFiltersSchema,
+  ItemFiltersType,
+} from "@schemas/item.schemas";
 import z from "zod";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
@@ -26,8 +32,18 @@ export async function getAllPaginated(
   page: number = 1,
   limit: number = 20,
   search: string | undefined = undefined,
+  filters: ItemFiltersType = {},
 ): Promise<APIResponse<PaginatedData<Item>>> {
   const skip = (page - 1) * limit;
+
+  const { data: validatedFilters, error: filtersError } = ItemFiltersSchema.safeParse(filters);
+  if (filtersError) {
+    return {
+      status: Status.InvalidDetails,
+      message: filtersError.message,
+    };
+  }
+
   const normalizedSearch = search?.trim();
   const where: ItemWhereInput | undefined = normalizedSearch
     ? {
@@ -37,8 +53,11 @@ export async function getAllPaginated(
           { sku: { contains: normalizedSearch, mode: "insensitive" } },
           { barcodes: { some: { code: { contains: normalizedSearch, mode: "insensitive" } } } },
         ],
+        ...filters,
       }
-    : undefined;
+    : Object.keys(validatedFilters).length > 0
+      ? validatedFilters
+      : undefined;
 
   const [items, total] = await prisma.$transaction([
     prisma.item.findMany({
