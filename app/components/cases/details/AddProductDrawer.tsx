@@ -55,6 +55,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
 
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [isProcessingScan, setIsProcessingScan] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,6 +66,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
       setSelectedProduct(null);
       setQuantity("1");
       setScanned(false);
+      setIsProcessingScan(false);
     }
   }, [isOpen]);
 
@@ -101,23 +103,30 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
   };
 
   const handleBarcodeScanned = async ({ data }: { data: string }) => {
-    if (scanned) return;
+    // Prevent multiple scans while processing
+    if (scanned || isProcessingScan) return;
 
     setScanned(true);
+    setIsProcessingScan(true);
+
     try {
       const response = await apiClient.get(`/items/barcode?barcode=${encodeURIComponent(data)}`);
+      console.log("🚀 ~ handleBarcodeScanned ~ response:", response);
 
-      if (response.data.status === "success" && response.data.data) {
+      if (response.data.status === "Success" && response.data.data) {
         setSelectedProduct(response.data.data);
         setMode("search"); // Switch back to search mode to show selected product
+        // Keep scanned true so it doesn't scan again
       } else {
         Alert.alert("Fejl", "Produkt ikke fundet");
-        setScanned(false);
+        // Keep scanned true to prevent continuous scanning
       }
     } catch (error) {
       console.error("Error fetching product by barcode:", error);
       Alert.alert("Fejl", "Produkt ikke fundet for stregkoden");
-      setScanned(false);
+      // Keep scanned true to prevent continuous scanning
+    } finally {
+      setIsProcessingScan(false);
     }
   };
 
@@ -154,6 +163,8 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
     setSelectedProduct(null);
     setSearchQuery("");
     setQuantity("1");
+    setScanned(false);
+    setIsProcessingScan(false);
   };
 
   const renderSearchMode = () => (
@@ -255,7 +266,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
   const renderScanMode = () => {
     if (!permission) {
       return (
-        <VStack space="md" className="items-center justify-center py-8 ">
+        <VStack space="md" className="items-center justify-center py-8">
           <Spinner />
           <Text className="text-typography-500">Indlæser kamera...</Text>
         </VStack>
@@ -280,11 +291,24 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
           <CameraView
             style={{ flex: 1 }}
             barcodeScannerSettings={{ barcodeTypes: ["ean13", "code128"] }}
-            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+            onBarcodeScanned={scanned || isProcessingScan ? undefined : handleBarcodeScanned}
           />
         </VStack>
-        {scanned && (
-          <Button action="secondary" variant="outline" onPress={() => setScanned(false)}>
+        {isProcessingScan && (
+          <HStack space="sm" className="items-center justify-center">
+            <Spinner />
+            <Text className="text-typography-500">Behandler...</Text>
+          </HStack>
+        )}
+        {scanned && !isProcessingScan && (
+          <Button
+            action="secondary"
+            variant="outline"
+            onPress={() => {
+              setScanned(false);
+              setIsProcessingScan(false);
+            }}
+          >
             <ButtonText>Scan igen</ButtonText>
           </Button>
         )}
@@ -299,7 +323,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
         <ActionsheetDragIndicatorWrapper>
           <ActionsheetDragIndicator />
         </ActionsheetDragIndicatorWrapper>
-        <VStack space="lg" className="w-full p-6 ">
+        <VStack space="lg" className="w-full p-6">
           <Heading size="lg" className="text-typography-900">
             Tilføj produkt
           </Heading>
@@ -310,7 +334,11 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
               action={mode === "search" ? "primary" : "secondary"}
               variant={mode === "search" ? "solid" : "outline"}
               size="md"
-              onPress={() => setMode("search")}
+              onPress={() => {
+                setMode("search");
+                setScanned(false);
+                setIsProcessingScan(false);
+              }}
               className="flex-1"
             >
               <ButtonIcon as={Search} />
@@ -320,7 +348,11 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
               action={mode === "scan" ? "primary" : "secondary"}
               variant={mode === "scan" ? "solid" : "outline"}
               size="md"
-              onPress={() => setMode("scan")}
+              onPress={() => {
+                setMode("scan");
+                setScanned(false);
+                setIsProcessingScan(false);
+              }}
               className="flex-1"
             >
               <ButtonIcon as={ScanBarcode} />
