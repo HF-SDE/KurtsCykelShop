@@ -156,6 +156,39 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
   };
 }
 
+export async function deleteOne(id: string): Promise<APIResponse> {
+  const idValidation = z.uuid().safeParse(id);
+  if (!idValidation.success) {
+    return {
+      status: Status.InvalidDetails,
+      message: "Invalid item ID",
+    };
+  }
+
+  const existingItem = await prisma.item.findUnique({ where: { id: idValidation.data } });
+  if (!existingItem) {
+    return {
+      status: Status.NotFound,
+      message: "Item not found",
+    };
+  }
+
+  try {
+    await prisma.item.delete({ where: { id: idValidation.data } });
+
+    return {
+      status: Status.Deleted,
+      message: "Item deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    return {
+      status: Status.DeleteFailed,
+      message: "Failed to delete item",
+    };
+  }
+}
+
 export async function getById(id: any): Promise<EitherDataOrError<Item, AppError | ValidationError>> {
   // Validate id
   const idValidation = z.uuid().safeParse(id);

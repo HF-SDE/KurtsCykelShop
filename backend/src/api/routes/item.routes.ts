@@ -1,5 +1,6 @@
 import {
   createOne,
+  deleteOne,
   getAll,
   getAllPaginated,
   getByBarcode,
@@ -18,5 +19,6 @@ router.get("/:id", getById);
 router.get("/", getAll);
 router.post("/", createOne);
 router.put("/:id", updateOne);
+router.delete("/:id", deleteOne);
 
 export { router as itemRoutes };

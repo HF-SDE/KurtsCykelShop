@@ -85,10 +85,11 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
     try {
       const response = await apiClient.get(`/items/search?search=${encodeURIComponent(searchQuery)}`);
 
-      if (response.data.status === "success" && response.data.data) {
+      if (response.data.status === "Success" && response.data.data) {
         setSearchResults(response.data.data);
       } else {
         setSearchResults([]);
+        Alert.alert("Fejl", "Kunne ikke finde produkter");
       }
     } catch (error) {
       console.error("Error searching products:", error);
@@ -133,27 +134,26 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
 
     setLoading(true);
     try {
-      // TODO: Call API to add product
-      // await apiClient.post(`/service-orders/${serviceOrderId}/parts`, {
-      //   itemId: selectedProduct.id,
-      //   quantity: parseInt(quantity),
-      // });
-
-      console.log("Adding product:", {
-        serviceOrderId,
-        productId: selectedProduct.id,
+      await apiClient.post(`/service-orders/${serviceOrderId}/parts`, {
+        itemId: selectedProduct.id,
         quantity: parseInt(quantity),
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       onProductAdded();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding product:", error);
+      const errorMessage = error?.response?.data?.message || "Kunne ikke tilføje produktet";
+      Alert.alert("Fejl", errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedProduct(null);
+    setSearchQuery("");
+    setQuantity("1");
   };
 
   const renderSearchMode = () => (
@@ -161,54 +161,63 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
       space="lg"
       className={(inputFocused && !selectedProduct) || amountInputFocused ? "w-full pb-[320px]" : "w-full"}
     >
-      {/* Search Input */}
-      <VStack space="sm">
-        <Text className="text-typography-700 font-medium">Søg efter produkt</Text>
-        <Input variant="outline" size="md">
-          <InputField
-            placeholder="Navn eller SKU..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
-          />
-        </Input>
-      </VStack>
+      {!selectedProduct && (
+        <>
+          {/* Search Input */}
+          <VStack space="sm">
+            <Text className="text-typography-700 font-medium">Søg efter produkt</Text>
+            <Input variant="outline" size="md">
+              <InputField
+                placeholder="Navn eller SKU..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              />
+            </Input>
+          </VStack>
 
-      {/* Search Results */}
-      {searching && (
-        <HStack space="sm" className="items-center justify-center py-4">
-          <Spinner />
-          <Text className="text-typography-500">Søger...</Text>
-        </HStack>
-      )}
+          {/* Search Results */}
+          {searching && (
+            <HStack space="sm" className="items-center justify-center py-4">
+              <Spinner />
+              <Text className="text-typography-500">Søger...</Text>
+            </HStack>
+          )}
 
-      {!searching && searchResults.length > 0 && (
-        <VStack space="xs" className="max-h-48">
-          <Text className="text-typography-700 font-medium">Resultater</Text>
-          <ActionsheetScrollView>
-            {searchResults.map((product) => (
-              <ActionsheetItem key={product.id} onPress={() => handleSelectProduct(product)}>
-                <VStack space="xs" className="flex-1">
-                  <ActionsheetItemText className="text-typography-900 font-semibold">
-                    {product.name}
-                  </ActionsheetItemText>
-                  <HStack space="sm">
-                    <Text className="text-typography-500 text-sm">SKU: {product.sku}</Text>
-                    <Text className="text-typography-500 text-sm">•</Text>
-                    <Text className="text-typography-500 text-sm">{product.price / 100} kr</Text>
-                  </HStack>
-                </VStack>
-              </ActionsheetItem>
-            ))}
-          </ActionsheetScrollView>
-        </VStack>
+          {!searching && searchResults.length > 0 && (
+            <VStack space="xs" className="max-h-48">
+              <Text className="text-typography-700 font-medium">Resultater</Text>
+              <ActionsheetScrollView>
+                {searchResults.map((product) => (
+                  <ActionsheetItem key={product.id} onPress={() => handleSelectProduct(product)}>
+                    <VStack space="xs" className="flex-1">
+                      <ActionsheetItemText className="text-typography-900 font-semibold">
+                        {product.name}
+                      </ActionsheetItemText>
+                      <HStack space="sm">
+                        <Text className="text-typography-500 text-sm">SKU: {product.sku}</Text>
+                        <Text className="text-typography-500 text-sm">•</Text>
+                        <Text className="text-typography-500 text-sm">{product.price / 100} kr</Text>
+                      </HStack>
+                    </VStack>
+                  </ActionsheetItem>
+                ))}
+              </ActionsheetScrollView>
+            </VStack>
+          )}
+        </>
       )}
 
       {/* Selected Product */}
       {selectedProduct && (
         <VStack space="md" className="bg-background-50 border-outline-200 rounded-lg border p-4">
-          <Text className="text-typography-700 font-medium">Valgt produkt</Text>
+          <HStack className="items-center justify-between">
+            <Text className="text-typography-700 font-medium">Valgt produkt</Text>
+            <Button action="secondary" variant="link" size="sm" onPress={handleClearSelection}>
+              <ButtonIcon as={X} />
+            </Button>
+          </HStack>
           <VStack space="xs">
             <Text className="text-typography-900 font-semibold">{selectedProduct.name}</Text>
             <Text className="text-typography-500 text-sm">SKU: {selectedProduct.sku}</Text>

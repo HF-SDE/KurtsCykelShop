@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Keyboard, Pressable } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -33,17 +34,19 @@ function RootLayoutNav() {
 
   return (
     <SessionProvider>
-      <GluestackUIProvider mode={colorMode}>
-        <SafeAreaProvider>
-          <KeyboardProvider>
-            <ThemeProvider>
-              <Pressable className="flex-1" onPress={Keyboard.dismiss}>
-                <Slot />
-              </Pressable>
-            </ThemeProvider>
-          </KeyboardProvider>
-        </SafeAreaProvider>
-      </GluestackUIProvider>
+      <GestureHandlerRootView className="flex-1">
+        <GluestackUIProvider mode={colorMode}>
+          <SafeAreaProvider>
+            <KeyboardProvider>
+              <ThemeProvider>
+                <Pressable className="flex-1" onPress={Keyboard.dismiss}>
+                  <Slot />
+                </Pressable>
+              </ThemeProvider>
+            </KeyboardProvider>
+          </SafeAreaProvider>
+        </GluestackUIProvider>
+      </GestureHandlerRootView>
     </SessionProvider>
   );
 }

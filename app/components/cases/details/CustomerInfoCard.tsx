@@ -55,18 +55,14 @@ export function CustomerInfoCard({
   serviceOrderId,
   onDataUpdated,
 }: CustomerInfoCardProps) {
-  console.log("🚀 ~ CustomerInfoCard ~ customer:", customer);
   const toast = useToast();
   const [showDateDrawer, setShowDateDrawer] = useState(false);
 
-  const handleDateChange = async (newDate: string) => {
+  const handleDateChange = async (newDate: Date) => {
     try {
-      // TODO: Call API
-      // await apiClient.patch(`/service-orders/${serviceOrderId}`, {
-      //   estimatedCompletion: new Date(newDate).toISOString()
-      // });
-      console.log("Updating date:", newDate);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await apiClient.patch(`/service-orders/${serviceOrderId}`, {
+        estimatedCompletion: newDate.toISOString(),
+      });
 
       toast.show({
         placement: "top",
@@ -138,7 +134,7 @@ export function CustomerInfoCard({
       <DatePickerDrawer
         isOpen={showDateDrawer}
         onClose={() => setShowDateDrawer(false)}
-        currentDate={formatDate(estimatedCompletion)}
+        currentDate={estimatedCompletion}
         onDateChange={handleDateChange}
       />
     </>

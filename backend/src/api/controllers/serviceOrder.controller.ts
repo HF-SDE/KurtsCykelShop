@@ -1,5 +1,5 @@
 import { APIResponse, PaginatedData, Status, TypedQuery } from "@api-types/general.types";
-import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
+import { Customer, Item, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response, response } from "express";
 import { types } from "node:util";
@@ -60,17 +60,10 @@ export async function getAllServiceOrdersPaginated(
 interface GetServiceOrderByIdParams {
   id?: string;
 }
-interface GetServiceOrderByIdResponse extends ServiceOrder {
-  customer: Customer | null;
-  assignedTo: Omit<User, "password"> | null;
-  assignedBy: Omit<User, "password"> | null;
-  servicePartsUsed: ServicePartsUsed[];
-  serviceRepairs: ServiceRepair[];
-}
 
 export async function getServiceOrderById(
-  req: Request<GetServiceOrderByIdParams, APIResponse<GetServiceOrderByIdResponse>, {}, {}>,
-  res: Response<APIResponse<GetServiceOrderByIdResponse>>,
+  req: Request<GetServiceOrderByIdParams, APIResponse<ServiceOrderService.GetServiceOrderByIdResponse>, {}, {}>,
+  res: Response<APIResponse<ServiceOrderService.GetServiceOrderByIdResponse>>,
 ): Promise<void> {
   const id = req.params.id;
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Alert, FlatList } from "react-native";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Item } from "@/types/Inventory/Item";
@@ -18,7 +19,7 @@ import { Spinner } from "@components/ui/spinner";
 import { Text } from "@components/ui/text";
 import apiClient from "@utils/apiClient";
 import { useRouter } from "expo-router";
-import { ListFilter, Pencil, Plus, ScanText } from "lucide-react-native";
+import { ListFilter, Pencil, Plus, ScanText, Trash2 } from "lucide-react-native";
 
 import { useStorage } from "./ctx";
 
@@ -43,6 +44,7 @@ export default function Storage() {
     setSearch,
     filters,
     setFilters,
+    setData,
     isLoading,
     isRefreshing,
     isLoadingMore,
@@ -52,6 +54,7 @@ export default function Storage() {
 
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [isBarcodeDrawerOpen, setIsBarcodeDrawerOpen] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   async function handleBarcodeScanned(barcode: string) {
     setIsBarcodeDrawerOpen(false);
@@ -79,6 +82,32 @@ export default function Storage() {
       Alert.alert("Fejl", "Kunne ikke slå stregkoden op. Prøv igen.");
       setIsBarcodeDrawerOpen(true);
     }
+  }
+
+  async function handleDeleteItem(item: Item) {
+    if (deletingItemId) return;
+    setDeletingItemId(item.id);
+
+    try {
+      await apiClient.delete(`/items/${item.id}`);
+      setData((currentItems) => currentItems.filter((currentItem) => currentItem.id !== item.id));
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      Alert.alert("Fejl", "Kunne ikke slette varen. Prøv igen.");
+    } finally {
+      setDeletingItemId(null);
+    }
+  }
+
+  function confirmDeleteItem(item: Item) {
+    Alert.alert("Slet genstand", `Er du sikker på, at du vil slette "${item.name}"?`, [
+      { text: "Annuller", style: "cancel" },
+      {
+        text: "Slet",
+        style: "destructive",
+        onPress: () => handleDeleteItem(item),
+      },
+    ]);
   }
 
   return (
@@ -127,16 +156,33 @@ export default function Storage() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ListTableRow
-              item={item}
-              columns={itemColumns}
-              onPress={() => router.push(`/storage/${item.id}/edit-item`)}
-              action={
-                <Button variant="outline" action="secondary" className="!border-0">
-                  <ButtonIcon size="3xl" as={Pencil} />
+            <Swipeable
+              overshootRight={false}
+              rightThreshold={40}
+              renderRightActions={() => (
+                <Button
+                  action="negative"
+                  size="lg"
+                  className="h-full w-[110px] rounded-none"
+                  onPress={() => confirmDeleteItem(item)}
+                  isDisabled={deletingItemId === item.id}
+                >
+                  <ButtonIcon className="text-typography-700" as={Trash2} />
+                  <ButtonText className="text-typography-700">{deletingItemId === item.id ? "..." : "Slet"}</ButtonText>
                 </Button>
-              }
-            />
+              )}
+            >
+              <ListTableRow
+                item={item}
+                columns={itemColumns}
+                onPress={() => router.push(`/storage/${item.id}/edit-item`)}
+                action={
+                  <Button variant="outline" action="secondary" className="!border-0">
+                    <ButtonIcon size="3xl" as={Pencil} />
+                  </Button>
+                }
+              />
+            </Swipeable>
           )}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="always"

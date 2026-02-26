@@ -5,9 +5,9 @@ import { Icon } from "@/components/ui/icon";
 
 import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
+import { PermissionManager } from "@utils/permissionManager";
 import { Tabs } from "expo-router";
 import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
-import { PermissionManager } from "@utils/permissionManager";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,12 +23,10 @@ export default function TabLayout() {
     const stockPermission = await permissionMan.hasPageAccess("StockPage");
     setHasStockPermission(stockPermission);
 
-    const casePermission =
-      await permissionMan.hasPageAccess("CasePage");
+    const casePermission = await permissionMan.hasPageAccess("CasePage");
     setHasCasePermission(casePermission);
 
-    const managementPermission =
-      await permissionMan.hasPageAccess("ManagementPage");
+    const managementPermission = await permissionMan.hasPageAccess("ManagementPage");
     setHasManagementPermission(managementPermission);
 
     setIsLoading(false);

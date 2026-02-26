@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  KeyboardAvoidingView,
-} from "react-native-keyboard-controller";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";

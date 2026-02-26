@@ -2,22 +2,22 @@ module.exports = function (api) {
   api.cache(true);
 
   return {
-    presets: [['babel-preset-expo'], 'nativewind/babel'],
+    presets: [["babel-preset-expo"], "nativewind/babel"],
 
     plugins: [
       [
-        'module-resolver',
+        "module-resolver",
         {
-          root: ['./'],
+          root: ["./"],
 
           alias: {
-            '@': './',
-            '@schemas': '../schemas',
-            'tailwind.config': './tailwind.config.js',
+            "@": "./",
+            "@schemas": "../schemas",
+            "tailwind.config": "./tailwind.config.js",
           },
         },
       ],
-      'react-native-worklets/plugin',
+      "react-native-worklets/plugin",
     ],
   };
 };

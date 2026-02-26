@@ -46,7 +46,9 @@ export function EmployeeSelectField({ selectedEmployee, onEmployeeChange }: Empl
     <VStack space="sm">
       <Text className="text-typography-700 font-medium">Medarbejder</Text>
       <Button action="primary" variant="solid" onPress={() => setShowEmployeeSheet(true)}>
-        <ButtonText>{selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : "Tildel til medarbejder"}</ButtonText>
+        <ButtonText>
+          {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : "Tildel til medarbejder"}
+        </ButtonText>
       </Button>
 
       {/* Employee Selection Actionsheet */}
