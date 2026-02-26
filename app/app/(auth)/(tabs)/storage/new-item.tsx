@@ -10,7 +10,7 @@ import { Location } from "@/types/Inventory/Location";
 import { Unit } from "@/types/Inventory/Unit";
 import { Vendor } from "@/types/Inventory/Vendor";
 
-import { AddBarcode } from "@components/storage/add-barcode";
+import { AddBarcode } from "@components/storage/add-barcode-drawer";
 import { FormStateValue, StorageField, toFormState, toInputValue } from "@components/storage/form-fields";
 import { Badge, BadgeText } from "@components/ui/badge";
 import { Box } from "@components/ui/box";
@@ -21,29 +21,39 @@ import { useNavigation, usePreventRemove } from "@react-navigation/native";
 import { CreateItemSchema, CreateItemType } from "@schemas/item.schemas";
 import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { z } from "zod";
 
 import { useStorage } from "./ctx";
 
-const initialState: CreateItemType = {
-  name: "",
-  description: "",
-  quantity: 0,
-  isPublic: false,
-  price: 0,
-  purchasePrice: 0,
-  unitId: "",
-  minSellQuantity: 0,
-  vendorId: "",
-  statusId: "",
-  locationId: "",
-  barcodes: [],
-};
-
 const cachedDataOptions = { cacheTimeMs: 60 * 60 * 1000 };
 
 export default function NewItem() {
+  const { barcode = undefined } = useLocalSearchParams();
+
+  const initialState: CreateItemType = {
+    name: "",
+    description: "",
+    quantity: 0,
+    isPublic: false,
+    price: 0,
+    purchasePrice: 0,
+    unitId: "",
+    minSellQuantity: 0,
+    vendorId: "",
+    statusId: "",
+    locationId: "",
+    barcodes: barcode ? [barcode as string] : [],
+  };
+
+  return <NewRender initialState={initialState} />;
+}
+
+interface NewRenderProps {
+  initialState: CreateItemType;
+}
+
+export function NewRender({ initialState }: NewRenderProps) {
   const toast = useToast();
   const { setData } = useStorage();
 
@@ -70,8 +80,8 @@ export default function NewItem() {
 
   function confirmDiscard(onConfirm: () => void) {
     Alert.alert("Bekræft", "Er du sikker på, at du vil annullere? Alle ændringer vil gå tabt.", [
-      { text: "Nej", style: "cancel" },
-      { text: "Ja", style: "destructive", onPress: onConfirm },
+      { text: "Annuller", style: "cancel" },
+      { text: "Slet og gå tilbage", style: "destructive", onPress: onConfirm },
     ]);
   }
 

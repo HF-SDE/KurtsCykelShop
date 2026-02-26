@@ -11,7 +11,7 @@ import { Unit } from "@/types/Inventory/Unit";
 import { Vendor } from "@/types/Inventory/Vendor";
 
 import { FoxLoader } from "@components/fox";
-import { AddBarcode } from "@components/storage/add-barcode";
+import { AddBarcode } from "@components/storage/add-barcode-drawer";
 import { FormStateValue, StorageField, toFormState, toInputValue } from "@components/storage/form-fields";
 import { Badge, BadgeText } from "@components/ui/badge";
 import { Box } from "@components/ui/box";
@@ -80,8 +80,8 @@ function EditRender({ initialState }: EditItemProps) {
 
   function confirmDiscard(onConfirm: () => void) {
     Alert.alert("Bekræft", "Er du sikker på, at du vil annullere? Alle ændringer vil gå tabt.", [
-      { text: "Nej", style: "cancel" },
-      { text: "Ja", style: "destructive", onPress: onConfirm },
+      { text: "Annuller", style: "cancel" },
+      { text: "Slet og gå tilbage", style: "destructive", onPress: onConfirm },
     ]);
   }
 
