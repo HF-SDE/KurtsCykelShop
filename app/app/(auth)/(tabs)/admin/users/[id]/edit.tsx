@@ -31,6 +31,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Save } from "lucide-react-native";
 
 import { UserWithRoles, useUsers } from "../ctx";
+import { Heading } from "@components/ui/heading";
 
 export default function EditUserPage() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -265,52 +266,42 @@ function EditUserPageContent({ userId }: { userId: string }) {
           </Avatar>
         </Center>
 
-        <FormControl className="mb-3">
+        <FormControl className="flex gap-1 mb-4">
           <FormControlLabel>
             <FormControlLabelText>Brugernavn</FormControlLabelText>
           </FormControlLabel>
           <Input className="w-full">
             <InputField placeholder="Brugernavn" value={username} onChangeText={setUsername} />
           </Input>
-        </FormControl>
 
-        <FormControl className="mb-3">
           <FormControlLabel>
             <FormControlLabelText>Fornavn</FormControlLabelText>
           </FormControlLabel>
           <Input className="w-full">
             <InputField placeholder="Fornavn" value={firstName} onChangeText={setFirstName} />
           </Input>
-        </FormControl>
 
-        <FormControl className="mb-3">
           <FormControlLabel>
             <FormControlLabelText>Efternavn</FormControlLabelText>
           </FormControlLabel>
           <Input className="w-full">
             <InputField placeholder="Efternavn" value={lastName} onChangeText={setLastName} />
           </Input>
-        </FormControl>
 
-        <FormControl className="mb-3">
           <FormControlLabel>
             <FormControlLabelText>Email</FormControlLabelText>
           </FormControlLabel>
           <Input className="w-full">
             <InputField placeholder="Email" keyboardType="email-address" value={email} onChangeText={setEmail} />
           </Input>
-        </FormControl>
 
-        <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText>Initialer</FormControlLabelText>
           </FormControlLabel>
           <Input className="w-full">
             <InputField placeholder="Initialer" value={initials} onChangeText={setInitials} maxLength={3} />
           </Input>
-        </FormControl>
 
-        <FormControl className="mb-4">
           <FormControlLabel>
             <FormControlLabelText>Roller</FormControlLabelText>
           </FormControlLabel>
@@ -348,7 +339,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
-            <FormControlLabelText>Nulstil password</FormControlLabelText>
+            <Heading size="lg">Change Password</Heading>
             <ModalCloseButton>
               <Icon as={CloseIcon} />
             </ModalCloseButton>
