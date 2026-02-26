@@ -6,12 +6,17 @@ import { ItemWhereInput } from "@prisma/models";
 import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
-  const items = await prisma.item.findMany();
+  const items = await prisma.item.findMany({ include: { barcodes: { select: { code: true } } } });
+
+  const mappedItems = items.map((item) => ({
+    ...item,
+    barcodes: item.barcodes.map((b) => b.code),
+  }));
 
   return {
     status: Status.Success,
     message: "Items retrieved successfully",
-    data: items,
+    data: mappedItems,
   };
 }
 
