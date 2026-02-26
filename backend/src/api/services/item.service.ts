@@ -1,9 +1,11 @@
-import { AppError, EitherDataOrError } from "@api-types/error.types";
+import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
 import { APIResponse, PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Item } from "@prisma/client";
 import { ItemWhereInput } from "@prisma/models";
+import { UuidSchema } from "@schemas/general.schemas";
 import { CreateItemSchema, CreateItemType, EditItemSchema, EditItemType } from "@schemas/item.schemas";
+import z from "zod";
 
 export async function getAll(): Promise<APIResponse<Item[]>> {
   const items = await prisma.item.findMany();
@@ -130,10 +132,22 @@ export async function updateOne(id: string, data: Partial<EditItemType>): Promis
   };
 }
 
-export async function getById({ id }: { id: string }): Promise<EitherDataOrError<Item, AppError>> {
+export async function getById(id: any): Promise<EitherDataOrError<Item, AppError | ValidationError>> {
+  // Validate id
+  const idValidation = z.uuid().safeParse(id);
+  if (!idValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid item ID",
+      },
+    ];
+  }
+
   try {
     const item = await prisma.item.findUnique({
-      where: { id },
+      where: { id: idValidation.data },
       include: { barcodes: { select: { code: true } } },
     });
 
@@ -141,7 +155,7 @@ export async function getById({ id }: { id: string }): Promise<EitherDataOrError
       return [
         null,
         {
-          code: Status.NotFound,
+          status: Status.NotFound,
           message: "Item not found",
         },
       ];
@@ -158,18 +172,30 @@ export async function getById({ id }: { id: string }): Promise<EitherDataOrError
     return [
       null,
       {
-        code: Status.Failed,
+        status: Status.Failed,
         message: "Failed to fetch item by ID",
-        details: error instanceof Error ? error.message : String(error),
+        details: error,
       },
     ];
   }
 }
 
-export async function getByBarcode(barcode: string): Promise<EitherDataOrError<Item, AppError>> {
+export async function getByBarcode(barcode: any): Promise<EitherDataOrError<Item, AppError | ValidationError>> {
+  // Validate barcode
+  const barcodeValidation = z.string().min(1, "Barcode cannot be empty").safeParse(barcode);
+  if (!barcodeValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid barcode",
+      },
+    ];
+  }
+
   try {
     const item = await prisma.item.findFirst({
-      where: { barcodes: { some: { code: barcode } } },
+      where: { barcodes: { some: { code: barcodeValidation.data } } },
       include: { barcodes: { select: { code: true } } },
     });
 
@@ -177,7 +203,7 @@ export async function getByBarcode(barcode: string): Promise<EitherDataOrError<I
       return [
         null,
         {
-          code: Status.NotFound,
+          status: Status.NotFound,
           message: "Item not found for the given barcode",
         },
       ];
@@ -194,9 +220,55 @@ export async function getByBarcode(barcode: string): Promise<EitherDataOrError<I
     return [
       null,
       {
-        code: Status.Failed,
+        status: Status.Failed,
         message: "Failed to fetch item by barcode",
-        details: error instanceof Error ? error.message : String(error),
+        details: error,
+      },
+    ];
+  }
+}
+
+export async function getBySearchQuery(search: any): Promise<EitherDataOrError<Item[], AppError | ValidationError>> {
+  // Validate search query
+  const searchValidation = z.string().min(1, "Search query cannot be empty").safeParse(search);
+  if (!searchValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid search query",
+      },
+    ];
+  }
+
+  try {
+    const normalizedSearch = searchValidation.data.trim();
+    const items = await prisma.item.findMany({
+      where: {
+        OR: [
+          { name: { contains: normalizedSearch, mode: "insensitive" } },
+          { description: { contains: normalizedSearch, mode: "insensitive" } },
+          { sku: { contains: normalizedSearch, mode: "insensitive" } },
+          { barcodes: { some: { code: { contains: normalizedSearch, mode: "insensitive" } } } },
+        ],
+      },
+      include: { barcodes: { select: { code: true } } },
+    });
+
+    const mappedItems = items.map((item) => ({
+      ...item,
+      barcodes: item.barcodes.map((b) => b.code),
+    }));
+
+    return [mappedItems, null];
+  } catch (error) {
+    console.error("Error fetching items by search query:", error);
+    return [
+      null,
+      {
+        status: Status.Failed,
+        message: "Failed to fetch items by search query",
+        details: error,
       },
     ];
   }

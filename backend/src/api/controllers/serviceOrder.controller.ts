@@ -1,12 +1,14 @@
-import { APIResponse, Status, TypedQuery } from "@api-types/general.types";
+import { APIResponse, PaginatedData, Status, TypedQuery } from "@api-types/general.types";
 import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 import { getHttpStatusCode } from "@utils/Utils";
 import { Request, Response, response } from "express";
+import { types } from "node:util";
+import { T } from "node_modules/@faker-js/faker/dist/airline-Dz1uGqgJ";
 import z from "zod";
 import da from "zod/v4/locales/da.js";
 
 import * as ServiceOrderService from "../services/serviceOrder.service";
-import { PaginatedServiceOrders } from "../services/serviceOrder.service";
+import { ServiceOrdersData } from "../services/serviceOrder.service";
 
 interface PaginatedServiceOrdersQuery {
   page?: string;
@@ -23,77 +25,36 @@ interface PaginatedServiceOrdersQuery {
  * @returns {Promise<void>}
  */
 export async function getAllServiceOrdersPaginated(
-  req: Request<{}, APIResponse<PaginatedServiceOrders>, {}, TypedQuery<PaginatedServiceOrdersQuery>>,
-  res: Response<APIResponse<PaginatedServiceOrders>>,
+  req: Request<{}, APIResponse<PaginatedData<ServiceOrdersData>>, {}, TypedQuery<PaginatedServiceOrdersQuery>>,
+  res: Response<APIResponse<PaginatedData<ServiceOrdersData>>>,
 ): Promise<void> {
-  try {
-    const page = Math.max(1, parseInt(req.query.page || "1", 10));
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "20", 10)));
-    const search = req.query.search || undefined;
-    const timeRange = (req.query.timeRange as "all" | "today" | "week" | "month" | "quarter" | "year") || undefined;
+  const search = req.query.search;
+  const statuses = req.query.statuses;
+  const timeRange = req.query.timeRange;
+  const page = req.query.page;
+  const limit = req.query.limit;
 
-    // Parse statuses from comma-separated string or array
-    let statuses: ("completed" | "cancelled" | "in-progress" | "pending")[] | undefined;
-    if (req.query.statuses) {
-      const statusesParam = req.query.statuses;
-      if (Array.isArray(statusesParam)) {
-        statuses = statusesParam as ("completed" | "cancelled" | "in-progress" | "pending")[];
-      } else if (typeof statusesParam === "string") {
-        statuses = statusesParam.split(",") as ("completed" | "cancelled" | "in-progress" | "pending")[];
-      }
-    }
+  const [data, error] = await ServiceOrderService.GetAllServiceOrdersPaginated({
+    page,
+    limit,
+    search,
+    statuses,
+    timeRange,
+  });
 
-    const schema = z.object({
-      page: z.string().optional(),
-      limit: z.string().optional(),
-      search: z.string().optional(),
-      timeRange: z.enum(["all", "today", "week", "month", "quarter", "year"]).optional(),
-      statuses: z.string().optional(),
-    });
-
-    const parseResult = schema.safeParse(req.query);
-    if (!parseResult.success) {
-      res.status(getHttpStatusCode(Status.InvalidDetails)).json({
-        status: Status.InvalidDetails,
-        message: parseResult.error.message,
-        errors: {
-          code: "VALIDATION_ERROR",
-          message: parseResult.error.message,
-          fieldErrors: z.flattenError(parseResult.error).fieldErrors,
-        },
-      });
-      return;
-    }
-
-    const [data, error] = await ServiceOrderService.GetAllServiceOrdersPaginated({
-      page,
-      limit,
-      search,
-      statuses,
-      timeRange,
-    });
-
-    if (error) {
-      res.status(getHttpStatusCode(Status.Failed)).json({
-        status: Status.Failed,
-        message: "Failed to fetch paginated service orders.",
-      });
-      return;
-    }
-
-    res.status(getHttpStatusCode(Status.Success)).json({
-      status: Status.Success,
-      message: "Paginated service orders fetched successfully",
-      data,
-    });
-  } catch (error) {
-    console.error("Error fetching paginated service orders:", error);
+  if (error) {
     res.status(getHttpStatusCode(Status.Failed)).json({
-      status: Status.Failed,
-      message:
-        "Failed to fetch paginated service orders from db- " + (error instanceof Error ? error.message : String(error)),
+      status: error.status || Status.Failed,
+      message: error.message || "Failed to fetch paginated service orders",
     });
+    return;
   }
+
+  res.status(getHttpStatusCode(Status.Success)).json({
+    status: Status.Success,
+    message: "Paginated service orders fetched successfully",
+    data,
+  });
 }
 
 interface GetServiceOrderByIdParams {
@@ -111,48 +72,64 @@ export async function getServiceOrderById(
   req: Request<GetServiceOrderByIdParams, APIResponse<GetServiceOrderByIdResponse>, {}, {}>,
   res: Response<APIResponse<GetServiceOrderByIdResponse>>,
 ): Promise<void> {
-  try {
-    const id = req.params.id;
+  const id = req.params.id;
 
-    if (!id) {
-      res.status(getHttpStatusCode(Status.MissingDetails)).json({
-        status: Status.MissingDetails,
-        message: "Service order ID is required",
-      });
-      return;
-    }
+  // Get service order by id
+  const [data, error] = await ServiceOrderService.GetServiceOrderById(id);
 
-    // Get service order by id
-    const [data, error] = await ServiceOrderService.GetServiceOrderById(id);
-
-    if (error) {
-      if (error.code === "NOT_FOUND") {
-        res.status(getHttpStatusCode(Status.NotFound)).json({
-          status: Status.NotFound,
-          message: "Service order not found",
-        });
-      } else {
-        res.status(getHttpStatusCode(Status.Failed)).json({
-          status: Status.Failed,
-          message: "Failed to fetch service order by ID",
-        });
-      }
-      return;
-    }
-
-    res
-      .status(getHttpStatusCode(Status.Success))
-      .json({
-        status: Status.Success,
-        message: "Service order fetched successfully",
-        data,
-      })
-      .end();
-  } catch (error) {
-    console.error("Error fetching service order by ID:", error);
-    res.status(getHttpStatusCode(Status.Failed)).json({
-      status: Status.Failed,
-      message: "Failed to fetch service order by ID",
+  if (error) {
+    res.status(getHttpStatusCode(error.status || Status.Failed)).json({
+      status: error.status || Status.Failed,
+      message: error.message || "Failed to fetch service order by ID",
     });
+    return;
   }
+
+  res
+    .status(getHttpStatusCode(Status.Success))
+    .json({
+      status: Status.Success,
+      message: "Service order fetched successfully",
+      data,
+    })
+    .end();
+}
+
+interface UpdateServiceOrderParams {
+  id?: string;
+}
+
+/**
+ * Update a service order
+ * @param {Request} req - The request object with id in params and update data in body
+ * @param {Response} res - The response object
+ * @returns {Promise<void>}
+ */
+export async function updateServiceOrder(
+  req: Request<UpdateServiceOrderParams, APIResponse<ServiceOrder>, {}, {}>,
+  res: Response<APIResponse<ServiceOrder>>,
+): Promise<void> {
+  const id = req.params.id;
+  const updateData = req.body;
+  const userId = req.user?.id;
+
+  // Update service order
+  const [data, error] = await ServiceOrderService.UpdateServiceOrder(id, updateData, userId);
+
+  if (error) {
+    res.status(getHttpStatusCode(error.status || Status.Failed)).json({
+      status: error.status || Status.Failed,
+      message: error.message || "Failed to update service order",
+    });
+    return;
+  }
+
+  res
+    .status(getHttpStatusCode(Status.Success))
+    .json({
+      status: Status.Success,
+      message: "Service order updated successfully",
+      data,
+    })
+    .end();
 }
