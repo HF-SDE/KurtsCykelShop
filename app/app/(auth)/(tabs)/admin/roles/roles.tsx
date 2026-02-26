@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ListTableColumn } from "@/types/ui/listTable";
 import { Role } from "@/types/users/Role";
 
+import CheckPermission from "@components/check-permission";
 import { FoxLoader } from "@components/fox";
 import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
@@ -61,7 +62,12 @@ export default function RolesPage() {
             <ButtonIcon as={ListFilter} />
           </Button>
 
-          <NavigationButton variant="outline" className="h-full" href="/admin/roles/new">
+          <NavigationButton
+            variant="outline"
+            className="h-full"
+            href="/admin/roles/new"
+            requiredPermission={["administrator:role:create"]}
+          >
             <ButtonIcon as={Plus} />
           </NavigationButton>
         </ButtonGroup>
@@ -78,9 +84,11 @@ export default function RolesPage() {
               columns={roleColumns}
               onPress={() => router.push(`/admin/roles/${item.id}/edit`)}
               action={
-                <Button variant="outline" action="secondary" className="!border-0">
-                  <ButtonIcon size="3xl" as={Pencil} />
-                </Button>
+                <CheckPermission requiredPermission={["administrator:role:update"]}>
+                  <Button variant="outline" action="secondary" className="!border-0">
+                    <ButtonIcon size="3xl" as={Pencil} />
+                  </Button>
+                </CheckPermission>
               }
             />
           )}
