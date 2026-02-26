@@ -21,6 +21,7 @@ const roleColumns: ListTableColumn<Role>[] = [
   {
     key: "name",
     header: "Rolle",
+    flexClassName: "flex-[2]",
   },
   {
     key: "description",
