@@ -55,6 +55,13 @@ export async function updateOne(
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
 
+export async function deleteOne(req: Request<{ id: string }>, res: Response<APIResponse>) {
+  const { id } = req.params;
+  const response = await ItemService.deleteOne(id);
+
+  res.status(getHttpStatusCode(response.status)).json(response).end();
+}
+
 interface GetItemByIdParams {
   id?: string;
 }
