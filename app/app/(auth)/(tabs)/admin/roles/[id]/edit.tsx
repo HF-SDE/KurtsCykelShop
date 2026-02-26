@@ -16,7 +16,7 @@ import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ListFilter, Plus, Save } from "lucide-react-native";
+import { ListFilter, Save } from "lucide-react-native";
 
 import { useRole } from "../ctx";
 
