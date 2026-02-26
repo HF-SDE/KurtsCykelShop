@@ -27,7 +27,9 @@
       "@passport": ["lib/passport"],
       "@prisma-instance": ["lib/prisma"],
       "@middlewares/*": ["middleware/*"],
-      "@lib/*": ["lib/*"]
+      "@lib/*": ["lib/*"],
+      "@permissions": ["../../permissions.ts"],
+      "@permission-types": ["../../permissions.d.ts"]
     },
     "allowJs": true
   },

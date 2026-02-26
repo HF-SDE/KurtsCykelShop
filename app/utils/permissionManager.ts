@@ -1,12 +1,13 @@
 import { getStorageItemAsync } from "@hooks/useStorageState";
+import { type Permission } from "@permission-types";
 
 // utils/PermissionManager.ts
 export class PermissionManager {
-  private permissions: string[] = [];
+  private permissions: Permission[] = [];
   private pages: string[] = [];
 
   // Map of permissions to multiple pages
-  private permissionsToPages: { [key: string]: string[] } = {
+  private permissionsToPages: Record<Permission, string[]> = {
     "administrator:users:view": ["ManagementPage", "UsersPage"],
     "administrator:users:update": ["ManagementPage", "UsersPage"],
     "administrator:users:create": ["ManagementPage", "UsersPage"],
@@ -17,7 +18,7 @@ export class PermissionManager {
     "administrator:role:view": ["ManagementPage", "RolesPage"],
     "administrator:role:update": ["ManagementPage", "RolesPage"],
     "administrator:role:create": ["ManagementPage", "RolesPage"],
-    "storage:view": ["StockPage"],
+    "storage:item:view": ["StockPage"],
     "storage:item:create": ["StockPage"],
     "storage:item:update": ["StockPage"],
     "storage:item:delete": ["StockPage"],
@@ -29,6 +30,7 @@ export class PermissionManager {
     "storage:location:create": ["StockPage"],
     "storage:location:update": ["StockPage"],
     "storage:location:delete": ["StockPage"],
+    "storage:unit:view": ["StockPage"],
     "storage:unit:create": ["StockPage"],
     "storage:unit:update": ["StockPage"],
     "storage:unit:delete": ["StockPage"],
@@ -37,6 +39,7 @@ export class PermissionManager {
     "case:create": ["CasePage"],
     "case:delete": ["CasePage"],
     "case:assign": ["CasePage"],
+    "case:update:items": ["CasePage"],
   };
 
   // Helper function to decode the JWT token
@@ -47,7 +50,7 @@ export class PermissionManager {
   }
 
   // Async method to get permissions
-  private async getPermissions(): Promise<string[]> {
+  private async getPermissions(): Promise<Permission[]> {
     const token: string | null = await getStorageItemAsync("token");
 
     if (!token) {
@@ -56,7 +59,7 @@ export class PermissionManager {
 
     // Decode the token and extract permissions
     const decoded = this.decodeJwt(token);
-    return decoded.permissions || []; // Return permissions or an empty array if not found
+    return (decoded.permissions || []) as Permission[]; // Return permissions or an empty array if not found
   }
 
   // Initialize method to load permissions asynchronously
@@ -66,17 +69,17 @@ export class PermissionManager {
   }
 
   // Method to check if the user has a particular permission
-  hasPermission(permission: string): boolean {
+  hasPermission(permission: Permission): boolean {
     return this.permissions.includes(permission);
   }
 
   // Method to check if the user has at least one of the permissions from a list
-  hasAnyPermission(permissions: string[]): boolean {
+  hasAnyPermission(permissions: readonly Permission[]): boolean {
     return permissions.some((permission) => this.permissions.includes(permission));
   }
 
   // Method to check if the user has all of the permissions from a list
-  hasAllPermissions(permissions: string[]): boolean {
+  hasAllPermissions(permissions: readonly Permission[]): boolean {
     return permissions.every((permission) => this.permissions.includes(permission));
   }
 
@@ -89,7 +92,7 @@ export class PermissionManager {
   public getAccessiblePages(): string[] {
     // Loop through the permissions and collect all pages the user has access to
     let accessiblePages: string[] = ["ProfilePage"];
-    Object.keys(this.permissionsToPages).forEach((permission) => {
+    (Object.keys(this.permissionsToPages) as Permission[]).forEach((permission) => {
       if (this.permissions.includes(permission)) {
         // Add all pages associated with this permission
         accessiblePages = [...accessiblePages, ...this.permissionsToPages[permission]];

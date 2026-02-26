@@ -1,6 +1,7 @@
 import {
   createOne,
   deleteOne,
+  getAllPublic,
   getAll,
   getAllPaginated,
   getByBarcode,
@@ -13,6 +14,8 @@ import { isAllowed } from "@middlewares/isAllowed.mw";
 import { Router } from "express";
 
 const router = Router();
+
+router.get("/public", getAllPublic);
 
 router.use("/", verifyJWT);
 

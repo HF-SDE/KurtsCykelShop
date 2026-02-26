@@ -11,6 +11,12 @@ export async function getAll(req: Request, res: Response<APIResponse<Item[]>>) {
   res.status(getHttpStatusCode(response.status)).json(response).end();
 }
 
+export async function getAllPublic(req: Request, res: Response<APIResponse<Item[]>>) {
+  const response = await ItemService.getAll({ onlyPublic: true });
+
+  res.status(getHttpStatusCode(response.status)).json(response).end();
+}
+
 type GetAllPaginatedQuery = TypedQuery<
   {
     page?: string;

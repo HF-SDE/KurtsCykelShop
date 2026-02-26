@@ -5,6 +5,8 @@
   "main": "./src/index.ts",
   "scripts": {
     "build:tsc": "tsc --project ./tsconfig.build.json",
+    "permission-types:generate": "node ./scripts/generate-permissions-type.mjs",
+    "prisma:generate": "prisma generate && npm run permission-types:generate",
     "lint": "eslint src/**",
     "start": "TS_NODE_PROJECT='./dist' node -r tsconfig-paths/register ./dist",
     "dev": "nodemon -L",

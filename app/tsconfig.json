@@ -4,6 +4,8 @@
     "strict": true,
     "paths": {
       "@schemas/*": ["../schemas/*"],
+      "@permissions": ["../permissions.ts"],
+      "@permission-types": ["../permissions.d.ts"],
       "@hooks/*": ["./hooks/*"],
       "tailwind.config": ["./tailwind.config.js"],
       "@components/*": ["./components/*"],

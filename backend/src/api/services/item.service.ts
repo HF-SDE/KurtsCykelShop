@@ -14,8 +14,11 @@ import {
 } from "@schemas/item.schemas";
 import z from "zod";
 
-export async function getAll(): Promise<APIResponse<Item[]>> {
-  const items = await prisma.item.findMany({ include: { barcodes: { select: { code: true } } } });
+export async function getAll({ onlyPublic = false } = {}): Promise<APIResponse<Item[]>> {
+  const items = await prisma.item.findMany({
+    where: { isPublic: onlyPublic ? true : undefined },
+    include: { barcodes: { select: { code: true } } },
+  });
 
   const mappedItems = items.map((item) => ({
     ...item,
