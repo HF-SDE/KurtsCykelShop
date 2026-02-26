@@ -62,14 +62,11 @@ export default function RolesPage() {
             <ButtonIcon as={ListFilter} />
           </Button>
 
-          <NavigationButton
-            variant="outline"
-            className="h-full"
-            href="/admin/roles/new"
-            requiredPermission={["administrator:role:create"]}
-          >
-            <ButtonIcon as={Plus} />
-          </NavigationButton>
+          <CheckPermission requiredPermission={["administrator:role:create"]}>
+            <NavigationButton variant="outline" className="h-full" href="/admin/roles/new">
+              <ButtonIcon as={Plus} />
+            </NavigationButton>
+          </CheckPermission>
         </ButtonGroup>
       </Box>
 
