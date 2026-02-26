@@ -6,4 +6,8 @@ export interface Permission {
   createdAt: string;
   updatedAt: string;
   isAssigned?: boolean;
+  permissionGroup?: {
+    id: string;
+    name: string;
+  };
 }
