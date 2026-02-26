@@ -180,7 +180,6 @@ function EditRolePageContent() {
                 {item.description}
               </Text>
 
-              {/* <Box className="w-16 items-center"> */}
               <Checkbox
                 size="md"
                 value={item.id}
@@ -197,7 +196,6 @@ function EditRolePageContent() {
                   <CheckboxIcon as={CheckIcon} />
                 </CheckboxIndicator>
               </Checkbox>
-              {/* </Box> */}
             </Box>
           ))}
         </ScrollView>
