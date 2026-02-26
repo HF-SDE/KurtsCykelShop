@@ -16,7 +16,7 @@ import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/to
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Plus, Save } from "lucide-react-native";
 
-import { RolePermissionProvider, useRolePermissions } from "../ctx";
+import { useRole } from "../ctx";
 
 type RolePermission = {
   id: string;
@@ -32,20 +32,17 @@ export default function EditRolePage() {
     return null;
   }
 
-  return (
-    <RolePermissionProvider id={id}>
-      <EditRolePageContent />
-    </RolePermissionProvider>
-  );
+  return <EditRolePageContent roleId={id} />;
 }
 
-function EditRolePageContent() {
-  const { data: role } = useRolePermissions();
+function EditRolePageContent({ roleId }: { roleId: string }) {
+  const { data: roles, isLoading } = useRole();
   const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, boolean>>({});
-  const [description, setDescription] = useState(role?.description || "");
+  const role = useMemo(() => roles.find((item) => item.id === roleId), [roleId, roles]);
+  const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const hydratedRoleIdRef = useRef<string | null>(null);
 
@@ -135,7 +132,7 @@ function EditRolePageContent() {
     }
   }, [description, isSaving, role, router, selectedPermissions, toast]);
 
-  if (!role) {
+  if (isLoading || !role) {
     return <FoxLoader />;
   }
 
