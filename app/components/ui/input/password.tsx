@@ -22,11 +22,26 @@ interface IPasswordInputProps {
   HelperText?: string;
   className?: string;
 }
-export default function SecretInput({ isInvalid, inputValue, onChangeText, errorMessage, placeholder, HelperText, className }: IPasswordInputProps) {
+export default function SecretInput({
+  isInvalid,
+  inputValue,
+  onChangeText,
+  errorMessage,
+  placeholder,
+  HelperText,
+  className,
+}: IPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <FormControl className={className} isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
+    <FormControl
+      className={className}
+      isInvalid={isInvalid}
+      size="md"
+      isDisabled={false}
+      isReadOnly={false}
+      isRequired={false}
+    >
       <FormControlLabel>
         <FormControlLabelText>{placeholder || "Password"}</FormControlLabelText>
       </FormControlLabel>
@@ -46,7 +61,9 @@ export default function SecretInput({ isInvalid, inputValue, onChangeText, error
       </FormControlHelper>
       <FormControlError>
         <FormControlErrorIcon as={AlertCircleIcon} className="text-red-500" />
-        <FormControlErrorText isTruncated className="w-full text-wrap h-full text-red-500" >{errorMessage}</FormControlErrorText>
+        <FormControlErrorText isTruncated className="h-full w-full text-wrap text-red-500">
+          {errorMessage}
+        </FormControlErrorText>
       </FormControlError>
     </FormControl>
   );

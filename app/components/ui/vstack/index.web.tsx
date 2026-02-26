@@ -1,27 +1,28 @@
-import React from 'react';
-import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import React from "react";
 
-import { vstackStyle } from './styles';
+import type { VariantProps } from "@gluestack-ui/utils/nativewind-utils";
 
-type IVStackProps = React.ComponentProps<'div'> &
-  VariantProps<typeof vstackStyle>;
+import { vstackStyle } from "./styles";
 
-const VStack = React.forwardRef<React.ComponentRef<'div'>, IVStackProps>(
-  function VStack({ className, space, reversed, ...props }, ref) {
-    return (
-      <div
-        className={vstackStyle({
-          space,
-          reversed: reversed as boolean,
-          class: className,
-        })}
-        {...props}
-        ref={ref}
-      />
-    );
-  }
-);
+type IVStackProps = React.ComponentProps<"div"> & VariantProps<typeof vstackStyle>;
 
-VStack.displayName = 'VStack';
+const VStack = React.forwardRef<React.ComponentRef<"div">, IVStackProps>(function VStack(
+  { className, space, reversed, ...props },
+  ref,
+) {
+  return (
+    <div
+      className={vstackStyle({
+        space,
+        reversed: reversed as boolean,
+        class: className,
+      })}
+      {...props}
+      ref={ref}
+    />
+  );
+});
+
+VStack.displayName = "VStack";
 
 export { VStack };

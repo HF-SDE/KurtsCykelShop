@@ -21,7 +21,10 @@ export function useRole() {
 }
 
 export default function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData, isLoading] = useData<Role>("/manage/role?withPermissions=true&withAllPermissions=true&withPermissionGroups=true", []);
+  const [data, setData, isLoading] = useData<Role>(
+    "/manage/role?withPermissions=true&withAllPermissions=true&withPermissionGroups=true",
+    [],
+  );
 
   return <RoleContext.Provider value={{ data, setData, isLoading }}>{children}</RoleContext.Provider>;
 }

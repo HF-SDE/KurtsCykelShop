@@ -6,8 +6,7 @@ import type { TextProps, ViewProps } from "react-native";
 
 import { createCheckbox } from "@gluestack-ui/core/checkbox/creator";
 import { IPrimitiveIcon, PrimitiveIcon, UIIcon } from "@gluestack-ui/core/icon/creator";
-import { tva } from "@gluestack-ui/utils/nativewind-utils";
-import { useStyleContext, withStyleContext } from "@gluestack-ui/utils/nativewind-utils";
+import { tva, useStyleContext, withStyleContext } from "@gluestack-ui/utils/nativewind-utils";
 import type { VariantProps } from "@gluestack-ui/utils/nativewind-utils";
 import { cssInterop } from "nativewind";
 

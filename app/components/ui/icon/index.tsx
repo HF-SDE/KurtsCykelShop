@@ -1,15 +1,15 @@
 import React from "react";
 import { Path } from "react-native-svg";
 
-import { createIcon } from "@gluestack-ui/core/icon/creator";
-import { IPrimitiveIcon, PrimitiveIcon, Svg } from "@gluestack-ui/core/icon/creator";
-import { tva } from "@gluestack-ui/utils/nativewind-utils";
-import { VariantProps } from "@gluestack-ui/utils/nativewind-utils";
+import { IPrimitiveIcon, PrimitiveIcon, Svg, createIcon } from "@gluestack-ui/core/icon/creator";
+import { VariantProps, tva } from "@gluestack-ui/utils/nativewind-utils";
 import { cssInterop } from "nativewind";
 
 export const UIIcon = createIcon({
   Root: PrimitiveIcon,
-}) as React.ForwardRefExoticComponent<React.ComponentPropsWithoutRef<typeof PrimitiveIcon> & React.RefAttributes<React.ComponentRef<typeof Svg>>>;
+}) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof PrimitiveIcon> & React.RefAttributes<React.ComponentRef<typeof Svg>>
+>;
 
 const iconStyle = tva({
   base: "text-typography-950 fill-none pointer-events-none",
@@ -43,7 +43,10 @@ cssInterop(UIIcon, {
 
 type IIConProps = IPrimitiveIcon & VariantProps<typeof iconStyle> & React.ComponentPropsWithoutRef<typeof UIIcon>;
 
-const Icon = React.forwardRef<React.ComponentRef<typeof UIIcon>, IIConProps>(function Icon({ size = "md", className, ...props }, ref) {
+const Icon = React.forwardRef<React.ComponentRef<typeof UIIcon>, IIConProps>(function Icon(
+  { size = "md", className, ...props },
+  ref,
+) {
   if (typeof size === "number") {
     return <UIIcon ref={ref} {...props} className={iconStyle({ class: className })} size={size} />;
   } else if ((props.height !== undefined || props.width !== undefined) && size === undefined) {
@@ -60,10 +63,16 @@ const createIconUI = ({ ...props }: ParameterTypes) => {
   const UIIconCreateIcon = createIcon({
     Root: Svg,
     ...props,
-  }) as React.ForwardRefExoticComponent<React.ComponentPropsWithoutRef<typeof PrimitiveIcon> & React.RefAttributes<React.ComponentRef<typeof Svg>>>;
+  }) as React.ForwardRefExoticComponent<
+    React.ComponentPropsWithoutRef<typeof PrimitiveIcon> & React.RefAttributes<React.ComponentRef<typeof Svg>>
+  >;
 
   return React.forwardRef<React.ComponentRef<typeof Svg>>(function UIIcon(
-    { className, size, ...inComingProps }: VariantProps<typeof iconStyle> & React.ComponentPropsWithoutRef<typeof UIIconCreateIcon>,
+    {
+      className,
+      size,
+      ...inComingProps
+    }: VariantProps<typeof iconStyle> & React.ComponentPropsWithoutRef<typeof UIIconCreateIcon>,
     ref,
   ) {
     return <UIIconCreateIcon ref={ref} {...inComingProps} className={iconStyle({ size, class: className })} />;
@@ -355,7 +364,15 @@ ChevronsLeftIcon.displayName = "ChevronsLeftIcon";
 ChevronsRightIcon.displayName = "ChevronsRightIcon";
 ChevronsUpDownIcon.displayName = "ChevronsUpDownIcon";
 
-export { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ChevronsUpDownIcon };
+export {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+  ChevronsUpDownIcon,
+};
 
 const CircleIcon = createIcon({
   Root: Svg,
@@ -503,7 +520,12 @@ const EyeIcon = createIcon({
   viewBox: "0 0 24 24",
   path: (
     <>
-      <Path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <Path
         d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
         strokeWidth="2"
@@ -1138,7 +1160,12 @@ const TrashIcon = createIcon({
   path: (
     <>
       <Path d="M3 6H21" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M19 6V20C19 21 18 22 17 22H7C6 22 5 21 5 20V6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d="M19 6V20C19 21 18 22 17 22H7C6 22 5 21 5 20V6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <Path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
@@ -1176,8 +1203,10 @@ const UserShieldIcon = createIcon({
   viewBox: "0 0 640 512",
   path: (
     <>
-      <Path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c1.8 0 3.5-.2 5.3-.5c-76.3-55.1-99.8-141-103.1-200.2c-16.1-4.8-33.1-7.3-50.7-7.3l-91.4 0zm308.8-78.3l-120 48C358 277.4 352 286.2 352 296c0 63.3 25.9 168.8 134.8 214.2c5.9 2.5 12.6 2.5 18.5 0C614.1 464.8 640 359.3 640 296c0-9.8-6-18.6-15.1-22.3l-120-48c-5.7-2.3-12.1-2.3-17.8 0zM591.4 312c-3.9 50.7-27.2 116.7-95.4 149.7l0-187.8L591.4 312z" 
-      fill="currentColor"/>
+      <Path
+        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c1.8 0 3.5-.2 5.3-.5c-76.3-55.1-99.8-141-103.1-200.2c-16.1-4.8-33.1-7.3-50.7-7.3l-91.4 0zm308.8-78.3l-120 48C358 277.4 352 286.2 352 296c0 63.3 25.9 168.8 134.8 214.2c5.9 2.5 12.6 2.5 18.5 0C614.1 464.8 640 359.3 640 296c0-9.8-6-18.6-15.1-22.3l-120-48c-5.7-2.3-12.1-2.3-17.8 0zM591.4 312c-3.9 50.7-27.2 116.7-95.4 149.7l0-187.8L591.4 312z"
+        fill="currentColor"
+      />
     </>
   ),
 });
