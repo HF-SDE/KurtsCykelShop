@@ -14,10 +14,7 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 const permissionGroups = [
-  { name: "Kurt" },
   { name: "Administrator" },
-  { name: "Medarbejder" },
-  { name: "BundenAfFødekæden" },
   { name: "Storage" },
 ] as const satisfies PermissionGroupCreateInput[];
 
