@@ -77,7 +77,7 @@ const permissions: PermissionSeed[] = [
     description: "Update existing roles",
   },
   {
-    code: "storage:view",
+    code: "storage:item:view",
     group: "Storage",
     description: "View storage",
   },
@@ -202,7 +202,7 @@ const roles = [
   {
     name: "Medarbejder",
     description: "Almindelig medarbejder",
-    permissionCodes: ["storage:view"],
+    permissionCodes: ["storage:item:view"],
   },
   {
     name: "BundenAfFødekæden",
