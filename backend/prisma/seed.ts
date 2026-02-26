@@ -16,6 +16,7 @@ const prisma = new PrismaClient({ adapter });
 const permissionGroups = [
   { name: "Administrator" },
   { name: "Storage" },
+  { name: "Case" },
 ] as const satisfies PermissionGroupCreateInput[];
 
 type PermissionSeed = {
@@ -36,7 +37,7 @@ const permissions: PermissionSeed[] = [
     description: "Update users information",
   },
   {
-    code: "administrator:user:create",
+    code: "administrator:users:create",
     group: "Administrator",
     description: "Create new users",
   },
@@ -76,20 +77,109 @@ const permissions: PermissionSeed[] = [
     description: "Update existing roles",
   },
   {
-    code: "administrator:dashboard:view",
-    group: "Administrator",
-    description: "View the admin dashboard",
+    code: "storage:view",
+    group: "Storage",
+    description: "View storage",
   },
   {
-    code: "administrator:dashboard:login",
-    group: "Administrator",
-    description: "Login to the admin dashboard",
-  },
-  { code: "storage:view", group: "Storage", description: "View storage" },
-  {
-    code: "storage:create:item",
+    code: "storage:item:create",
     group: "Storage",
     description: "Create storage item",
+  },
+  {
+    code: "storage:item:update",
+    group: "Storage",
+    description: "Update storage item",
+  },
+  {
+    code: "storage:item:delete",
+    group: "Storage",
+    description: "Delete storage item",
+  },
+  {
+    code: "storage:vendor:view",
+    group: "Storage",
+    description: "View storage vendor",
+  },
+  {
+    code: "storage:vendor:create",
+    group: "Storage",
+    description: "Create storage vendor",
+  },
+  {
+    code: "storage:vendor:update",
+    group: "Storage",
+    description: "Update storage vendor",
+  },
+  {
+    code: "storage:vendor:delete",
+    group: "Storage",
+    description: "Delete storage vendor",
+  },
+  {
+    code: "storage:location:view",
+    group: "Storage",
+    description: "View storage location",
+  },
+  {
+    code: "storage:location:create",
+    group: "Storage",
+    description: "Create storage location",
+  },
+  {
+    code: "storage:location:update",
+    group: "Storage",
+    description: "Update storage location",
+  },
+  {
+    code: "storage:location:delete",
+    group: "Storage",
+    description: "Delete storage location",
+  },
+  {
+    code: "storage:unit:view",
+    group: "Storage",
+    description: "View storage unit",
+  },
+  {
+    code: "storage:unit:create",
+    group: "Storage",
+    description: "Create storage unit",
+  },
+  {
+    code: "storage:unit:update",
+    group: "Storage",
+    description: "Update storage unit",
+  },
+  {
+    code: "storage:unit:delete",
+    group: "Storage",
+    description: "Delete storage unit",
+  },
+  {
+    code: "case:view",
+    group: "Case",
+    description: "View case",
+  },
+  {
+    code: "case:create",
+    group: "Case",
+    description: "Create case",
+  },
+  {
+    code: "case:update",
+    group: "Case",
+    description: "Update case",
+  },
+  {
+    code: "case:delete",
+    group: "Case",
+    description: "Delete case",
+  },
+  {
+    code: "case:assign",
+    group: "Case",
+    description: "Assign case to user",
   },
 ];
 
@@ -160,12 +250,10 @@ async function seedDatabase() {
 
   // Insert permission groups if not existing
   const existingGroups = await prisma.permissionGroup.count();
-  if (existingGroups === 0) {
-    await prisma.permissionGroup.createMany({
-      data: permissionGroups,
-      skipDuplicates: true,
-    });
-  }
+  await prisma.permissionGroup.createMany({
+    data: permissionGroups,
+    skipDuplicates: true,
+  });
 
   // Fetch Permission Group IDs
   const permissionGroupsMap = Object.fromEntries(
