@@ -20,6 +20,7 @@ export const GetRoleSchema = z.object({
   name: z.string().trim().optional(),
   withPermissions: z.coerce.boolean().default(false),
   withAllPermissions: z.coerce.boolean().default(false),
+  withPermissionGroups: z.coerce.boolean().default(false),
 });
 
 export const CreateRoleSchema = z.object({
