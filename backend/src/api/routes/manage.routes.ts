@@ -17,13 +17,9 @@ const router = Router();
 router.use("/", verifyJWT);
 
 router.get("/user", isAllowed(["administrator:users:view"]), getUsers);
-router.get(
-  ["/permission", "/permission/:id"],
-  isAllowed(["administrator:permission:view"]),
-  validateParams,
-  getPermissions,
-);
-router.get("/permissionGroups", isAllowed(["administrator:permission:view"]), validateParams, getPermissionGroups);
+router.get("/permission", isAllowed(["administrator:permission:view"]), getPermissions);
+router.get("/permission/:id", isAllowed(["administrator:permission:view"]), validateParams, getPermissions);
+router.get("/permissionGroups", isAllowed(["administrator:permission:view"]), getPermissionGroups);
 
 router.post("/user", isAllowed(["administrator:users:create"]), createUser);
 router.put("/user/:id", isAllowed(["administrator:users:update"]), updateUser);

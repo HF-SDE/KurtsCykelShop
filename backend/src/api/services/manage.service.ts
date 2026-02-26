@@ -70,7 +70,6 @@ export async function getPermissions(
   params: GetPermissionsInput,
 ): Promise<APIResponse<Permission[]>> {
   const validation = getPermissionSchema.safeParse({ ...query, ...params });
-
   if (!validation.success) {
     return {
       status: Status.InvalidDetails,
@@ -78,10 +77,17 @@ export async function getPermissions(
     };
   }
 
-  const where = validation.data as Prisma.PermissionWhereInput;
+  const { id, code, permissionGroupId } = { ...query, ...params };
 
   const data = await prisma.permission.findMany({
-    ...(Object.keys(where).length > 0 ? { where } : {}),
+    where: {
+      id,
+      code,
+      permissionGroupId,
+    },
+    include: {
+      permissionGroup: true,
+    },
   });
 
   return {
