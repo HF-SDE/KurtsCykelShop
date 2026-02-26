@@ -102,12 +102,11 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
       message: "withAllPermissions requires withPermissions to be true",
     };
   } else
-
-  return {
-    status: Status.Success,
-    message: "Roles retrieved successfully",
-    data: data,
-  };
+    return {
+      status: Status.Success,
+      message: "Roles retrieved successfully",
+      data: data,
+    };
 }
 
 /**
@@ -132,12 +131,18 @@ export async function getRole(id: string | undefined, query: GetRoleInput): Prom
     };
   }
 
-  const { withPermissions, withAllPermissions } = validation.data;
+  const { withPermissions, withAllPermissions, withPermissionGroups } = validation.data;
 
   const data = await prisma.role.findUnique({
     where: { id },
     include: {
-      permissions: withPermissions,
+      permissions: withPermissions
+        ? {
+            include: {
+              permissionGroup: withPermissionGroups,
+            },
+          }
+        : false,
     },
   });
 
@@ -151,7 +156,11 @@ export async function getRole(id: string | undefined, query: GetRoleInput): Prom
   const permissions: PermissionWithAssignment[] = [];
 
   if (withAllPermissions) {
-    const allPermissions = await prisma.permission.findMany();
+    const allPermissions = await prisma.permission.findMany({
+      include: {
+        permissionGroup: withPermissionGroups,
+      },
+    });
     permissions.push(
       ...allPermissions.map((permission) => ({
         ...permission,
