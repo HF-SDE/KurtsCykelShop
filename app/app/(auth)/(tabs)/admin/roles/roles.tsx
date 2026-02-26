@@ -37,8 +37,11 @@ export default function RolesPage() {
 
   const filteredRoles = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return data || [];
-    return data.filter((r) => r.name.toLowerCase().includes(q));
+    const roles = data ?? [];
+
+    return roles
+      .filter((r) => (q ? r.name.toLowerCase().includes(q) : true))
+      .sort((a, b) => a.name.localeCompare(b.name, "da", { sensitivity: "base" }));
   }, [data, search]);
 
   if (isLoading)
@@ -51,7 +54,7 @@ export default function RolesPage() {
   return (
     <Box className="bg-background-0 w-full flex-1 px-2">
       <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
-        <Searchbar className="h-full flex-1" placeholder="Search roles..." value={search} onChangeText={setSearch} />
+        <Searchbar className="h-full flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full">
@@ -92,7 +95,7 @@ export default function RolesPage() {
       ) : (
         <Box className="bg-background-0 flex-1 items-center justify-center">
           <Text size="lg" className="mb-4">
-            No roles found
+            Ingen roller fundet
           </Text>
         </Box>
       )}
