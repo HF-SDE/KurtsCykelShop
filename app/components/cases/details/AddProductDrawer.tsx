@@ -20,6 +20,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
+import apiClient from "@/utils/apiClient";
+
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { ScanBarcode, Search, X } from "lucide-react-native";
 
@@ -27,8 +29,10 @@ interface Product {
   id: string;
   sku: string;
   name: string;
+  description?: string | null;
   price: number;
   quantity: number;
+  barcodes?: string[];
 }
 
 interface AddProductDrawerProps {
@@ -79,27 +83,17 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
   const handleSearch = async () => {
     setSearching(true);
     try {
-      // TODO: Call API to search products
-      // const response = await apiClient.get(`/service-orders/items/search?query=${searchQuery}`);
-      // setSearchResults(response.data.data);
+      const response = await apiClient.get(`/items/search?search=${encodeURIComponent(searchQuery)}`);
 
-      // Mock data for now
-      console.log("Searching for:", searchQuery);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const mockProducts: Product[] = [
-        { id: "1", sku: "CK45729582902", name: "Cykelkæde", price: 15000, quantity: 10 },
-        { id: "2", sku: "35567299552", name: "Olie", price: 8000, quantity: 5 },
-        { id: "3", sku: "SP12345", name: 'Dæk 28"', price: 25000, quantity: 8 },
-      ].filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.sku.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-
-      setSearchResults(mockProducts);
+      if (response.data.status === "success" && response.data.data) {
+        setSearchResults(response.data.data);
+      } else {
+        setSearchResults([]);
+      }
     } catch (error) {
       console.error("Error searching products:", error);
+      setSearchResults([]);
+      Alert.alert("Fejl", "Kunne ikke søge efter produkter");
     } finally {
       setSearching(false);
     }
@@ -110,27 +104,18 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
 
     setScanned(true);
     try {
-      // TODO: Call API to get product by barcode
-      // const response = await apiClient.get(`/service-orders/items/barcode?barcode=${data}`);
-      // const product = response.data.data;
+      const response = await apiClient.get(`/items/barcode?barcode=${encodeURIComponent(data)}`);
 
-      console.log("Scanned barcode:", data);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Mock product data
-      const mockProduct: Product = {
-        id: "1",
-        sku: data,
-        name: "Cykelkæde",
-        price: 15000,
-        quantity: 10,
-      };
-
-      setSelectedProduct(mockProduct);
-      setMode("search"); // Switch back to search mode to show selected product
+      if (response.data.status === "success" && response.data.data) {
+        setSelectedProduct(response.data.data);
+        setMode("search"); // Switch back to search mode to show selected product
+      } else {
+        Alert.alert("Fejl", "Produkt ikke fundet");
+        setScanned(false);
+      }
     } catch (error) {
       console.error("Error fetching product by barcode:", error);
-      Alert.alert("Fejl", "Produkt ikke fundet");
+      Alert.alert("Fejl", "Produkt ikke fundet for stregkoden");
       setScanned(false);
     }
   };
@@ -285,7 +270,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
         <VStack className="overflow-hidden rounded-lg" style={{ height: 300 }}>
           <CameraView
             style={{ flex: 1 }}
-            barcodeScannerSettings={{ barcodeTypes: ["ean13"] }}
+            barcodeScannerSettings={{ barcodeTypes: ["ean13", "code128"] }}
             onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
           />
         </VStack>
