@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ScrollView } from "react-native";
 
 import apiClient from "@/utils/apiClient";
 
@@ -47,6 +47,7 @@ function EditRolePageContent() {
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, boolean>>({});
   const [description, setDescription] = useState(role?.description || "");
   const [isSaving, setIsSaving] = useState(false);
+  const hydratedRoleIdRef = useRef<string | null>(null);
 
   const permissions = useMemo<RolePermission[]>(
     () =>
@@ -60,12 +61,16 @@ function EditRolePageContent() {
   );
 
   useEffect(() => {
-    setSelectedPermissions(Object.fromEntries(permissions.map((item) => [item.id, item.isAssigned])));
-  }, [permissions]);
+    if (!role) {
+      return;
+    }
 
-  useEffect(() => {
-    setDescription(role?.description || "");
-  }, [role?.description]);
+    if (hydratedRoleIdRef.current !== role.id) {
+      setSelectedPermissions(Object.fromEntries(permissions.map((item) => [item.id, item.isAssigned])));
+      setDescription(role.description || "");
+      hydratedRoleIdRef.current = role.id;
+    }
+  }, [permissions, role]);
 
   const filteredPermissions = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -75,11 +80,6 @@ function EditRolePageContent() {
       (item) => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
     );
   }, [permissions, search]);
-
-  function togglePermission(id: string) {
-    console.log("Toggling permission with ID:", id);
-    setSelectedPermissions((prev) => ({ ...prev, [id]: !(prev[id] ?? false) }));
-  }
 
   const handleSave = useCallback(async () => {
     if (!role || isSaving) {
@@ -167,36 +167,40 @@ function EditRolePageContent() {
           <Text className="text-typography-800 flex-[1.5] text-base font-bold">Description</Text>
         </Box>
 
-        <FlatList
-          data={filteredPermissions}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => togglePermission(item.id)}>
-              <Box className="border-outline-200 bg-background-0 flex-row items-center gap-2 border-b px-4 py-3">
-                <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
-                  {item.name}
-                </Text>
-                <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
-                  {item.description}
-                </Text>
+        <ScrollView keyboardShouldPersistTaps="handled">
+          {filteredPermissions.map((item) => (
+            <Box
+              key={item.id}
+              className="border-outline-200 bg-background-0 flex-row items-center gap-2 border-b px-4 py-3"
+            >
+              <Text className="text-typography-800 flex-[1.3] text-xl" numberOfLines={2}>
+                {item.name}
+              </Text>
+              <Text className="text-typography-700 flex-[1.5] text-xl" numberOfLines={1}>
+                {item.description}
+              </Text>
 
-                {/* <Box className="w-16 items-center"> */}
-                <Checkbox
-                  size="md"
-                  value={item.id}
-                  className="items-center justify-center"
-                  isChecked={selectedPermissions[item.id] ?? false}
-                  // onChange={() => togglePermission(item.id)}
-                >
-                  <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
-                    <CheckboxIcon as={CheckIcon} />
-                  </CheckboxIndicator>
-                </Checkbox>
-                {/* </Box> */}
-              </Box>
-            </Pressable>
-          )}
-        />
+              {/* <Box className="w-16 items-center"> */}
+              <Checkbox
+                size="md"
+                value={item.id}
+                className="items-center justify-center"
+                isChecked={selectedPermissions[item.id] ?? false}
+                onChange={(isChecked) =>
+                  setSelectedPermissions((prev) => ({
+                    ...prev,
+                    [item.id]: Boolean(isChecked),
+                  }))
+                }
+              >
+                <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
+                  <CheckboxIcon as={CheckIcon} />
+                </CheckboxIndicator>
+              </Checkbox>
+              {/* </Box> */}
+            </Box>
+          ))}
+        </ScrollView>
       </Box>
     </Box>
   );
