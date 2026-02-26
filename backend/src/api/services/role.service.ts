@@ -24,7 +24,14 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
     };
   }
 
-  const { id, name, withPermissions, withAllPermissions } = validation.data;
+  const { id, name, withPermissions, withAllPermissions, withPermissionGroups } = validation.data;
+
+  if (withPermissionGroups && !withPermissions) {
+    return {
+      status: Status.InvalidDetails,
+      message: "withPermissionGroups requires withPermissions to be true",
+    };
+  }
 
   if (id || name) {
     const exist = await prisma.role.findUnique({
@@ -33,7 +40,11 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
         OR: [{ name: { contains: name, mode: "insensitive" } }],
       },
       include: {
-        permissions: withPermissions,
+        permissions: {
+          include: {
+            permissionGroup: withPermissionGroups,
+          },
+        },
       },
     });
 
@@ -54,14 +65,22 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
       },
     },
     include: {
-      permissions: withPermissions,
+      permissions: {
+        include: {
+          permissionGroup: withPermissionGroups,
+        },
+      },
     },
   });
 
   if (withPermissions && withAllPermissions) {
     const roles: RoleWithPermissions[] = [];
 
-    const allPermissions = await prisma.permission.findMany();
+    const allPermissions = await prisma.permission.findMany({
+      include: {
+        permissionGroup: withPermissionGroups,
+      },
+    });
     for (const role of data) {
       roles.push({
         ...role,
@@ -77,7 +96,12 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
       message: "Roles retrieved successfully",
       data: roles,
     };
-  }
+  } else if (withAllPermissions && !withPermissions) {
+    return {
+      status: Status.InvalidDetails,
+      message: "withAllPermissions requires withPermissions to be true",
+    };
+  } else
 
   return {
     status: Status.Success,
