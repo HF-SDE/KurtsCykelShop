@@ -7,34 +7,35 @@ import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedba
 
 import { Tabs } from "expo-router";
 import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
+import { PermissionManager } from "@utils/permissionManager";
 
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
 
-  const [hasOrderPermission, setHasOrderPermission] = useState(true);
-  const [hasReservationPermission, setHasReservationPermission] = useState(true);
+  const [hasStockPermission, setHasStockPermission] = useState(true);
+  const [hasCasePermission, setHasCasePermission] = useState(true);
   const [hasManagementPermission, setHasManagementPermission] = useState(true);
 
-  // const checkPermissions = async () => {
-  //   const permissionMan = new PermissionManager();
-  //   await permissionMan.init();
+  const checkPermissions = async () => {
+    const permissionMan = new PermissionManager();
+    await permissionMan.init();
 
-  //   const orderPermission = await permissionMan.hasPageAccess("OrderPage");
-  //   setHasOrderPermission(orderPermission);
+    const stockPermission = await permissionMan.hasPageAccess("StockPage");
+    setHasStockPermission(stockPermission);
 
-  //   const reservationPermission =
-  //     await permissionMan.hasPageAccess("ReservationPage");
-  //   setHasReservationPermission(reservationPermission);
+    const casePermission =
+      await permissionMan.hasPageAccess("CasePage");
+    setHasCasePermission(casePermission);
 
-  //   const managementPermission =
-  //     await permissionMan.hasPageAccess("ManagementPage");
-  //   setHasManagementPermission(managementPermission);
+    const managementPermission =
+      await permissionMan.hasPageAccess("ManagementPage");
+    setHasManagementPermission(managementPermission);
 
-  //   setIsLoading(false);
-  // };
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    // checkPermissions();
+    checkPermissions();
   }, []);
 
   return (
@@ -59,7 +60,7 @@ export default function TabLayout() {
         tabPress: () => triggerHapticFeedback(ImpactFeedbackStyle.Soft),
       }}
     >
-      {hasOrderPermission && (
+      {hasCasePermission && (
         <Tabs.Screen
           name="case"
           options={{
@@ -71,7 +72,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {hasManagementPermission && (
+      {hasStockPermission && (
         <Tabs.Screen
           name="storage"
           options={{
