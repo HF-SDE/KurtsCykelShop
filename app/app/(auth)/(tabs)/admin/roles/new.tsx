@@ -7,6 +7,10 @@ import { Permission } from "@/types/users/Permission";
 import { Role } from "@/types/users/Role";
 
 import { FoxLoader } from "@components/fox";
+import {
+  RolePermissionGroupFiltersType,
+  RolesPermissionGroupFilterDrawer,
+} from "@components/roles/roles-permission-group-filter-drawer";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
@@ -26,6 +30,7 @@ type RolePermission = {
   id: string;
   name: string;
   description: string;
+  permissionGroupId?: string;
   isAssigned: boolean;
 };
 
@@ -38,6 +43,8 @@ export default function NewRolePage() {
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, boolean>>({});
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [filters, setFilters] = useState<RolePermissionGroupFiltersType>({});
 
   const allPermissions = useMemo<Permission[]>(() => {
     const permissionsById = new Map<string, Permission>();
@@ -61,6 +68,7 @@ export default function NewRolePage() {
         id: permission.id,
         name: permission.code,
         description: permission.description || "",
+        permissionGroupId: permission.permissionGroupId,
         isAssigned: selectedPermissions[permission.id] ?? false,
       })),
     [allPermissions, selectedPermissions],
@@ -68,12 +76,16 @@ export default function NewRolePage() {
 
   const filteredPermissions = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return permissions;
+    const filteredByGroup = filters.permissionGroupId
+      ? permissions.filter((item) => item.permissionGroupId === filters.permissionGroupId)
+      : permissions;
 
-    return permissions.filter(
+    if (!query) return filteredByGroup;
+
+    return filteredByGroup.filter(
       (item) => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
     );
-  }, [permissions, search]);
+  }, [filters.permissionGroupId, permissions, search]);
 
   function togglePermission(id: string) {
     setSelectedPermissions((prev) => ({
@@ -201,11 +213,18 @@ export default function NewRolePage() {
       <Box className="mb-3 flex-row items-center gap-3">
         <Searchbar className="flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
         <ButtonGroup className="h-full flex-row gap-2">
-          <Button variant="outline" className="h-full">
+          <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
             <ButtonIcon as={ListFilter} />
           </Button>
         </ButtonGroup>
       </Box>
+
+      <RolesPermissionGroupFilterDrawer
+        showDrawer={showFilterDrawer}
+        setShowDrawer={setShowFilterDrawer}
+        filters={filters}
+        setFilters={setFilters}
+      />
 
       <Box className="border-outline-200 flex-1 overflow-hidden rounded-2xl border">
         <Box className="border-outline-200 bg-background-50 flex-row border-b px-4 py-3">
