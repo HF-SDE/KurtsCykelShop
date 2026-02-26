@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-export const UuidSchema = z.string().uuid("Invalid UUID v4 format");
+export const UuidSchema = z.uuid("Invalid UUID v4 format");
 
-export const EmailSchema = z.string().email("Invalid email address");
+export const EmailSchema = z.email("Invalid email address");
 
 export const StringOrNumberSchema = z.union([
   z.number(),
