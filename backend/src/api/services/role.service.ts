@@ -24,31 +24,65 @@ export async function getRoles(query: GetRoleInput): Promise<APIResponse<Role[]>
     };
   }
 
-  const where: Prisma.RoleWhereInput = {};
-  const validated = validation.data;
+  const { id, name, withPermissions, withAllPermissions } = validation.data;
 
-  if (validated.id) {
-    where.id = validated.id;
-  }
+  if (id || name) {
+    const exist = await prisma.role.findUnique({
+      where: {
+        id,
+        OR: [{ name: { contains: name, mode: "insensitive" } }],
+      },
+      include: {
+        permissions: withPermissions,
+      },
+    });
 
-  if (validated.name) {
-    where.name = {
-      contains: validated.name,
-      mode: "insensitive",
-    };
+    if (!exist) {
+      return {
+        status: Status.NotFound,
+        message: "Role(s) not found",
+      };
+    }
   }
 
   const data = await prisma.role.findMany({
-    ...(Object.keys(where).length > 0 ? { where } : {}),
+    where: {
+      id: id || undefined,
+      name: {
+        contains: name,
+        mode: "insensitive",
+      },
+    },
     include: {
-      permissions: true,
+      permissions: withPermissions,
     },
   });
+
+  if (withPermissions && withAllPermissions) {
+    const roles: RoleWithPermissions[] = [];
+
+    const allPermissions = await prisma.permission.findMany();
+    for (const role of data) {
+      roles.push({
+        ...role,
+        permissions: allPermissions.map((permission) => ({
+          ...permission,
+          isAssigned: role.permissions?.some((p) => p.id === permission.id) || false,
+        })),
+      });
+    }
+
+    return {
+      status: Status.Success,
+      message: "Roles retrieved successfully",
+      data: roles,
+    };
+  }
 
   return {
     status: Status.Success,
     message: "Roles retrieved successfully",
-    data,
+    data: data,
   };
 }
 
