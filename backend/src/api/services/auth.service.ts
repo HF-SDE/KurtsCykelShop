@@ -9,6 +9,7 @@ import {
 } from "@api-types/auth.types";
 import { APIResponse, Status } from "@api-types/general.types";
 import config from "@config";
+import { type Permission } from "@permission-types";
 import prisma from "@prisma-instance";
 import { Session } from "@prisma/client";
 import { LoginSchema, TokenSchema } from "@schemas/auth.schemas";
@@ -50,7 +51,8 @@ export async function generateUserTokens(
     include: { roles: { include: { permissions: true } } },
   });
 
-  const permissionCodes = userWithRoles?.roles.flatMap((role) => role.permissions.map((perm) => perm.code));
+  const permissionCodes = (userWithRoles?.roles.flatMap((role) => role.permissions.map((perm) => perm.code)) ||
+    []) as Permission[];
 
   const newAccessToken = generateToken(
     {

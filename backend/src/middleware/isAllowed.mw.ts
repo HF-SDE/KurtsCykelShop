@@ -1,4 +1,5 @@
 import { ExpressFunction, Status } from "@api-types/general.types";
+import { type Permission } from "@permission-types";
 import prisma from "@prisma-instance";
 import { PermissionGetPayload } from "@prisma/models";
 import { getHttpStatusCode } from "@utils/Utils";
@@ -6,10 +7,10 @@ import { Response } from "express";
 
 /**
  * Middleware to check if the user has the required permissions to access a route.
- * @param {string[]} permissions - The permissions required to access the route.
+ * @param {Permission[]} permissions - The permissions required to access the route.
  * @returns {ExpressFunction} The middleware function to check permissions.
  */
-export function isAllowed(permissions: string[]): ExpressFunction {
+export function isAllowed(permissions: readonly Permission[]): ExpressFunction {
   return async (req, res: Response, next) => {
     const user = req.user as { id: string } | undefined;
 
@@ -24,7 +25,7 @@ export function isAllowed(permissions: string[]): ExpressFunction {
     const Permissions = (await prisma.permission.findMany({
       where: {
         code: {
-          in: permissions,
+          in: [...permissions],
         },
         roles: {
           some: {

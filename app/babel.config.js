@@ -13,6 +13,8 @@ module.exports = function (api) {
           alias: {
             "@": "./",
             "@schemas": "../schemas",
+            "@permissions": "../permissions",
+            "@permission-types": "../permissions",
             "tailwind.config": "./tailwind.config.js",
           },
         },

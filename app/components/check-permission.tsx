@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
 
+import { type Permission } from "@permission-types";
 import { PermissionManager } from "@utils/permissionManager";
 
 import { Button } from "./ui/button";
@@ -53,7 +54,7 @@ function disableChildrenRecursively(children: ReactNode, disabled: boolean): Rea
 }
 
 interface CheckPermissionProps {
-  requiredPermission: string[];
+  requiredPermission: readonly Permission[];
   showIfNotPermitted?: boolean;
   children: ReactNode;
 }
