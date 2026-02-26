@@ -8,7 +8,7 @@ import { Role } from "@/types/users/Role";
 import { FoxLoader } from "@components/fox";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
-import { Button, ButtonIcon, ButtonText } from "@components/ui/button";
+import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@components/ui/button";
 import { Checkbox, CheckboxIcon, CheckboxIndicator } from "@components/ui/checkbox";
 import { Heading } from "@components/ui/heading";
 import { CheckIcon } from "@components/ui/icon";
@@ -16,7 +16,7 @@ import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Plus, Save } from "lucide-react-native";
+import { ListFilter, Plus, Save } from "lucide-react-native";
 
 import { useRole } from "../ctx";
 
@@ -176,12 +176,12 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
       </Textarea>
 
       <Box className="mb-3 flex-row items-center gap-3">
-        <Searchbar className="h-12 flex-1" placeholder="Search" value={search} onChangeText={setSearch} />
-
-        <Button variant="outline" action="secondary" className="h-12 px-4">
-          <ButtonText>Filter</ButtonText>
-          <ButtonIcon as={Plus} size="md" />
-        </Button>
+        <Searchbar className="flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
+        <ButtonGroup className="h-full flex-row gap-2">
+          <Button variant="outline" className="h-full">
+            <ButtonIcon as={ListFilter} />
+          </Button>
+        </ButtonGroup>
       </Box>
 
       <Box className="border-outline-200 flex-1 overflow-hidden rounded-2xl border">
