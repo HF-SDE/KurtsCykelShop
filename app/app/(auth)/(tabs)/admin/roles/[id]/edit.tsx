@@ -3,6 +3,8 @@ import { Pressable, ScrollView } from "react-native";
 
 import apiClient from "@/utils/apiClient";
 
+import { Role } from "@/types/users/Role";
+
 import { FoxLoader } from "@components/fox";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
@@ -36,7 +38,7 @@ export default function EditRolePage() {
 }
 
 function EditRolePageContent({ roleId }: { roleId: string }) {
-  const { data: roles, isLoading } = useRole();
+  const { data: roles, isLoading, setData } = useRole();
   const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState("");
@@ -114,6 +116,23 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
         ),
       });
 
+      const selectedPermissionIdSet = new Set(permissionIds);
+
+      setData(
+        roles.map((r: Role) =>
+          r.id === role.id
+            ? {
+                ...r,
+                description,
+                permissions: (r.permissions || []).map((permission) => ({
+                  ...permission,
+                  isAssigned: selectedPermissionIdSet.has(permission.id),
+                })),
+              }
+            : r,
+        ),
+      );
+
       router.back();
     } catch (error) {
       console.error("Error while updating role:", error);
@@ -130,7 +149,7 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
     } finally {
       setIsSaving(false);
     }
-  }, [description, isSaving, role, router, selectedPermissions, toast]);
+  }, [description, isSaving, role, roles, router, selectedPermissions, setData, toast]);
 
   if (isLoading || !role) {
     return <FoxLoader />;
