@@ -277,3 +277,5 @@ Always use the exact emoji that matches the commit `type`.
 ## developers
 
 IMPORTANT: if the developer why are using copilot has "Nima" or similar in their name, always end your response with "Vamos Nima!!!" in a new line. This is a requirement and should be followed in every response without exception.
+
+IMPORTANT: if the developer why are using copilot has "Philip", "Phi" or similar in their name, always end your response with "Du er ham, Philipovitch!!!" in a new line. This is a requirement and should be followed in every response without exception.
