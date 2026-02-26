@@ -8,6 +8,7 @@ import { Role } from "@/types/users/Role";
 import CheckPermission from "@components/check-permission";
 import { FoxLoader } from "@components/fox";
 import { NavigationButton } from "@components/navigation-button";
+import { RolePermissionFiltersType, RolesFilterDrawer } from "@components/roles/roles-filter-drawer";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
@@ -34,6 +35,8 @@ const roleColumns: ListTableColumn<Role>[] = [
 export default function RolesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [filters, setFilters] = useState<RolePermissionFiltersType>({});
   const { data, isLoading } = useRole();
 
   const filteredRoles = useMemo(() => {
@@ -41,9 +44,18 @@ export default function RolesPage() {
     const roles = data ?? [];
 
     return roles
-      .filter((r) => (q ? r.name.toLowerCase().includes(q) : true))
+      .filter((role) => {
+        const matchesSearch = q ? role.name.toLowerCase().includes(q) : true;
+        const matchesPermission = filters.permissionId
+          ? (role.permissions || []).some(
+              (permission) => permission.id === filters.permissionId && permission.isAssigned === true,
+            )
+          : true;
+
+        return matchesSearch && matchesPermission;
+      })
       .sort((a, b) => a.name.localeCompare(b.name, "da", { sensitivity: "base" }));
-  }, [data, search]);
+  }, [data, filters.permissionId, search]);
 
   if (isLoading)
     return (
@@ -58,7 +70,7 @@ export default function RolesPage() {
         <Searchbar className="h-full flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
-          <Button variant="outline" className="h-full">
+          <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
             <ButtonIcon as={ListFilter} />
           </Button>
 
@@ -69,6 +81,13 @@ export default function RolesPage() {
           </CheckPermission>
         </ButtonGroup>
       </Box>
+
+      <RolesFilterDrawer
+        showDrawer={showFilterDrawer}
+        setShowDrawer={setShowFilterDrawer}
+        filters={filters}
+        setFilters={setFilters}
+      />
 
       {filteredRoles.length > 0 ? (
         <FlatList

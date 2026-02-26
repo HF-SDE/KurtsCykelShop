@@ -20,8 +20,8 @@ export function isAllowed(permissions: string[]): ExpressFunction {
       });
       return;
     }
-    
-    const Permissions = await prisma.permission.findMany({
+
+    const Permissions = (await prisma.permission.findMany({
       where: {
         code: {
           in: permissions,
@@ -39,7 +39,7 @@ export function isAllowed(permissions: string[]): ExpressFunction {
       include: {
         roles: true,
       },
-    }) as PermissionGetPayload<{ include: { roles: true } }>[];
+    })) as PermissionGetPayload<{ include: { roles: true } }>[];
 
     if (Permissions.length) return next();
     res.status(getHttpStatusCode(Status.Forbidden)).json({

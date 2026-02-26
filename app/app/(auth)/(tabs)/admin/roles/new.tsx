@@ -1,21 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView } from "react-native";
 
 import apiClient from "@/utils/apiClient";
 
+import { Permission } from "@/types/users/Permission";
 import { Role } from "@/types/users/Role";
 
 import { FoxLoader } from "@components/fox";
+import {
+  RolePermissionGroupFiltersType,
+  RolesPermissionGroupFilterDrawer,
+} from "@components/roles/roles-permission-group-filter-drawer";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
 import { Checkbox, CheckboxIcon, CheckboxIndicator } from "@components/ui/checkbox";
 import { Heading } from "@components/ui/heading";
 import { CheckIcon, Icon } from "@components/ui/icon";
+import { Input, InputField } from "@components/ui/input";
 import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { ListFilter, Save } from "lucide-react-native";
 
 import { useRole } from "./ctx";
@@ -24,61 +30,62 @@ type RolePermission = {
   id: string;
   name: string;
   description: string;
+  permissionGroupId?: string;
   isAssigned: boolean;
 };
 
 export default function NewRolePage() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-
-  if (!id) {
-    return null;
-  }
-
-  return <NewRolePageContent roleId={id} />;
-}
-
-function NewRolePageContent({ roleId }: { roleId: string }) {
   const { data: roles, isLoading, setData } = useRole();
   const router = useRouter();
   const toast = useToast();
   const [search, setSearch] = useState("");
+  const [name, setName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<Record<string, boolean>>({});
-  const role = useMemo(() => roles.find((item) => item.id === roleId), [roleId, roles]);
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const hydratedRoleIdRef = useRef<string | null>(null);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [filters, setFilters] = useState<RolePermissionGroupFiltersType>({});
+
+  const allPermissions = useMemo<Permission[]>(() => {
+    const permissionsById = new Map<string, Permission>();
+
+    for (const role of roles) {
+      for (const permission of role.permissions || []) {
+        if (!permissionsById.has(permission.id)) {
+          permissionsById.set(permission.id, permission);
+        }
+      }
+    }
+
+    return Array.from(permissionsById.values()).sort((a, b) =>
+      a.code.localeCompare(b.code, "da", { sensitivity: "base" }),
+    );
+  }, [roles]);
 
   const permissions = useMemo<RolePermission[]>(
     () =>
-      (role?.permissions || []).map((permission) => ({
+      allPermissions.map((permission) => ({
         id: permission.id,
         name: permission.code,
         description: permission.description || "",
-        isAssigned: permission.isAssigned || false,
+        permissionGroupId: permission.permissionGroupId,
+        isAssigned: selectedPermissions[permission.id] ?? false,
       })),
-    [role],
+    [allPermissions, selectedPermissions],
   );
-
-  useEffect(() => {
-    if (!role) {
-      return;
-    }
-
-    if (hydratedRoleIdRef.current !== role.id) {
-      setSelectedPermissions(Object.fromEntries(permissions.map((item) => [item.id, item.isAssigned])));
-      setDescription(role.description || "");
-      hydratedRoleIdRef.current = role.id;
-    }
-  }, [permissions, role]);
 
   const filteredPermissions = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return permissions;
+    const filteredByGroup = filters.permissionGroupId
+      ? permissions.filter((item) => item.permissionGroupId === filters.permissionGroupId)
+      : permissions;
 
-    return permissions.filter(
+    if (!query) return filteredByGroup;
+
+    return filteredByGroup.filter(
       (item) => item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
     );
-  }, [permissions, search]);
+  }, [filters.permissionGroupId, permissions, search]);
 
   function togglePermission(id: string) {
     setSelectedPermissions((prev) => ({
@@ -88,7 +95,22 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
   }
 
   const handleSave = useCallback(async () => {
-    if (!role || isSaving) {
+    if (isSaving) {
+      return;
+    }
+
+    const roleName = name.trim();
+
+    if (roleName.length < 2) {
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>Ugyldigt rollenavn</ToastTitle>
+            <ToastDescription>Navnet skal være mindst 2 tegn</ToastDescription>
+          </Toast>
+        ),
+      });
       return;
     }
 
@@ -99,9 +121,9 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
         .filter(([, isChecked]) => isChecked)
         .map(([permissionId]) => permissionId);
 
-      await apiClient.put(`/manage/role/${role.id}`, {
-        name: role.name,
-        description,
+      const response = await apiClient.post(`/manage/role`, {
+        name: roleName,
+        description: description.trim() || undefined,
         permissions: permissionIds,
       });
 
@@ -109,38 +131,37 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
         placement: "top",
         render: ({ id }) => (
           <Toast nativeID={id} action="success" variant="solid">
-            <ToastTitle>Rollen er opdateret</ToastTitle>
-            <ToastDescription>Dine ændringer er gemt</ToastDescription>
+            <ToastTitle>Rollen er oprettet</ToastTitle>
+            <ToastDescription>Din nye rolle er gemt</ToastDescription>
           </Toast>
         ),
       });
 
       const selectedPermissionIdSet = new Set(permissionIds);
+      const createdRole = (response?.data?.data || null) as Role | null;
 
-      setData(
-        roles.map((r: Role) =>
-          r.id === role.id
-            ? {
-                ...r,
-                description,
-                permissions: (r.permissions || []).map((permission) => ({
-                  ...permission,
-                  isAssigned: selectedPermissionIdSet.has(permission.id),
-                })),
-              }
-            : r,
-        ),
-      );
+      if (createdRole) {
+        const createdRoleWithPermissions: Role = {
+          ...createdRole,
+          description: description.trim() || undefined,
+          permissions: allPermissions.map((permission) => ({
+            ...permission,
+            isAssigned: selectedPermissionIdSet.has(permission.id),
+          })),
+        };
+
+        setData([...roles, createdRoleWithPermissions]);
+      }
 
       router.back();
     } catch (error) {
-      console.error("Error while updating role:", error);
+      console.error("Error while creating role:", error);
 
       toast.show({
         placement: "top",
         render: ({ id }) => (
           <Toast nativeID={id} action="error" variant="solid">
-            <ToastTitle>Kunne ikke gemme rolle</ToastTitle>
+            <ToastTitle>Kunne ikke oprette rolle</ToastTitle>
             <ToastDescription>Prøv igen om et øjeblik</ToastDescription>
           </Toast>
         ),
@@ -148,9 +169,9 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
     } finally {
       setIsSaving(false);
     }
-  }, [description, isSaving, role, roles, router, selectedPermissions, setData, toast]);
+  }, [allPermissions, description, isSaving, name, roles, router, selectedPermissions, setData, toast]);
 
-  if (isLoading || !role) {
+  if (isLoading) {
     return <FoxLoader />;
   }
 
@@ -178,8 +199,12 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
       />
 
       <Heading bold size="4xl" className="mb-4 text-center">
-        {role.name || "Null"}
+        Ny rolle
       </Heading>
+
+      <Input className="mb-4 w-full">
+        <InputField placeholder="Rollenavn" value={name} onChangeText={setName} />
+      </Input>
 
       <Textarea className="mb-4 w-full">
         <TextareaInput placeholder="Description" value={description} onChangeText={setDescription} />
@@ -188,11 +213,18 @@ function NewRolePageContent({ roleId }: { roleId: string }) {
       <Box className="mb-3 flex-row items-center gap-3">
         <Searchbar className="flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
         <ButtonGroup className="h-full flex-row gap-2">
-          <Button variant="outline" className="h-full">
+          <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
             <ButtonIcon as={ListFilter} />
           </Button>
         </ButtonGroup>
       </Box>
+
+      <RolesPermissionGroupFilterDrawer
+        showDrawer={showFilterDrawer}
+        setShowDrawer={setShowFilterDrawer}
+        filters={filters}
+        setFilters={setFilters}
+      />
 
       <Box className="border-outline-200 flex-1 overflow-hidden rounded-2xl border">
         <Box className="border-outline-200 bg-background-50 flex-row border-b px-4 py-3">

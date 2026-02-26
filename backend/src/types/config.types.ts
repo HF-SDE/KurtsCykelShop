@@ -15,12 +15,7 @@ export type Port = number;
  * @returns {value is Port} True if the value is a valid port, otherwise false.
  */
 export function isPort(value: unknown): value is Port {
-  return (
-    typeof value === "number" &&
-    Number.isInteger(value) &&
-    value >= 0 &&
-    value <= 65535
-  );
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 65535;
 }
 
 /**

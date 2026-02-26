@@ -13,8 +13,10 @@ const config: Config = {
   PORT: isPort(Number(process.env.PORT)) ? Number(process.env.PORT) : 5000,
   RATE_LIMIT_COUNT: Number(process.env.RATE_LIMIT_COUNT) || 500,
   RATE_LIMIT_RESET_MINUTES: Number(process.env.RATE_LIMIT_RESET_MINUTES) || 60,
-  ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET || "this_is_a_super_secret_key_for_the_access_token_please_change_it",
-  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "this_is_a_super_secret_key_for_the_refresh_token_please_change_it",
+  ACCESS_TOKEN_SECRET:
+    process.env.ACCESS_TOKEN_SECRET || "this_is_a_super_secret_key_for_the_access_token_please_change_it",
+  REFRESH_TOKEN_SECRET:
+    process.env.REFRESH_TOKEN_SECRET || "this_is_a_super_secret_key_for_the_refresh_token_please_change_it",
   ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION || "5m",
   REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION || "1h",
   MAX_FAILED_LOGIN_ATTEMPTS: Number(process.env.MAX_FAILED_LOGIN_ATTEMPTS) || 5,
