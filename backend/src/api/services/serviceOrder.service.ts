@@ -1,7 +1,7 @@
 import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
 import { PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
-import { Customer, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
+import { Customer, Item, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 import { StringOrNumberSchema, UuidSchema } from "@schemas/general.schemas";
 import { ServiceOrderUpdateSchema, ServiceOrdersPaginatedSchema } from "@schemas/serviceOrder.schemas";
 import z from "zod";
@@ -156,13 +156,16 @@ export async function GetAllServiceOrdersPaginated(
     ];
   }
 }
-
+interface ServicePartsUsedWithItem extends ServicePartsUsed {
+  item: Item;
+}
 export interface GetServiceOrderByIdResponse extends ServiceOrder {
   customer: Customer | null;
   assignedTo: Omit<User, "password"> | null;
   assignedBy: Omit<User, "password"> | null;
   servicePartsUsed: ServicePartsUsed[];
   serviceRepairs: ServiceRepair[];
+  servicePartsUsedWithItem: ServicePartsUsedWithItem[];
 }
 
 /**
@@ -190,7 +193,9 @@ export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<Ge
         customer: true,
         assignedTo: true,
         assignedBy: true,
-        servicePartsUsed: true,
+        servicePartsUsed: {
+          include: { item: true },
+        },
         serviceRepairs: true,
       },
     });
@@ -213,6 +218,10 @@ export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<Ge
       ...serviceOrder,
       assignedTo: assignedTo as Omit<User, "password"> | null,
       assignedBy: assignedBy as Omit<User, "password">,
+      servicePartsUsedWithItem: serviceOrder.servicePartsUsed.map((spu) => ({
+        ...spu,
+        item: spu.item,
+      })),
     };
 
     return [response, null];

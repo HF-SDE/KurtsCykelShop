@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Alert, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { ScrollView } from "react-native";
 
 import {
   CustomerInfoCard,
@@ -8,6 +8,8 @@ import {
   ProductsCard,
   RepairsCard,
 } from "@/components/cases/details";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
@@ -17,6 +19,7 @@ import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderD
 
 import FoxLoader from "@components/fox";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { AlertCircle, FileQuestion } from "lucide-react-native";
 
 export default function CaseDetailsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,30 +28,61 @@ export default function CaseDetailsPage() {
   // State
   const [caseData, setCaseData] = useState<ServiceOrderData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load case data
+  // Load case data with proper cleanup and error handling
   useEffect(() => {
-    loadCaseData();
-  }, [id]);
-  console.log("🚀 ~ CaseDetailsPage ~ id:", id);
+    if (!id) {
+      setError("Mangler sags-ID");
+      setLoading(false);
+      return;
+    }
 
-  const loadCaseData = async () => {
+    let cancelled = false;
+
+    const loadCaseData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await apiClient.get(`/service-orders/${id}`);
+
+        if (!cancelled) {
+          const data = result.data.data as ServiceOrderData;
+          setCaseData(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Error loading case:", error);
+          setError("Kunne ikke indlæse sagen");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCaseData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  // Memoized reload function for child components
+  const reloadCaseData = useCallback(async () => {
+    if (!id) return;
+
     try {
-      setLoading(true);
-      //add manuel delay to show loading state
+      setError(null);
       const result = await apiClient.get(`/service-orders/${id}`);
       const data = result.data.data as ServiceOrderData;
-
-      console.log("🚀 ~ loadCaseData ~ data:", data);
       setCaseData(data);
     } catch (error) {
-      console.error("🚀 ~ loadCaseData ~ error:", error);
-      console.error("Error loading case:", error);
-      Alert.alert("Fejl", "Kunne ikke indlæse sagen");
-    } finally {
-      setLoading(false);
+      console.error("Error reloading case:", error);
+      setError("Kunne ikke genindlæse sagen");
     }
-  };
+  }, [id]);
 
   if (loading) {
     return (
@@ -58,10 +92,40 @@ export default function CaseDetailsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <VStack className="bg-background-50 flex-1 items-center justify-center p-4" space="md">
+        <Icon as={AlertCircle} size="xl" className="text-error-500" />
+        <VStack space="sm" className="items-center">
+          <Text className="text-typography-900 text-xl font-semibold">Noget gik galt</Text>
+          <Text className="text-typography-500 text-center">{error}</Text>
+        </VStack>
+        <Button
+          action="primary"
+          variant="solid"
+          onPress={() => {
+            setError(null);
+            setLoading(true);
+            reloadCaseData();
+          }}
+        >
+          <ButtonText>Prøv igen</ButtonText>
+        </Button>
+      </VStack>
+    );
+  }
+
   if (!caseData) {
     return (
-      <VStack className="bg-background-50 flex-1 items-center justify-center p-4">
-        <Text className="text-typography-700 text-lg">Sag ikke fundet</Text>
+      <VStack className="bg-background-50 flex-1 items-center justify-center p-4" space="md">
+        <Icon as={FileQuestion} size="xl" className="text-typography-400" />
+        <VStack space="sm" className="items-center">
+          <Text className="text-typography-700 text-xl font-semibold">Sag ikke fundet</Text>
+          <Text className="text-typography-500 text-center">Denne sag eksisterer ikke eller er blevet slettet</Text>
+        </VStack>
+        <Button action="secondary" variant="outline" onPress={() => router.back()}>
+          <ButtonText>Gå tilbage</ButtonText>
+        </Button>
       </VStack>
     );
   }
@@ -75,25 +139,29 @@ export default function CaseDetailsPage() {
             createdAt={caseData.createdAt}
             estimatedCompletion={caseData.estimatedCompletion}
             serviceOrderId={id || ""}
-            onDataUpdated={loadCaseData}
+            onDataUpdated={reloadCaseData}
           />
 
           <DescriptionCard
             initialDescription={caseData.description}
             serviceOrderId={id || ""}
-            onDescriptionUpdated={loadCaseData}
+            onDescriptionUpdated={reloadCaseData}
           />
 
           <EmployeeAssignmentCard
             assignedTo={caseData.assignedTo}
             assignedBy={caseData.assignedBy}
             serviceOrderId={id || ""}
-            onAssignmentUpdated={loadCaseData}
+            onAssignmentUpdated={reloadCaseData}
           />
 
-          <RepairsCard repairs={caseData.serviceRepairs} serviceOrderId={id || ""} onRepairAdded={loadCaseData} />
+          <RepairsCard repairs={caseData.serviceRepairs} serviceOrderId={id || ""} onRepairAdded={reloadCaseData} />
 
-          <ProductsCard products={caseData.servicePartsUsed} serviceOrderId={id || ""} onProductAdded={loadCaseData} />
+          <ProductsCard
+            products={caseData.servicePartsUsedWithItem}
+            serviceOrderId={id || ""}
+            onProductAdded={reloadCaseData}
+          />
         </VStack>
       </ScrollView>
     </>

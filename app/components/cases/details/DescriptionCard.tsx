@@ -34,10 +34,7 @@ export function DescriptionCard({ initialDescription, serviceOrderId, onDescript
 
     setSaving(true);
     try {
-      // TODO: Call API
-      // await apiClient.patch(`/service-orders/${serviceOrderId}`, { description });
-      console.log("Saving description:", description);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await apiClient.patch(`/service-orders/${serviceOrderId}`, { description });
 
       setOriginalDescription(description);
       toast.show({
