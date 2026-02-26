@@ -1,10 +1,15 @@
+import { useState } from "react";
+
 import { Box } from "@components/ui/box";
-import { Button, ButtonText } from "@components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@components/ui/button";
 import { Drawer, DrawerBackdrop, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from "@components/ui/drawer";
 import { Heading } from "@components/ui/heading";
 import { Icon } from "@components/ui/icon";
 import { Text } from "@components/ui/text";
-import { Trash } from "lucide-react-native";
+import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
+import { ScanText, Trash } from "lucide-react-native";
+
+import { ActionSheetBarcodeScanner } from "./action-sheet-barcode-scanner";
 
 interface AddBarcodeProps {
   isOpen: boolean;
@@ -16,13 +21,6 @@ interface AddBarcodeProps {
   noBarcodesText?: string;
 }
 
-function generateId() {
-  const id = Math.floor(Math.random() * 10 ** 13)
-    .toString()
-    .padStart(13, "0");
-  return id;
-}
-
 export function AddBarcode({
   isOpen,
   setIsOpen,
@@ -32,20 +30,47 @@ export function AddBarcode({
   headerText,
   noBarcodesText,
 }: AddBarcodeProps) {
+  const toast = useToast();
+
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  function handleAddBarcode(barcode: string) {
+    if (barcodes.includes(barcode)) {
+      toast.show({
+        id: "barcode-exists:" + barcode,
+        render: () => (
+          <Toast>
+            <ToastTitle>Stregkode allerede tilføjet</ToastTitle>
+            <ToastDescription>Stregkoden {barcode} er allerede i listen.</ToastDescription>
+          </Toast>
+        ),
+      });
+
+      return;
+    }
+
+    onAddBarcode(barcode);
+    setIsScannerOpen(false);
+  }
+
   return (
     <Drawer isOpen={isOpen} size="md" anchor="right" onClose={() => setIsOpen(false)}>
       <DrawerBackdrop />
       <DrawerContent className="items-center pb-10 pt-20">
         <DrawerHeader>
           <Heading size="lg">{headerText || "Tilføj stregkode"}</Heading>
-          {/* <DrawerCloseButton>
-            <Icon as={CloseIcon} />
-          </DrawerCloseButton> */}
         </DrawerHeader>
         <DrawerBody className="w-full">
-          <Button variant="outline" onPress={() => onAddBarcode(generateId())} className="mb-4">
+          <ActionSheetBarcodeScanner
+            isOpen={isScannerOpen}
+            onClose={() => setIsScannerOpen(false)}
+            onBarcodeScanned={handleAddBarcode}
+          />
+          <Button variant="outline" className="mb-4" onPress={() => setIsScannerOpen(true)}>
             <ButtonText>Scan stregkode</ButtonText>
+            <ButtonIcon as={ScanText} />
           </Button>
+
           {barcodes.length > 0 ? (
             <Box className="flex-1 gap-1">
               {barcodes.map((barcode) => (
@@ -55,7 +80,12 @@ export function AddBarcode({
                 >
                   <Text>{barcode}</Text>
 
-                  <Button variant="outline" size="sm" className="w-10 border-0" onPress={() => onRemoveBarcode(barcode)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-10 border-0"
+                    onPress={() => onRemoveBarcode(barcode)}
+                  >
                     <Icon as={Trash} className="justify-end" />
                   </Button>
                 </Box>

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import apiClient from "@/utils/apiClient";
 
+import { ItemFiltersType } from "@schemas/item.schemas";
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -14,6 +16,8 @@ export interface UsePaginatedDataResult<T> {
   setData: React.Dispatch<React.SetStateAction<T[]>>;
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
+  filters: ItemFiltersType;
+  setFilters: React.Dispatch<React.SetStateAction<ItemFiltersType>>;
   isLoading: boolean;
   isRefreshing: boolean;
   isLoadingMore: boolean;
@@ -34,6 +38,7 @@ export function usePaginatedData<T>(url: string, options: UsePaginatedDataOption
 
   const [data, setData] = useState<T[]>([]);
   const [search, setSearch] = useState(options.initialSearch ?? "");
+  const [filters, setFilters] = useState<ItemFiltersType>({});
   const [debouncedSearch, setDebouncedSearch] = useState(options.initialSearch ?? "");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -56,6 +61,11 @@ export function usePaginatedData<T>(url: string, options: UsePaginatedDataOption
       const trimmedSearch = debouncedSearch.trim();
       const params: Record<string, string | number> = { page, limit };
       if (trimmedSearch.length > 0) params[searchParam] = trimmedSearch;
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== "") {
+          params[key] = String(value);
+        }
+      });
 
       const response = await apiClient.get<{ data: PaginatedResponse<T> }>(url, { params });
 
@@ -67,7 +77,7 @@ export function usePaginatedData<T>(url: string, options: UsePaginatedDataOption
       setHasMore(more);
       currentPage.current = page;
     },
-    [debouncedSearch, limit, searchParam, url],
+    [debouncedSearch, limit, searchParam, url, filters],
   );
 
   const load = useCallback(async () => {
@@ -113,6 +123,8 @@ export function usePaginatedData<T>(url: string, options: UsePaginatedDataOption
     setData,
     search,
     setSearch,
+    filters,
+    setFilters,
     isLoading,
     isRefreshing,
     isLoadingMore,

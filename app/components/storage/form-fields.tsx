@@ -163,7 +163,6 @@ export function StorageField<T>({
         </Select>
       ) : fieldType === "combobox" ? (
         <Combobox
-          label={label}
           placeholder={placeholder}
           options={selectOptions || []}
           value={value as string}

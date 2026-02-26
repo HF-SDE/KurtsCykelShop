@@ -30,6 +30,7 @@ interface ComboboxProps {
 const MAX_SHORT_NAME_LENGTH = 18;
 
 export function Combobox({
+  label,
   placeholder = "Vælg",
   searchPlaceholder = "Søg...",
   emptyStateText = "Ingen resultater fundet",
@@ -58,6 +59,7 @@ export function Combobox({
 
   return (
     <Box>
+      {label && <Text className="text-typography-500 mb-1 text-xs font-medium uppercase">{label}</Text>}
       <Button
         variant="outline"
         className="justify-between px-2"
