@@ -1,14 +1,31 @@
 import { z } from "zod";
 
-import { UuidSchema } from "./general.schemas";
+import { StringOrNumberSchema, UuidSchema } from "./general.schemas";
+
+// Alternative simpler version using coerce (uncomment to use instead):
+// export const StringOrNumberSchema = z.coerce.number();
+
+export const timeRangeEnum = ["all", "today", "week", "month", "quarter", "year"] as const;
+export const statusEnum = ["completed", "cancelled", "in-progress", "pending"] as const;
+
+export type timeRangeTypesFromEnum = (typeof timeRangeEnum)[number];
+export type statusTypesFromEnum = (typeof statusEnum)[number];
+
+export const ServiceOrdersPaginatedSchema = z.object({
+  page: StringOrNumberSchema.optional(),
+  limit: StringOrNumberSchema.optional(),
+  search: z.string().optional(),
+  timeRange: z.enum(timeRangeEnum).optional(),
+  statuses: z.array(z.enum(statusEnum)).optional(),
+});
 
 /**
  * Schema for updating a service order
  */
 export const ServiceOrderUpdateSchema = z.object({
   description: z.string().min(1, "Description cannot be empty").optional(),
+  status: z.enum(statusEnum).optional(),
   estimatedCompletion: z.string().datetime("Invalid date format").optional(),
-  completedAt: z.string().datetime("Invalid date format").nullable().optional(),
   assignedToId: UuidSchema.nullable().optional(),
 });
 

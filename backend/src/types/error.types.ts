@@ -1,6 +1,8 @@
+import { Status } from "./general.types";
+
 // For validation errors with field-specific messages
 export interface ValidationError {
-  code: string;
+  status: Status;
   message: string;
   fieldErrors: {
     [field: string]: string[];
@@ -9,7 +11,7 @@ export interface ValidationError {
 
 // For general application errors
 export interface AppError {
-  code: string;
+  status: Status;
   message: string;
   details?: unknown;
 }
