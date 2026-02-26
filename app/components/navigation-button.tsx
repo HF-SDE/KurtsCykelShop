@@ -3,13 +3,21 @@ import { useCallback, useState } from "react";
 import { Button } from "@components/ui/button";
 import { useFocusEffect } from "@react-navigation/native";
 import { Href, useRouter } from "expo-router";
+import CheckPermission from "./check-permission";
 
-type NavigationButtonProps = Omit<React.ComponentProps<typeof Button>, "onPress"> & {
+export type NavigationButtonProps = Omit<React.ComponentProps<typeof Button>, "onPress"> & {
   href: Href;
   replace?: boolean;
+  requiredPermission?: string[];
 };
 
-export function NavigationButton({ href, replace = false, isDisabled, ...buttonProps }: NavigationButtonProps) {
+export function NavigationButton({
+  href,
+  replace = false,
+  isDisabled,
+  requiredPermission,
+  ...buttonProps
+}: NavigationButtonProps) {
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -32,5 +40,9 @@ export function NavigationButton({ href, replace = false, isDisabled, ...buttonP
     router.push(href);
   };
 
-  return <Button {...buttonProps} isDisabled={Boolean(isDisabled) || isNavigating} onPress={handlePress} />;
+  return (
+    <CheckPermission requiredPermission={requiredPermission ?? []}>
+      <Button {...buttonProps} isDisabled={Boolean(isDisabled) || isNavigating} onPress={handlePress} />
+    </CheckPermission>
+  );
 }
