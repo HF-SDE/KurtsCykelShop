@@ -199,7 +199,7 @@ export function CasesSection() {
       <HStack className="my-6" space="md">
         <Searchbar
           placeholder="Søg efter sager..."
-          className=" flex-grow"
+          className="flex-grow"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -208,7 +208,7 @@ export function CasesSection() {
             setShowDrawer(true);
           }}
           variant="outline"
-          className=" h-full"
+          className="h-full"
           action="secondary"
         >
           <ButtonIcon as={Filter} className="text-typography-950" />

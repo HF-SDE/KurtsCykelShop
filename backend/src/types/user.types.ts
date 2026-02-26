@@ -20,4 +20,3 @@ interface UserPermission {
   Permission: Permission;
   assignedBy: string;
 }
-

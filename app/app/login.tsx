@@ -98,12 +98,12 @@ export default function Index() {
               onChangeText={setPassword}
             />
             {isLoading ? (
-              <Button className="mt-4 " size="lg" variant="solid">
+              <Button className="mt-4" size="lg" variant="solid">
                 <ButtonSpinner />
                 <ButtonText>Please wait...</ButtonText>
               </Button>
             ) : (
-              <Button className="mt-4 " size="lg" variant="solid" onPress={handleLogin}>
+              <Button className="mt-4" size="lg" variant="solid" onPress={handleLogin}>
                 <ButtonText>Login</ButtonText>
               </Button>
             )}

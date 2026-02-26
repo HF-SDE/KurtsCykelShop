@@ -6,9 +6,7 @@ export const LoginSchema = z.object({
 });
 
 export const TokenSchema = z.object({
-  token: z
-    .string()
-    .regex(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/),
+  token: z.string().regex(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/),
 });
 
 export type LoginType = z.infer<typeof LoginSchema>;

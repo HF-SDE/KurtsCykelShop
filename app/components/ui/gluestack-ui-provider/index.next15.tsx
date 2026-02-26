@@ -12,6 +12,10 @@ import { script } from "./script";
 
 // This is a Next.js 15 compatible version of the GluestackUIProvider
 
+// This is a Next.js 15 compatible version of the GluestackUIProvider
+
+// This is a Next.js 15 compatible version of the GluestackUIProvider
+
 const variableStyleTagId = "nativewind-style";
 const createStyle = (styleTagId: string) => {
   const style = document.createElement("style");
