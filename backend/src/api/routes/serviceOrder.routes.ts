@@ -6,16 +6,18 @@ import { Router } from "express";
 
 const router = Router();
 
+router.use("/", verifyJWT);
+
 // Service order routes
 // router.get("/", verifyJWT, serviceOrderController.getAllServiceOrders);
-router.get("/paginated", verifyJWT, serviceOrderController.getAllServiceOrdersPaginated);
-router.get("/:id", verifyJWT, serviceOrderController.getServiceOrderById);
-router.patch("/:id", verifyJWT, serviceOrderController.updateServiceOrder);
+router.get("/paginated", serviceOrderController.getAllServiceOrdersPaginated);
+router.get("/:id", serviceOrderController.getServiceOrderById);
+router.patch("/:id", serviceOrderController.updateServiceOrder);
 
 // Service repair routes (nested under service orders)
-router.post("/:serviceOrderId/repairs", verifyJWT, serviceRepairController.createServiceRepair);
+router.post("/:serviceOrderId/repairs", serviceRepairController.createServiceRepair);
 
 // Service parts used routes (nested under service orders)
-router.post("/:serviceOrderId/parts", verifyJWT, servicePartsUsedController.createServicePartUsed);
+router.post("/:serviceOrderId/parts", servicePartsUsedController.createServicePartUsed);
 
 export default router;
