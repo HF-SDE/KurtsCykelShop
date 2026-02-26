@@ -81,6 +81,7 @@ export function ListTableHeader<TItem>({ columns, className = "", action }: List
  * ```
  */
 export function ListTableRow<TItem>({ item, columns, onPress, action, className = "" }: ListTableRowProps<TItem>) {
+  
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
       {({ hovered, pressed }) => (

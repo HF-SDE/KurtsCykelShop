@@ -29,10 +29,16 @@ export const patchUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  name: z.string().min(1).optional(),
   username: usernameSchema.optional(),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  email: EmailSchema.optional(),
   initials: z.string().max(6).optional(),
   active: z.boolean().optional(),
   password: z.string().min(8).optional(),
   UserRoles: z.array(z.string()).optional(),
+});
+
+export const resetUserPasswordSchema = z.object({
+  password: z.string().min(8),
 });

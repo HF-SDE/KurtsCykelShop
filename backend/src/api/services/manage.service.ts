@@ -4,6 +4,7 @@ import { Permission, PermissionGroup, Prisma, User } from "@prisma/client";
 import { getPermissionSchema } from "@schemas/permission.schemas";
 import { getPermissionGroupsSchema } from "@schemas/permissionGroups.schemas";
 import { createUserSchema, getUserSchema, patchUserSchema, updateUserSchema } from "@schemas/user.schemas";
+import { hash } from "argon2";
 import { z } from "zod";
 
 type GetUsersInput = z.input<typeof getUserSchema>;
@@ -12,6 +13,10 @@ type GetPermissionGroupsInput = z.input<typeof getPermissionGroupsSchema>;
 type CreateUserInput = z.input<typeof createUserSchema>;
 type UpdateUserInput = z.input<typeof updateUserSchema>;
 type PatchUserInput = z.input<typeof patchUserSchema>;
+const resetUserPasswordBodySchema = z.object({
+  password: z.string().min(8),
+});
+type ResetUserPasswordInput = z.infer<typeof resetUserPasswordBodySchema>;
 
 type UserWithRoles = Prisma.UserGetPayload<{
   include: {
@@ -176,9 +181,27 @@ export async function updateUser(id: string | undefined, body: UpdateUserInput):
     };
   }
 
+  const { username, email, initials, firstName, lastName, active, password, UserRoles } = validation.data;
+
+  const hashedPassword = password ? await hash(password) : undefined;
+
   const data = await prisma.user.update({
     where: { id },
-    data: validation.data as never,
+    data: {
+      username,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      email,
+      initials,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      firstName,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      lastName,
+      isActive: active,
+      password: hashedPassword,
+      roles: {
+        connect: UserRoles?.map((roleId) => ({ id: roleId })) ?? [],
+      },
+    },
   });
 
   return {
@@ -220,5 +243,46 @@ export async function patchUser(id: string | undefined, body: PatchUserInput): P
     status: Status.Updated,
     message: "User patched successfully",
     data,
+  };
+}
+
+/**
+ * Resets a user password by id.
+ * @param {string | undefined} id - User id.
+ * @param {ResetUserPasswordInput} body - Request body payload.
+ * @returns {Promise<APIResponse<void>>} Password reset response.
+ */
+export async function resetUserPassword(
+  id: string | undefined,
+  body: ResetUserPasswordInput,
+): Promise<APIResponse<void>> {
+  if (!id) {
+    return {
+      status: Status.MissingDetails,
+      message: "Missing id",
+    };
+  }
+
+  const validation = resetUserPasswordBodySchema.safeParse(body);
+
+  if (!validation.success) {
+    return {
+      status: Status.InvalidDetails,
+      message: validation.error.message,
+    };
+  }
+
+  const hashedPassword = await hash(validation.data.password);
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return {
+    status: Status.Updated,
+    message: "User password reset successfully",
   };
 }

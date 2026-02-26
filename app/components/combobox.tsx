@@ -16,18 +16,40 @@ interface ComboboxOption {
   name: string;
 }
 
-interface ComboboxProps {
+interface ComboboxBaseProps {
   label?: string;
   placeholder?: string;
   searchPlaceholder?: string;
   emptyStateText?: string;
   options: ComboboxOption[];
-  value?: string;
-  onChange: (value: string) => void;
   isDisabled?: boolean;
 }
 
+type SingleSelectProps = {
+  multiSelect?: false;
+  value?: string;
+  onChange: (value: string) => void;
+  values?: never;
+  onChangeValues?: never;
+};
+
+type MultiSelectProps = {
+  multiSelect: true;
+  values: string[];
+  onChangeValues: (values: string[]) => void;
+  value?: never;
+  onChange?: never;
+};
+
+type ComboboxProps = ComboboxBaseProps & (SingleSelectProps | MultiSelectProps);
+
 const MAX_SHORT_NAME_LENGTH = 18;
+const CHIP_HORIZONTAL_PADDING_AND_ICON_WIDTH = 30;
+const CHIP_CHARACTER_WIDTH = 6.5;
+const CHIP_MIN_WIDTH = 44;
+const CHIP_MAX_WIDTH = 180;
+const CHIP_GAP_WIDTH = 8;
+const OVERFLOW_CHIP_BASE_WIDTH = 24;
 
 export function Combobox({
   label,
@@ -37,11 +59,28 @@ export function Combobox({
   options,
   value,
   onChange,
+  values,
+  onChangeValues,
+  multiSelect = false,
   isDisabled = false,
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const selectedOption = useMemo(() => options.find((option) => option.id === value), [options, value]);
+  const [chipContainerWidth, setChipContainerWidth] = useState(0);
+  const selectedIds = useMemo<string[]>(() => {
+    if (multiSelect) {
+      return values || [];
+    }
+
+    return value ? [value] : [];
+  }, [multiSelect, value, values]);
+
+  const selectedOptions = useMemo(
+    () => options.filter((option) => selectedIds.includes(option.id)),
+    [options, selectedIds],
+  );
+
+  const selectedOption = multiSelect ? undefined : selectedOptions[0];
 
   const filteredOptions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -57,6 +96,60 @@ export function Combobox({
       : selectedOption.name;
   }, [selectedOption]);
 
+  const displayedMultiSelect = useMemo(() => {
+    if (!multiSelect) {
+      return { visibleOptions: [] as ComboboxOption[], hiddenCount: 0 };
+    }
+
+    if (selectedOptions.length === 0) {
+      return { visibleOptions: [] as ComboboxOption[], hiddenCount: 0 };
+    }
+
+    const availableWidth = chipContainerWidth > 0 ? chipContainerWidth : Infinity;
+
+    const estimateChipWidth = (label: string) =>
+      Math.min(
+        CHIP_MAX_WIDTH,
+        Math.max(CHIP_MIN_WIDTH, label.length * CHIP_CHARACTER_WIDTH + CHIP_HORIZONTAL_PADDING_AND_ICON_WIDTH),
+      );
+
+    const computeVisibleCount = (reservedOverflowWidth: number) => {
+      let usedWidth = 0;
+      let visibleCount = 0;
+
+      for (const option of selectedOptions) {
+        const chipWidth = estimateChipWidth(option.name);
+        const nextWidth = usedWidth + (visibleCount > 0 ? CHIP_GAP_WIDTH : 0) + chipWidth;
+
+        if (nextWidth > availableWidth - reservedOverflowWidth) {
+          break;
+        }
+
+        usedWidth = nextWidth;
+        visibleCount += 1;
+      }
+
+      return visibleCount;
+    };
+
+    let visibleCount = computeVisibleCount(0);
+
+    if (visibleCount < selectedOptions.length) {
+      const hiddenCount = selectedOptions.length - visibleCount;
+      const overflowChipWidth = Math.max(44, `${hiddenCount}`.length * CHIP_CHARACTER_WIDTH + OVERFLOW_CHIP_BASE_WIDTH);
+      visibleCount = computeVisibleCount(overflowChipWidth);
+
+      if (visibleCount === 0 && selectedOptions.length > 0) {
+        visibleCount = 1;
+      }
+    }
+
+    const visibleOptions = selectedOptions.slice(0, visibleCount);
+    const hiddenCount = selectedOptions.length - visibleOptions.length;
+
+    return { visibleOptions, hiddenCount };
+  }, [chipContainerWidth, multiSelect, selectedOptions]);
+
   return (
     <Box>
       {label && <Text className="text-typography-500 mb-1 text-xs font-medium uppercase">{label}</Text>}
@@ -66,9 +159,48 @@ export function Combobox({
         onPress={() => setIsOpen(true)}
         isDisabled={isDisabled}
       >
-        <ButtonText className={cn("text-typography-700", { "text-typography-500": !selectedOption })}>
-          {shortName ?? placeholder}
-        </ButtonText>
+        {multiSelect ? (
+          <Box
+            className="min-h-8 flex-1 flex-row items-center gap-2 overflow-hidden py-1"
+            onLayout={(event) => setChipContainerWidth(event.nativeEvent.layout.width)}
+          >
+            {selectedOptions.length > 0 ? (
+              <>
+                {displayedMultiSelect.visibleOptions.map((option) => (
+                  <Pressable
+                    key={option.id}
+                    className="bg-background-100 border-outline-200 flex-row items-center gap-2 rounded-full border px-3 py-1"
+                    onPress={(event) => {
+                      event.stopPropagation();
+
+                      const nextValues = selectedIds.filter((selectedId) => selectedId !== option.id);
+                      onChangeValues?.(nextValues);
+                    }}
+                  >
+                    <Text className="text-typography-700 text-sm font-medium">{option.name}</Text>
+                    <Icon as={CloseIcon} className="text-typography-400" size="xs" />
+                  </Pressable>
+                ))}
+
+                {displayedMultiSelect.hiddenCount > 0 ? (
+                  <Box className="bg-background-100 border-outline-200 rounded-full border px-3 py-1">
+                    <Text className="text-typography-700 text-sm font-medium">+{displayedMultiSelect.hiddenCount}</Text>
+                  </Box>
+                ) : null}
+              </>
+            ) : (
+              <Text className="text-typography-500">{placeholder}</Text>
+            )}
+          </Box>
+        ) : (
+          <ButtonText
+            className={cn("text-typography-700", {
+              "text-typography-500": !selectedOption,
+            })}
+          >
+            {shortName ?? placeholder}
+          </ButtonText>
+        )}
         <ButtonIcon as={ChevronDownIcon} />
       </Button>
 
@@ -116,10 +248,19 @@ export function Combobox({
                 renderItem={({ item }) => (
                   <Pressable
                     className={cn("active:bg-background-100 w-full rounded-lg px-3 py-2", {
-                      "bg-background-50": item.id === value,
+                      "bg-background-50": selectedIds.includes(item.id),
                     })}
                     onPress={() => {
-                      onChange(item.id);
+                      if (multiSelect) {
+                        const nextValues = selectedIds.includes(item.id)
+                          ? selectedIds.filter((selectedId) => selectedId !== item.id)
+                          : [...selectedIds, item.id];
+
+                        onChangeValues?.(nextValues);
+                        return;
+                      }
+
+                      onChange?.(item.id);
                       setIsOpen(false);
                       setSearchValue("");
                     }}
