@@ -1,5 +1,3 @@
-import React, { useEffect, useState } from "react";
-
 import { Box } from "@/components/ui/box";
 import { Icon } from "@/components/ui/icon";
 
@@ -8,38 +6,11 @@ import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedba
 import { UsePermissions } from "@/contexts/permissions.ctx";
 
 import { FoxLoader } from "@components/fox";
-import { PermissionManager } from "@utils/permissionManager";
 import { Tabs } from "expo-router";
 import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
 
 export default function TabLayout() {
-  // const [isLoading, setIsLoading] = useState(true);
-
-  // const [hasStockPermission, setHasStockPermission] = useState(true);
-  // const [hasCasePermission, setHasCasePermission] = useState(true);
-  // const [hasManagementPermission, setHasManagementPermission] = useState(true);
-
-  // const checkPermissions = async () => {
-  //   const permissionMan = new PermissionManager();
-  //   await permissionMan.init();
-
-  //   const stockPermission = await permissionMan.hasPageAccess("StockPage");
-  //   setHasStockPermission(stockPermission);
-
-  //   const casePermission = await permissionMan.hasPageAccess("CasePage");
-  //   setHasCasePermission(casePermission);
-
-  //   const managementPermission = await permissionMan.hasPageAccess("ManagementPage");
-  //   setHasManagementPermission(managementPermission);
-
-  //   setIsLoading(false);
-  // };
-
-  // useEffect(() => {
-  //   checkPermissions();
-  // }, []);
-
-  const { hasPageAccess, getAccessiblePages, isLoading } = UsePermissions();
+  const { hasPageAccess, isLoading } = UsePermissions();
 
   if (isLoading) return <FoxLoader />;
 
