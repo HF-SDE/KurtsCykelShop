@@ -9,11 +9,11 @@ import { Combobox } from "@components/combobox";
 import { FoxLoader } from "@components/fox";
 import { Avatar, AvatarFallbackText } from "@components/ui/avatar";
 import { Box } from "@components/ui/box";
-import { Button, ButtonText } from "@components/ui/button";
+import { Button, ButtonGroup, ButtonText } from "@components/ui/button";
 import { Center } from "@components/ui/center";
-import { Checkbox, CheckboxIcon, CheckboxIndicator, CheckboxLabel } from "@components/ui/checkbox";
 import { FormControl, FormControlLabel, FormControlLabelText } from "@components/ui/form-control";
-import { CheckIcon, CloseIcon, Icon } from "@components/ui/icon";
+import { Heading } from "@components/ui/heading";
+import { CloseIcon, Icon } from "@components/ui/icon";
 import { Input, InputField } from "@components/ui/input";
 import SecretInput from "@components/ui/input/password";
 import {
@@ -25,13 +25,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@components/ui/modal";
+import { Text } from "@components/ui/text";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { useData } from "@hooks/useData";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Save } from "lucide-react-native";
 
 import { UserWithRoles, useUsers } from "../ctx";
-import { Heading } from "@components/ui/heading";
 
 export default function EditUserPage() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -65,6 +65,8 @@ function EditUserPageContent({ userId }: { userId: string }) {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordModalError, setPasswordModalError] = useState("");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isUpdatingAccountStatus, setIsUpdatingAccountStatus] = useState(false);
+  const [isAccountStatusModalOpen, setIsAccountStatusModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -227,6 +229,49 @@ function EditUserPageContent({ userId }: { userId: string }) {
     }
   }, [confirmNewPassword, isResettingPassword, newPassword, toast, user]);
 
+  const handleToggleAccountStatus = useCallback(async () => {
+    if (!user || isUpdatingAccountStatus) {
+      return;
+    }
+
+    const nextActive = !isActive;
+
+    try {
+      setIsUpdatingAccountStatus(true);
+
+      await apiClient.put(`/manage/user/${user.id}/account-status`, {
+        active: nextActive,
+      });
+
+      setIsActive(nextActive);
+      setData(users.map((item) => (item.id === user.id ? { ...item, isActive: nextActive } : item)));
+
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="success" variant="solid">
+            <ToastTitle>Brugerstatus opdateret</ToastTitle>
+            <ToastDescription>{nextActive ? "Brugeren er aktiveret" : "Brugeren er deaktiveret"}</ToastDescription>
+          </Toast>
+        ),
+      });
+    } catch (error) {
+      console.error("Error while updating account status:", error);
+
+      toast.show({
+        placement: "top",
+        render: ({ id }) => (
+          <Toast nativeID={id} action="error" variant="solid">
+            <ToastTitle>Kunne ikke opdatere brugerstatus</ToastTitle>
+            <ToastDescription>Prøv igen om et øjeblik</ToastDescription>
+          </Toast>
+        ),
+      });
+    } finally {
+      setIsUpdatingAccountStatus(false);
+    }
+  }, [isActive, isUpdatingAccountStatus, setData, toast, user, users]);
+
   if (isLoading || isRolesLoading || !user) {
     return <FoxLoader />;
   }
@@ -266,7 +311,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
           </Avatar>
         </Center>
 
-        <FormControl className="flex gap-1 mb-4">
+        <FormControl className="mb-4 flex gap-1">
           <FormControlLabel>
             <FormControlLabelText>Brugernavn</FormControlLabelText>
           </FormControlLabel>
@@ -316,16 +361,26 @@ function EditUserPageContent({ userId }: { userId: string }) {
           />
         </FormControl>
 
-        <Button className="mb-4" variant="outline" action="secondary" onPress={() => setIsResetPasswordModalOpen(true)}>
-          <ButtonText>Nulstil password</ButtonText>
-        </Button>
+        <ButtonGroup className="mb-4 w-full flex-col items-stretch gap-2">
+          <Button
+            className="w-full"
+            variant="outline"
+            action="secondary"
+            onPress={() => setIsResetPasswordModalOpen(true)}
+          >
+            <ButtonText>Nulstil password</ButtonText>
+          </Button>
 
-        <Checkbox size="md" value="isActive" isChecked={isActive} onChange={() => setIsActive((prev) => !prev)}>
-          <CheckboxIndicator className="border-outline-400 rounded-sm border-2">
-            <CheckboxIcon as={CheckIcon} />
-          </CheckboxIndicator>
-          <CheckboxLabel>Aktiv</CheckboxLabel>
-        </Checkbox>
+          <Button
+            className="w-full"
+            variant="outline"
+            action="secondary"
+            onPress={() => setIsAccountStatusModalOpen(true)}
+            isDisabled={isUpdatingAccountStatus}
+          >
+            <ButtonText>{isActive ? "Disable" : "Active"}</ButtonText>
+          </Button>
+        </ButtonGroup>
       </ScrollView>
 
       <Modal
@@ -376,6 +431,50 @@ function EditUserPageContent({ userId }: { userId: string }) {
             </Button>
             <Button onPress={handleResetPassword} isDisabled={isResettingPassword}>
               <ButtonText>Gem</ButtonText>
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        isOpen={isAccountStatusModalOpen}
+        onClose={() => {
+          setIsAccountStatusModalOpen(false);
+        }}
+        size="md"
+      >
+        <ModalBackdrop />
+        <ModalContent>
+          <ModalHeader>
+            <Heading size="lg">Bekræft ændring</Heading>
+            <ModalCloseButton>
+              <Icon as={CloseIcon} />
+            </ModalCloseButton>
+          </ModalHeader>
+          <ModalBody>
+            <Text>
+              {isActive
+                ? "Er du sikker på, at du vil deaktivere denne bruger?"
+                : "Er du sikker på, at du vil aktivere denne bruger?"}
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="outline"
+              action="secondary"
+              className="mr-3"
+              onPress={() => setIsAccountStatusModalOpen(false)}
+            >
+              <ButtonText>Annuller</ButtonText>
+            </Button>
+            <Button
+              onPress={async () => {
+                await handleToggleAccountStatus();
+                setIsAccountStatusModalOpen(false);
+              }}
+              isDisabled={isUpdatingAccountStatus}
+            >
+              <ButtonText>Bekræft</ButtonText>
             </Button>
           </ModalFooter>
         </ModalContent>

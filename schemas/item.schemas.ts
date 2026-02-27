@@ -13,7 +13,7 @@ export const ItemFiltersSchema = z.object({
 export const CreateItemSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
   description: z.string().optional(),
-  quantity: z.coerce.number().int().positive("Antal skal være et positivt heltal"),
+  quantity: z.coerce.number().int().min(0, "Antal skal være 0 eller et positivt heltal"),
   unitId: z.uuid("Enhed er påkrævet"),
   minSellQuantity: z.coerce.number().int().positive("Minimums salgsantal skal være et positivt heltal"),
   isPublic: z.boolean(),

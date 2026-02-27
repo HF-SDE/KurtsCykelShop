@@ -17,6 +17,10 @@ const resetUserPasswordBodySchema = z.object({
   password: z.string().min(8),
 });
 type ResetUserPasswordInput = z.infer<typeof resetUserPasswordBodySchema>;
+const setUserAccountStatusBodySchema = z.object({
+  active: z.boolean(),
+});
+type SetUserAccountStatusInput = z.infer<typeof setUserAccountStatusBodySchema>;
 
 type UserWithRoles = Prisma.UserGetPayload<{
   include: {
@@ -284,5 +288,44 @@ export async function resetUserPassword(
   return {
     status: Status.Updated,
     message: "User password reset successfully",
+  };
+}
+
+/**
+ * Enables or disables a user account.
+ * @param {string | undefined} id - User id.
+ * @param {SetUserAccountStatusInput} body - Request body payload.
+ * @returns {Promise<APIResponse<void>>} Account status update response.
+ */
+export async function setUserAccountStatus(
+  id: string | undefined,
+  body: SetUserAccountStatusInput,
+): Promise<APIResponse<void>> {
+  if (!id) {
+    return {
+      status: Status.MissingDetails,
+      message: "Missing id",
+    };
+  }
+
+  const validation = setUserAccountStatusBodySchema.safeParse(body);
+
+  if (!validation.success) {
+    return {
+      status: Status.InvalidDetails,
+      message: validation.error.message,
+    };
+  }
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      isActive: validation.data.active,
+    },
+  });
+
+  return {
+    status: Status.Updated,
+    message: validation.data.active ? "User account enabled" : "User account disabled",
   };
 }
