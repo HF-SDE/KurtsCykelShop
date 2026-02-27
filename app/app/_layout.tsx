@@ -8,6 +8,7 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
 import SessionProvider from "@/app/ctx";
+import PermissionsProvider from "@/contexts/permissions.ctx";
 import "@/global.css";
 
 import { Slot } from "expo-router";
@@ -39,9 +40,11 @@ function RootLayoutNav() {
           <SafeAreaProvider>
             <KeyboardProvider>
               <ThemeProvider>
-                <Pressable className="flex-1" onPress={Keyboard.dismiss}>
-                  <Slot />
-                </Pressable>
+                <PermissionsProvider>
+                  <Pressable className="flex-1" onPress={Keyboard.dismiss}>
+                    <Slot />
+                  </Pressable>
+                </PermissionsProvider>
               </ThemeProvider>
             </KeyboardProvider>
           </SafeAreaProvider>

@@ -5,36 +5,43 @@ import { Icon } from "@/components/ui/icon";
 
 import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
+import { UsePermissions } from "@/contexts/permissions.ctx";
+
+import { FoxLoader } from "@components/fox";
 import { PermissionManager } from "@utils/permissionManager";
 import { Tabs } from "expo-router";
 import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
 
 export default function TabLayout() {
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
-  const [hasStockPermission, setHasStockPermission] = useState(true);
-  const [hasCasePermission, setHasCasePermission] = useState(true);
-  const [hasManagementPermission, setHasManagementPermission] = useState(true);
+  // const [hasStockPermission, setHasStockPermission] = useState(true);
+  // const [hasCasePermission, setHasCasePermission] = useState(true);
+  // const [hasManagementPermission, setHasManagementPermission] = useState(true);
 
-  const checkPermissions = async () => {
-    const permissionMan = new PermissionManager();
-    await permissionMan.init();
+  // const checkPermissions = async () => {
+  //   const permissionMan = new PermissionManager();
+  //   await permissionMan.init();
 
-    const stockPermission = await permissionMan.hasPageAccess("StockPage");
-    setHasStockPermission(stockPermission);
+  //   const stockPermission = await permissionMan.hasPageAccess("StockPage");
+  //   setHasStockPermission(stockPermission);
 
-    const casePermission = await permissionMan.hasPageAccess("CasePage");
-    setHasCasePermission(casePermission);
+  //   const casePermission = await permissionMan.hasPageAccess("CasePage");
+  //   setHasCasePermission(casePermission);
 
-    const managementPermission = await permissionMan.hasPageAccess("ManagementPage");
-    setHasManagementPermission(managementPermission);
+  //   const managementPermission = await permissionMan.hasPageAccess("ManagementPage");
+  //   setHasManagementPermission(managementPermission);
 
-    setIsLoading(false);
-  };
+  //   setIsLoading(false);
+  // };
 
-  useEffect(() => {
-    checkPermissions();
-  }, []);
+  // useEffect(() => {
+  //   checkPermissions();
+  // }, []);
+
+  const { hasPageAccess, getAccessiblePages, isLoading } = UsePermissions();
+
+  if (isLoading) return <FoxLoader />;
 
   return (
     <Tabs
@@ -58,7 +65,7 @@ export default function TabLayout() {
         tabPress: () => triggerHapticFeedback(ImpactFeedbackStyle.Soft),
       }}
     >
-      {hasCasePermission && (
+      {hasPageAccess("CasePage") && (
         <Tabs.Screen
           name="case"
           options={{
@@ -70,7 +77,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {hasStockPermission && (
+      {hasPageAccess("StockPage") && (
         <Tabs.Screen
           name="storage"
           options={{
@@ -82,7 +89,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {hasManagementPermission && (
+      {hasPageAccess("ManagementPage") && (
         <Tabs.Screen
           name="admin"
           options={{
@@ -98,7 +105,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {hasManagementPermission && (
+      {hasPageAccess("ManagementPage") && (
         <Tabs.Screen
           name="index"
           options={{
