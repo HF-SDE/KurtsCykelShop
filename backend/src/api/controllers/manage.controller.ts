@@ -13,6 +13,7 @@ type CreateUserInput = z.input<typeof createUserSchema>;
 type UpdateUserInput = z.input<typeof updateUserSchema>;
 type PatchUserInput = z.input<typeof patchUserSchema>;
 type ResetUserPasswordInput = { password: string };
+type SetUserAccountStatusInput = { active: boolean };
 
 /**
  * Returns users with roles and permissions.
@@ -115,6 +116,24 @@ export async function resetUserPassword(
   res: Response,
 ): Promise<void> {
   const response = await ManageService.resetUserPassword(
+    typeof req.params.id === "string" ? req.params.id : undefined,
+    req.body,
+  );
+
+  res.status(getHttpStatusCode(response.status)).json(response).end();
+}
+
+/**
+ * Sets a user's account status (active/disabled).
+ * @param {Request<{ id?: string }, unknown, SetUserAccountStatusInput>} req - Express request.
+ * @param {Response} res - Express response.
+ * @returns {Promise<void>} No return value.
+ */
+export async function setUserAccountStatus(
+  req: Request<{ id?: string }, unknown, SetUserAccountStatusInput>,
+  res: Response,
+): Promise<void> {
+  const response = await ManageService.setUserAccountStatus(
     typeof req.params.id === "string" ? req.params.id : undefined,
     req.body,
   );

@@ -5,6 +5,7 @@ import {
   getUsers,
   patchUser,
   resetUserPassword,
+  setUserAccountStatus,
   updateUser,
 } from "@controllers/manage.controller";
 import { createRole, getRole, getRoles, updateRole } from "@controllers/role.controller";
@@ -25,6 +26,7 @@ router.get("/permissionGroups", isAllowed(["administrator:permission:view"]), ge
 router.post("/user", isAllowed(["administrator:users:create"]), createUser);
 router.put("/user/:id", isAllowed(["administrator:users:update"]), updateUser);
 router.put("/user/:id/reset-password", isAllowed(["administrator:users:update"]), resetUserPassword);
+router.put("/user/:id/account-status", isAllowed(["administrator:users:update"]), setUserAccountStatus);
 router.patch("/user/:id", isAllowed(["administrator:users:update"]), patchUser);
 
 router.get("/role", isAllowed(["administrator:role:view"]), getRoles);
