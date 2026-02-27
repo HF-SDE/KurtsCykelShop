@@ -1,6 +1,8 @@
+import { TouchableOpacity } from "react-native";
+
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 
-import { SearchIcon } from "lucide-react-native";
+import { SearchIcon, X } from "lucide-react-native";
 
 export function Searchbar({
   placeholder,
@@ -19,6 +21,12 @@ export function Searchbar({
         <InputIcon as={SearchIcon} />
       </InputSlot>
       <InputField placeholder={placeholder ?? "Søg..."} value={value} onChangeText={onChangeText} />
+
+      {value && (
+        <TouchableOpacity disabled={!value} className="absolute right-3" onPress={() => onChangeText?.("")}>
+          <InputIcon as={X} />
+        </TouchableOpacity>
+      )}
     </Input>
   );
 }

@@ -47,4 +47,6 @@ export type ListTableRowProps<TItem> = {
   onPress?: () => void;
   action?: React.ReactNode;
   className?: string;
+  preventMultiplePresses?: boolean;
+  pressLockDurationMs?: number;
 };

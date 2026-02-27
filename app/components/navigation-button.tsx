@@ -2,9 +2,8 @@ import { useCallback, useState } from "react";
 
 import { Button } from "@components/ui/button";
 import { useFocusEffect } from "@react-navigation/native";
+import { tryAcquireNavigationLock } from "@utils/navigationLock";
 import { Href, useRouter } from "expo-router";
-
-import CheckPermission from "./check-permission";
 
 export type NavigationButtonProps = Omit<React.ComponentProps<typeof Button>, "onPress"> & {
   href: Href;
@@ -23,6 +22,7 @@ export function NavigationButton({ href, replace = false, isDisabled, ...buttonP
 
   const handlePress = () => {
     if (isNavigating || isDisabled) return;
+    if (!tryAcquireNavigationLock()) return;
 
     setIsNavigating(true);
 
