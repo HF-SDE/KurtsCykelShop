@@ -175,7 +175,7 @@ export default function Storage() {
               <ListTableRow
                 item={item}
                 columns={itemColumns}
-                onPress={() => router.push(`/storage/${item.id}/edit-item`)}
+                onPress={() => router.navigate(`/storage/${item.id}/edit-item`)}
                 action={
                   <Button variant="outline" action="secondary" className="!border-0">
                     <ButtonIcon size="3xl" as={Pencil} />

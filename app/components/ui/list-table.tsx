@@ -1,10 +1,11 @@
 import React from "react";
-import { Pressable } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 
 import { ListTableHeaderProps, ListTableRowProps } from "@/types/ui/listTable";
 
 import { Box } from "@components/ui/box";
 import { Text } from "@components/ui/text";
+import { tryAcquireNavigationLock } from "@utils/navigationLock";
 
 /**
  * Renders a table header row with column titles and optional action slot.
@@ -80,10 +81,29 @@ export function ListTableHeader<TItem>({ columns, className = "", action }: List
  * />
  * ```
  */
-export function ListTableRow<TItem>({ item, columns, onPress, action, className = "" }: ListTableRowProps<TItem>) {
-  
+export function ListTableRow<TItem>({
+  item,
+  columns,
+  onPress,
+  action,
+  className = "",
+  preventMultiplePresses = true,
+  pressLockDurationMs = 500,
+}: ListTableRowProps<TItem>) {
+  function handlePress() {
+    if (!onPress) return;
+
+    if (!preventMultiplePresses) {
+      onPress();
+      return;
+    }
+
+    if (!tryAcquireNavigationLock(pressLockDurationMs)) return;
+    onPress();
+  }
+
   return (
-    <Pressable onPress={onPress} disabled={!onPress}>
+    <Pressable onPress={handlePress} disabled={!onPress}>
       {({ hovered, pressed }) => (
         <Box
           className={`border-outline-200 flex-row border-b ${pressed ? "bg-background-100" : hovered ? "bg-background-50" : "bg-background-0"} ${className}`.trim()}
