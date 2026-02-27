@@ -13,7 +13,7 @@ export type UserWithRoles = User & {
 
 export const UsersContext = createContext<{
   data: UserWithRoles[];
-  setData: (data: UserWithRoles[]) => void;
+  setData: React.Dispatch<React.SetStateAction<UserWithRoles[]>>;
   isLoading: boolean;
 }>({
   data: [],
