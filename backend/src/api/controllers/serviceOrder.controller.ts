@@ -93,6 +93,40 @@ interface UpdateServiceOrderParams {
 }
 
 /**
+ * Create a new service order
+ * @param {Request} req - The request object with service order data in body
+ * @param {Response} res - The response object
+ * @returns {Promise<void>}
+ */
+export async function createServiceOrder(
+  req: Request<{}, APIResponse<ServiceOrder>, {}, {}>,
+  res: Response<APIResponse<ServiceOrder>>,
+): Promise<void> {
+  const userId = req.user?.id;
+  const body = req.body;
+
+  const [data, error] = await ServiceOrderService.CreateServiceOrder(body, userId);
+
+  if (error) {
+    const statusCode = getHttpStatusCode(error.status || Status.Failed);
+    res.status(statusCode).json({
+      status: error.status || Status.Failed,
+      message: error.message || "Failed to create service order",
+    });
+    return;
+  }
+
+  res
+    .status(getHttpStatusCode(Status.Created))
+    .json({
+      status: Status.Created,
+      message: "Service order created successfully",
+      data,
+    })
+    .end();
+}
+
+/**
  * Update a service order
  * @param {Request} req - The request object with id in params and update data in body
  * @param {Response} res - The response object

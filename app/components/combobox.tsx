@@ -23,6 +23,7 @@ interface ComboboxBaseProps {
   emptyStateText?: string;
   options: ComboboxOption[];
   isDisabled?: boolean;
+  onSearchChange?: (query: string) => void;
 }
 
 type SingleSelectProps = {
@@ -63,6 +64,7 @@ export function Combobox({
   onChangeValues,
   multiSelect = false,
   isDisabled = false,
+  onSearchChange,
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -232,7 +234,10 @@ export function Combobox({
                 <InputField
                   placeholder={searchPlaceholder}
                   value={searchValue}
-                  onChangeText={setSearchValue}
+                  onChangeText={(text) => {
+                    setSearchValue(text);
+                    onSearchChange?.(text);
+                  }}
                   autoFocus
                 />
               </Input>

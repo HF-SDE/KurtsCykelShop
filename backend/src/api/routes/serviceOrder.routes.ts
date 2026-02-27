@@ -10,11 +10,12 @@ const router = Router();
 router.use("/", verifyJWT);
 // router.get("/", verifyJWT, serviceOrderController.getAllServiceOrders);
 router.get("/paginated", isAllowed(["case:view"]), serviceOrderController.getAllServiceOrdersPaginated);
+router.post("/", isAllowed(["case:create"]), serviceOrderController.createServiceOrder);
 router.get("/:id", isAllowed(["case:view"]), serviceOrderController.getServiceOrderById);
 router.patch("/:id", isAllowed(["case:update"]), serviceOrderController.updateServiceOrder);
 
 // Service repair routes (nested under service orders)
-router.post("/:serviceOrderId/repairs", isAllowed(["case:update"]), serviceRepairController.createServiceRepair);
+router.post("/:serviceOrderId/repairs", isAllowed(["case:create"]), serviceRepairController.createServiceRepair);
 
 // Service parts used routes (nested under service orders)
 router.post(

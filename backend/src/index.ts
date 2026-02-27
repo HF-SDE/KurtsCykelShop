@@ -1,5 +1,6 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
+import customerRoutes from "@routes/customer.routes";
 import { itemRoutes } from "@routes/item.routes";
 import { itemStatusRoutes } from "@routes/itemStatuses.routes";
 import { locationRoutes } from "@routes/locations.routes";
@@ -48,6 +49,7 @@ app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
 app.use(`/manage`, manageRoutes);
 app.use(`/service-orders`, serviceOrderRoutes);
+app.use(`/customers`, customerRoutes);
 app.use("/units", unitRoutes);
 app.use("/items", itemRoutes);
 app.use("/user", userRoutes);

@@ -20,19 +20,31 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 interface DatePickerDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  currentDate: string; // Expects ISO 8601 string (e.g., "2024-03-15T10:00:00.000Z")
+  currentDate?: string | Date; // ISO 8601 string or Date object (defaults to today)
   onDateChange: (newDate: Date) => void;
+  title?: string;
+  subtitle?: string;
+  confirmLabel?: string;
+  minimumDate?: Date;
 }
 
-export function DatePickerDrawer({ isOpen, onClose, currentDate, onDateChange }: DatePickerDrawerProps) {
+export function DatePickerDrawer({
+  isOpen,
+  onClose,
+  currentDate,
+  onDateChange,
+  title = "Vælg dato",
+  subtitle = "Valgt dato",
+  confirmLabel = "Bekræft",
+  minimumDate = new Date(),
+}: DatePickerDrawerProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       try {
-        // Parse ISO 8601 date string to Date object
-        const parsedDate = new Date(currentDate);
+        const parsedDate = currentDate instanceof Date ? currentDate : currentDate ? new Date(currentDate) : new Date();
 
         if (isNaN(parsedDate.getTime())) {
           console.error("Invalid date format received:", currentDate);
@@ -86,11 +98,11 @@ export function DatePickerDrawer({ isOpen, onClose, currentDate, onDateChange }:
         </ActionsheetDragIndicatorWrapper>
         <VStack space="lg" className="w-full p-6 pb-8">
           <Heading size="lg" className="text-typography-900">
-            Opdater forventet færdig
+            {title}
           </Heading>
 
           <VStack space="sm">
-            <Text className="text-typography-700 font-medium">Valgt dato</Text>
+            <Text className="text-typography-700 font-medium">{subtitle}</Text>
 
             {Platform.OS === "android" && (
               <Button action="secondary" variant="outline" size="lg" onPress={() => setShowPicker(true)}>
@@ -104,7 +116,7 @@ export function DatePickerDrawer({ isOpen, onClose, currentDate, onDateChange }:
                 mode="date"
                 display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={handleDateChangeNative}
-                minimumDate={new Date()}
+                minimumDate={minimumDate}
                 locale="da-DK"
               />
             )}
@@ -114,12 +126,10 @@ export function DatePickerDrawer({ isOpen, onClose, currentDate, onDateChange }:
                 <Text className="text-typography-700 text-center font-medium">{formatDateDisplay(selectedDate)}</Text>
               </HStack>
             )}
-
-            <Text className="text-typography-500 text-sm">Kunden vil modtage en e-mail med den opdaterede dato</Text>
           </VStack>
 
           <Button action="primary" variant="solid" size="lg" onPress={handleConfirm}>
-            <ButtonText>Bekræft</ButtonText>
+            <ButtonText>{confirmLabel}</ButtonText>
           </Button>
         </VStack>
       </ActionsheetContent>

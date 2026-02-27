@@ -50,3 +50,46 @@ export const AddPartSchema = z.object({
 });
 
 export type AddPart = z.infer<typeof AddPartSchema>;
+
+/**
+ * Schema for creating a new service order.
+ * Either provide an existing customerId OR full customer details to create a new one.
+ */
+export const ServiceOrderCreateSchema = z
+  .object({
+    // Existing customer ID (optional - if provided, uses existing customer)
+    customerId: UuidSchema.optional(),
+
+    // New customer fields (required if customerId is not provided)
+    customerFirstName: z.string().min(1, "Fornavn er påkrævet").max(100).optional(),
+    customerLastName: z.string().min(1, "Efternavn er påkrævet").max(100).optional(),
+    customerEmail: z.email("Ugyldig email").optional(),
+    customerPhone: z.string().max(20).optional(),
+
+    // Service order fields
+    description: z.string().min(1, "Beskrivelse er påkrævet").max(2000, "Beskrivelse er for lang"),
+    estimatedCompletion: z.string().datetime("Ugyldigt datoformat"),
+    assignedToId: UuidSchema.nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      // Either customerId must be set, or all required customer fields must be provided
+      if (data.customerId) return true;
+      return !!data.customerFirstName && !!data.customerLastName && !!data.customerEmail;
+    },
+    {
+      message: "Enten kunde-ID eller fulde kundeoplysninger (fornavn, efternavn, email) er påkrævet",
+      path: ["customerId"],
+    },
+  );
+
+export type ServiceOrderCreate = z.infer<typeof ServiceOrderCreateSchema>;
+
+/**
+ * Schema for searching customers by query string
+ */
+export const CustomerSearchSchema = z.object({
+  q: z.string().max(200).optional(),
+});
+
+export type CustomerSearch = z.infer<typeof CustomerSearchSchema>;
