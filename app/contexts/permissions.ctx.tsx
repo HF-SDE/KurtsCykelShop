@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 import { useSession } from "@/app/ctx";
+
 import { type Permission } from "@permission-types";
 
 interface PermissionsContextValue {
@@ -28,39 +29,20 @@ export function UsePermissions() {
 export default function PermissionsProvider({ children }: { children: React.ReactNode }) {
   const { session, isLoading: isSessionLoading } = useSession();
 
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    if (isSessionLoading) {
-      setIsLoading(true);
-      return () => {
-        isMounted = false;
-      };
-    }
-
+  const permissions = useMemo<Permission[]>(() => {
     if (!session) {
-      setPermissions([]);
-      setIsLoading(false);
-      return () => {
-        isMounted = false;
-      };
+      return [];
     }
 
     const decoded = decodeJwt(session);
-    const nextPermissions = decoded && Array.isArray(decoded.permissions) ? (decoded.permissions as Permission[]) : [];
-
-    if (isMounted) {
-      setPermissions(nextPermissions);
-      setIsLoading(false);
+    if (!decoded || !Array.isArray(decoded.permissions)) {
+      return [];
     }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [session, isSessionLoading]);
+    return decoded.permissions as Permission[];
+  }, [session]);
+
+  const isLoading = isSessionLoading;
 
   const permissionSet = useMemo(() => new Set<Permission>(permissions), [permissions]);
 
