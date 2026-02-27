@@ -11,6 +11,7 @@ import { VStack } from "@/components/ui/vstack";
 
 import apiClient from "@/utils/apiClient";
 
+import CheckPermission from "@components/check-permission";
 import { Calendar, Mail, Phone } from "lucide-react-native";
 
 interface Customer {
@@ -118,16 +119,17 @@ export function CustomerInfoCard({
             <Text className="text-typography-500 text-sm">Oprettet</Text>
             <Text className="text-typography-700">{formatDateTime(createdAt)}</Text>
           </HStack>
-
-          <TouchableOpacity onPress={() => setShowDateDrawer(true)}>
-            <HStack className="items-center justify-between">
-              <Text className="text-typography-500 text-sm">Forventet færdig</Text>
-              <HStack space="sm" className="items-center">
-                <Text className="text-primary-500 font-medium">{formatDate(estimatedCompletion)}</Text>
-                <Icon as={Calendar} size="sm" className="text-primary-500" />
+          <CheckPermission requiredPermission={["case:update"]} showIfNotPermitted={true}>
+            <TouchableOpacity onPress={() => setShowDateDrawer(true)}>
+              <HStack className="items-center justify-between">
+                <Text className="text-typography-500 text-sm">Forventet færdig</Text>
+                <HStack space="sm" className="items-center">
+                  <Text className="text-primary-500 font-medium">{formatDate(estimatedCompletion)}</Text>
+                  <Icon as={Calendar} size="sm" className="text-primary-500" />
+                </HStack>
               </HStack>
-            </HStack>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </CheckPermission>
         </VStack>
       </VStack>
 
