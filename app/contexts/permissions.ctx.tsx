@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-import { getStorageItemAsync } from "@hooks/useStorageState";
+import { useSession } from "@/app/ctx";
 import { type Permission } from "@permission-types";
 
 interface PermissionsContextValue {
@@ -26,39 +26,41 @@ export function UsePermissions() {
 }
 
 export default function PermissionsProvider({ children }: { children: React.ReactNode }) {
+  const { session, isLoading: isSessionLoading } = useSession();
+
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const getPermissions = useCallback(async (): Promise<Permission[]> => {
-    const token = await getStorageItemAsync("token");
-
-    if (!token) return [];
-
-    const decoded = decodeJwt(token);
-    if (!decoded || !Array.isArray(decoded.permissions)) {
-      return [];
-    }
-
-    return decoded.permissions as Permission[];
-  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function init() {
-      const perms = await getPermissions();
-      if (!isMounted) return;
-
-      setPermissions(perms);
-      setIsLoading(false);
+    if (isSessionLoading) {
+      setIsLoading(true);
+      return () => {
+        isMounted = false;
+      };
     }
 
-    init();
+    if (!session) {
+      setPermissions([]);
+      setIsLoading(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const decoded = decodeJwt(session);
+    const nextPermissions = decoded && Array.isArray(decoded.permissions) ? (decoded.permissions as Permission[]) : [];
+
+    if (isMounted) {
+      setPermissions(nextPermissions);
+      setIsLoading(false);
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [getPermissions]);
+  }, [session, isSessionLoading]);
 
   const permissionSet = useMemo(() => new Set<Permission>(permissions), [permissions]);
 
