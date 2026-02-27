@@ -385,6 +385,8 @@ export async function UpdateServiceOrder(
 
     if (validation.data.assignedToId !== undefined) {
       updateData.assignedToId = validation.data.assignedToId;
+      if (existingServiceOrder.status == "pending") updateData.status = "in-progress";
+
       logEntries.push({
         tableField: "assignedToId",
         oldValue: existingServiceOrder.assignedToId ?? null,

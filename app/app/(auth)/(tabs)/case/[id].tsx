@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 
 import {
+  CancelOrderButton,
+  CompleteOrderButton,
   CustomerInfoCard,
   DescriptionCard,
   EmployeeAssignmentCard,
@@ -17,6 +19,7 @@ import apiClient from "@/utils/apiClient";
 
 import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderData";
 
+import CheckPermission from "@components/check-permission";
 import FoxLoader from "@components/fox";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlertCircle, FileQuestion } from "lucide-react-native";
@@ -134,34 +137,54 @@ export default function CaseDetailsPage() {
     <>
       <ScrollView className="bg-background-50 flex-1" showsVerticalScrollIndicator={false}>
         <VStack space="lg" className="p-4 pb-8">
-          <CustomerInfoCard
-            customer={caseData.customer}
-            createdAt={caseData.createdAt}
-            estimatedCompletion={caseData.estimatedCompletion}
-            serviceOrderId={id || ""}
-            onDataUpdated={reloadCaseData}
-          />
+          <CheckPermission requiredPermission={["case:update"]} showIfNotPermitted={true}>
+            <CustomerInfoCard
+              customer={caseData.customer}
+              createdAt={caseData.createdAt}
+              estimatedCompletion={caseData.estimatedCompletion}
+              serviceOrderId={id || ""}
+              onDataUpdated={reloadCaseData}
+            />
 
-          <DescriptionCard
-            initialDescription={caseData.description}
-            serviceOrderId={id || ""}
-            onDescriptionUpdated={reloadCaseData}
-          />
+            <DescriptionCard
+              initialDescription={caseData.description}
+              serviceOrderId={id || ""}
+              onDescriptionUpdated={reloadCaseData}
+            />
+          </CheckPermission>
+          <CheckPermission requiredPermission={["case:assign"]} showIfNotPermitted={true}>
+            <EmployeeAssignmentCard
+              assignedTo={caseData.assignedTo}
+              assignedBy={caseData.assignedBy}
+              serviceOrderId={id || ""}
+              onAssignmentUpdated={reloadCaseData}
+            />
+          </CheckPermission>
 
-          <EmployeeAssignmentCard
-            assignedTo={caseData.assignedTo}
-            assignedBy={caseData.assignedBy}
-            serviceOrderId={id || ""}
-            onAssignmentUpdated={reloadCaseData}
-          />
+          <CheckPermission requiredPermission={["case:update"]} showIfNotPermitted={true}>
+            <RepairsCard repairs={caseData.serviceRepairs} serviceOrderId={id || ""} onRepairAdded={reloadCaseData} />
+          </CheckPermission>
 
-          <RepairsCard repairs={caseData.serviceRepairs} serviceOrderId={id || ""} onRepairAdded={reloadCaseData} />
+          <CheckPermission requiredPermission={["case:update:items"]} showIfNotPermitted={true}>
+            <ProductsCard
+              products={caseData.servicePartsUsedWithItem}
+              serviceOrderId={id || ""}
+              onProductAdded={reloadCaseData}
+            />
+          </CheckPermission>
 
-          <ProductsCard
-            products={caseData.servicePartsUsedWithItem}
-            serviceOrderId={id || ""}
-            onProductAdded={reloadCaseData}
-          />
+          <CheckPermission requiredPermission={["case:update"]}>
+            <CompleteOrderButton
+              serviceOrderId={id || ""}
+              currentStatus={caseData.status}
+              onStatusUpdated={reloadCaseData}
+            />
+            <CancelOrderButton
+              serviceOrderId={id || ""}
+              currentStatus={caseData.status}
+              onStatusUpdated={reloadCaseData}
+            />
+          </CheckPermission>
         </VStack>
       </ScrollView>
     </>
