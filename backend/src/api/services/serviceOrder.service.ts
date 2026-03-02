@@ -3,8 +3,14 @@ import { PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Customer, Item, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
 import { StringOrNumberSchema, UuidSchema } from "@schemas/general.schemas";
-import { ServiceOrderUpdateSchema, ServiceOrdersPaginatedSchema } from "@schemas/serviceOrder.schemas";
+import {
+  ServiceOrderCreateSchema,
+  ServiceOrderUpdateSchema,
+  ServiceOrdersPaginatedSchema,
+} from "@schemas/serviceOrder.schemas";
 import z from "zod";
+
+import * as CustomerService from "./customer.service";
 
 interface GetAllServiceOrdersPaginatedParams {
   search?: any;
@@ -385,6 +391,8 @@ export async function UpdateServiceOrder(
 
     if (validation.data.assignedToId !== undefined) {
       updateData.assignedToId = validation.data.assignedToId;
+      if (existingServiceOrder.status == "pending") updateData.status = "in-progress";
+
       logEntries.push({
         tableField: "assignedToId",
         oldValue: existingServiceOrder.assignedToId ?? null,
@@ -425,6 +433,139 @@ export async function UpdateServiceOrder(
       {
         status: Status.Failed,
         message: "Failed to update service order",
+        details: error,
+      },
+    ];
+  }
+}
+
+/**
+ * Create a new service order.
+ * If customerId is provided, uses existing customer.
+ * Otherwise creates a new customer from the provided details.
+ * @param data - The creation data
+ * @param userId - The ID of the user creating the order (assignedBy)
+ * @returns {Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>>}
+ */
+export async function CreateServiceOrder(
+  data: any,
+  userId: any,
+): Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>> {
+  // Validate userId
+  const userIdValidation = UuidSchema.safeParse(userId);
+  if (!userIdValidation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid user ID",
+        fieldErrors: { userId: ["Invalid UUID format"] },
+      },
+    ];
+  }
+
+  // Validate creation data
+  const validation = ServiceOrderCreateSchema.safeParse(data);
+  if (!validation.success) {
+    return [
+      null,
+      {
+        status: Status.InvalidDetails,
+        message: "Invalid service order data",
+        fieldErrors: z.flattenError(validation.error).fieldErrors,
+      },
+    ];
+  }
+
+  const validData = validation.data;
+
+  try {
+    let customerId: string;
+
+    if (validData.customerId) {
+      // Verify customer exists
+      const existingCustomer = await prisma.customer.findUnique({
+        where: { id: validData.customerId },
+      });
+
+      if (!existingCustomer) {
+        return [
+          null,
+          {
+            status: Status.NotFound,
+            message: "Customer not found",
+          },
+        ];
+      }
+
+      customerId = existingCustomer.id;
+    } else {
+      // Create new customer
+      const [newCustomer, customerError] = await CustomerService.CreateCustomer({
+        firstName: validData.customerFirstName!,
+        lastName: validData.customerLastName!,
+        email: validData.customerEmail!,
+        phone: validData.customerPhone,
+      });
+
+      if (customerError) {
+        return [
+          null,
+          {
+            status: customerError.status,
+            message: customerError.message,
+          },
+        ];
+      }
+
+      customerId = newCustomer.id;
+    }
+
+    // If assignedToId is provided, verify the user exists
+    if (validData.assignedToId) {
+      const assignedUser = await prisma.user.findUnique({
+        where: { id: validData.assignedToId },
+      });
+
+      if (!assignedUser) {
+        return [
+          null,
+          {
+            status: Status.NotFound,
+            message: "Assigned user not found",
+          },
+        ];
+      }
+    }
+
+    // Determine initial status
+    const initialStatus = validData.assignedToId ? "in-progress" : "pending";
+
+    // Create the service order
+    const serviceOrder = await prisma.serviceOrder.create({
+      data: {
+        customerId,
+        description: validData.description,
+        estimatedCompletion: new Date(validData.estimatedCompletion),
+        assignedToId: validData.assignedToId || null,
+        assignedById: userIdValidation.data,
+        status: initialStatus,
+      },
+      include: {
+        customer: true,
+        assignedTo: true,
+        assignedBy: true,
+      },
+    });
+
+    return [serviceOrder, null];
+  } catch (error) {
+    console.error("Error creating service order:", error);
+    return [
+      null,
+      {
+        status: Status.CreationFailed,
+        message: "Failed to create service order",
         details: error,
       },
     ];

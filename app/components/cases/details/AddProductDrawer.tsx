@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, ScrollView } from "react-native";
 
 import {
@@ -22,7 +22,7 @@ import { VStack } from "@/components/ui/vstack";
 
 import apiClient from "@/utils/apiClient";
 
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { BarcodeScanningResult, CameraView, useCameraPermissions } from "expo-camera";
 import { ScanBarcode, Search, X } from "lucide-react-native";
 
 interface Product {
@@ -54,8 +54,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
   const [amountInputFocused, setAmountInputFocused] = useState(false);
 
   const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
-  const [isProcessingScan, setIsProcessingScan] = useState(false);
+  const hasScannedRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,8 +64,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
       setSearchResults([]);
       setSelectedProduct(null);
       setQuantity("1");
-      setScanned(false);
-      setIsProcessingScan(false);
+      hasScannedRef.current = false;
     }
   }, [isOpen]);
 
@@ -102,31 +100,21 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
     }
   };
 
-  const handleBarcodeScanned = async ({ data }: { data: string }) => {
-    // Prevent multiple scans while processing
-    if (scanned || isProcessingScan) return;
-
-    setScanned(true);
-    setIsProcessingScan(true);
-
+  const handleBarcodeFetch = async ({ data }: { data: string }) => {
     try {
       const response = await apiClient.get(`/items/barcode?barcode=${encodeURIComponent(data)}`);
       console.log("🚀 ~ handleBarcodeScanned ~ response:", response);
 
       if (response.data.status === "Success" && response.data.data) {
         setSelectedProduct(response.data.data);
-        setMode("search"); // Switch back to search mode to show selected product
-        // Keep scanned true so it doesn't scan again
+        setMode("search");
       } else {
         Alert.alert("Fejl", "Produkt ikke fundet");
-        // Keep scanned true to prevent continuous scanning
       }
     } catch (error) {
       console.error("Error fetching product by barcode:", error);
       Alert.alert("Fejl", "Produkt ikke fundet for stregkoden");
       // Keep scanned true to prevent continuous scanning
-    } finally {
-      setIsProcessingScan(false);
     }
   };
 
@@ -163,8 +151,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
     setSelectedProduct(null);
     setSearchQuery("");
     setQuantity("1");
-    setScanned(false);
-    setIsProcessingScan(false);
+    hasScannedRef.current = false;
   };
 
   const renderSearchMode = () => (
@@ -263,6 +250,27 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
     </VStack>
   );
 
+  useEffect(() => {
+    if (!permission) return;
+
+    if (!permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
+
+  const handleBarcodeScanned = useCallback(
+    async ({ data }: BarcodeScanningResult) => {
+      if (hasScannedRef.current) return;
+      hasScannedRef.current = true;
+
+      await handleBarcodeFetch({ data });
+
+      // Reset after delay so user can scan again on error (success switches mode anyway)
+      setTimeout(() => (hasScannedRef.current = false), 2000);
+    },
+    [handleBarcodeFetch],
+  );
+
   const renderScanMode = () => {
     if (!permission) {
       return (
@@ -291,27 +299,9 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
           <CameraView
             style={{ flex: 1 }}
             barcodeScannerSettings={{ barcodeTypes: ["ean13", "code128"] }}
-            onBarcodeScanned={scanned || isProcessingScan ? undefined : handleBarcodeScanned}
+            onBarcodeScanned={handleBarcodeScanned}
           />
         </VStack>
-        {isProcessingScan && (
-          <HStack space="sm" className="items-center justify-center">
-            <Spinner />
-            <Text className="text-typography-500">Behandler...</Text>
-          </HStack>
-        )}
-        {scanned && !isProcessingScan && (
-          <Button
-            action="secondary"
-            variant="outline"
-            onPress={() => {
-              setScanned(false);
-              setIsProcessingScan(false);
-            }}
-          >
-            <ButtonText>Scan igen</ButtonText>
-          </Button>
-        )}
       </VStack>
     );
   };
@@ -336,8 +326,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
               size="md"
               onPress={() => {
                 setMode("search");
-                setScanned(false);
-                setIsProcessingScan(false);
+                hasScannedRef.current = false;
               }}
               className="flex-1"
             >
@@ -350,8 +339,7 @@ export function AddProductDrawer({ isOpen, onClose, serviceOrderId, onProductAdd
               size="md"
               onPress={() => {
                 setMode("scan");
-                setScanned(false);
-                setIsProcessingScan(false);
+                hasScannedRef.current = false;
               }}
               className="flex-1"
             >
