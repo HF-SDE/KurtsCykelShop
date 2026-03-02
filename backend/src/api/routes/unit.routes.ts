@@ -1,4 +1,4 @@
-import { getAll } from "@controllers/unit.controller";
+import { createOne, deleteOne, getAll, updateOne } from "@controllers/unit.controller";
 import { verifyJWT } from "@middlewares/authenticate.mw";
 import { isAllowed } from "@middlewares/isAllowed.mw";
 import { Router } from "express";
@@ -7,6 +7,9 @@ const router = Router();
 
 router.use("/", verifyJWT);
 
-router.get(["/", "/:id"], isAllowed(["storage:unit:view"]), getAll);
+router.get("/", isAllowed(["storage:unit:view"]), getAll);
+router.post("/", isAllowed(["storage:unit:create"]), createOne);
+router.put("/:id", isAllowed(["storage:unit:update"]), updateOne);
+router.delete("/:id", isAllowed(["storage:unit:delete"]), deleteOne);
 
-export default router;
+export { router as unitRoutes };
