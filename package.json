@@ -13,7 +13,10 @@
     "build": "docker compose -f ./docker/docker-compose.prod.yml build",
     "seed": "cd backend && npx prisma migrate deploy && npx prisma db seed",
     "prisma:generate": "cd backend && npm run prisma:generate",
-    "create-envs": "node config/environment-variables/copy-env-dev.mjs"
+    "create-envs": "node config/environment-variables/copy-env-dev.mjs",
+    "k8s:apply": "kubectl apply -k ./k8s",
+    "k8s:dry-run": "kubectl apply -k ./k8s --dry-run=client",
+    "k8s:status": "kubectl get deployments && kubectl get pods"
   },
   "author": "Kurt",
   "description": "World best cykel shop",

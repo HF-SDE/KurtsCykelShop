@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: cloudflare-tunnel
+  name: cloudflare-tunnel
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      io.kompose.service: cloudflare-tunnel
+  template:
+    metadata:
+      labels:
+        io.kompose.service: cloudflare-tunnel
+    spec:
+      containers:
+        - command:
+            - cloudflared
+            - tunnel
+            - --no-autoupdate
+            - run
+            - --token
+            - $(CLOUDFLARE_TUNNEL_TOKEN)
+          envFrom:
+            - secretRef:
+                name: cloudflare-tunnel-secret
+          image: cloudflare/cloudflared:latest
+          name: cloudflare-tunnel
+      restartPolicy: Always

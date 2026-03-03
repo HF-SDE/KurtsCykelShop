@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: db
+  name: db-env
+data:
+  POSTGRES_DB: KurtsCykelShop
+  POSTGRES_USER: admin

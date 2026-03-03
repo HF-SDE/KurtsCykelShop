@@ -1,0 +1,414 @@
+apiVersion: v1
+data:
+  auth.schemas.ts: |
+    import { z } from "zod";
+
+    export const LoginSchema = z.object({
+      username: z.string().min(1, "Username is required"),
+      password: z.string().min(1, "Password is required"),
+    });
+
+    export const TokenSchema = z.object({
+      token: z.string().regex(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/),
+    });
+
+    export type LoginType = z.infer<typeof LoginSchema>;
+    export type TokenType = z.infer<typeof TokenSchema>;
+  general.schemas.ts: |
+    import { z } from "zod";
+
+    export const UuidSchema = z.uuid("Invalid UUID v4 format");
+
+    export const EmailSchema = z.email("Invalid email address");
+
+    export const StringOrNumberSchema = z.union([
+      z.number(),
+      z.string().transform((val, ctx) => {
+        const parsed = Number(val);
+        if (isNaN(parsed)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Invalid number format",
+          });
+          return z.NEVER;
+        }
+        return parsed;
+      }),
+    ]);
+  item.schemas.ts: |
+    import { z } from "zod";
+
+    export const ItemFiltersSchema = z.object({
+      isPublic: z
+        .string()
+        .transform((val) => (val === "true" ? true : val === "false" ? false : undefined))
+        .optional(),
+      statusId: z.uuid().optional(),
+      locationId: z.uuid().optional(),
+      vendorId: z.uuid().optional(),
+    });
+
+    export const CreateItemSchema = z.object({
+      name: z.string().min(1, "Navn er påkrævet"),
+      description: z.string().optional(),
+      quantity: z.coerce.number().int().min(0, "Antal skal være 0 eller et positivt heltal"),
+      unitId: z.uuid("Enhed er påkrævet"),
+      minSellQuantity: z.coerce.number().int().positive("Minimums salgsantal skal være et positivt heltal"),
+      isPublic: z.boolean(),
+      price: z.coerce.number().positive("Pris skal være et positivt tal"),
+      purchasePrice: z.coerce.number().positive("Indkøbspris skal være et positivt tal"),
+      vendorId: z.uuid("Leverandør er påkrævet"),
+      statusId: z.uuid("Status er påkrævet"),
+      locationId: z.uuid("Lokation er påkrævet"),
+      barcodes: z.array(z.string()).optional(),
+    });
+
+    export const EditItemSchema = CreateItemSchema.partial();
+
+    export type ItemFiltersType = z.infer<typeof ItemFiltersSchema>;
+    export type CreateItemType = z.infer<typeof CreateItemSchema>;
+    export type EditItemType = z.infer<typeof EditItemSchema>;
+  location.schema.ts: |-
+    import { z } from "zod";
+
+    export const CreateLocationSchema = z.object({
+      name: z.string().min(1, "Name is required"),
+      description: z.string().optional(),
+      isActive: z.boolean().optional(),
+    });
+
+    export const EditLocationSchema = CreateLocationSchema.partial();
+
+    export type CreateLocationType = z.infer<typeof CreateLocationSchema>;
+    export type EditLocationType = z.infer<typeof EditLocationSchema>;
+  password.schemas.ts: |
+    import { z } from "zod";
+
+    export const PasswordSchema = z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .max(255)
+      .refine((val) => /[A-Z]/.test(val), {
+        message: "Password must contain one uppercase letter",
+      })
+      .refine((val) => /[a-z]/.test(val), {
+        message: "Password must contain one lowercase letter",
+      })
+      .refine((val) => /[0-9]/.test(val), {
+        message: "Password must contain one number",
+      })
+      .refine((val) => /[!@#$%^&*(),.?":{}|<>=´`'£¤/7/\\\]§;]/.test(val), {
+        message: "Password must contain one special character",
+      });
+  permission.schemas.ts: |
+    import { z } from "zod";
+
+    import { UuidSchema } from "./general.schemas";
+
+    export const getPermissionSchema = z.object({
+      id: UuidSchema.optional(),
+      code: z.string().min(1).optional(),
+      permissionGroupId: UuidSchema.optional(),
+    });
+  permissionGroups.schemas.ts: |
+    import { z } from "zod";
+
+    import { UuidSchema } from "./general.schemas";
+
+    export const getPermissionGroupsSchema = z.object({
+      id: UuidSchema.optional(),
+    });
+  profile.schemas.ts: |
+    import { z } from "zod";
+
+    import { PasswordSchema } from "./password.schemas";
+
+    export const ChangePasswordBase64Schema = z.object({
+      newPassword: z.base64(),
+      oldPassword: z.base64(),
+    });
+
+    export const ChangePasswordSchema = z
+      .object({
+        newPassword: PasswordSchema,
+        oldPassword: z.string(),
+      })
+      .refine((data) => data.newPassword !== data.oldPassword, {
+        message: "Your new password must not be the same as your old password",
+        path: ["newPassword"],
+      });
+
+    export const jwtTokenSchema = z
+      .string()
+      .regex(/^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-+/=]*)$/, "Invalid JWT token format");
+  role.schema.ts: |
+    import { z } from "zod";
+
+    export const RoleNameSchema = z
+      .string()
+      .trim()
+      .min(2, "Role name must be at least 2 characters")
+      .max(50, "Role name must be at most 50 characters");
+
+    export const RoleSchema = z.object({
+      id: z.string().uuid(),
+      name: RoleNameSchema,
+      description: z.string().trim().max(255).optional().nullable(),
+      permissions: z.array(z.string().uuid()).default([]),
+      createdAt: z.coerce.date(),
+      updatedAt: z.coerce.date(),
+    });
+
+    export const GetRoleSchema = z.object({
+      id: z.string().uuid().optional(),
+      name: z.string().trim().optional(),
+    });
+
+    export const CreateRoleSchema = z.object({
+      name: RoleNameSchema,
+      description: z.string().trim().max(255).optional(),
+      permissions: z.array(z.string().uuid()).default([]),
+    });
+
+    export const UpdateRoleSchema = z
+      .object({
+        name: RoleNameSchema.optional(),
+        description: z.string().trim().max(255).nullable().optional(),
+        permissions: z.array(z.string().uuid()).optional(),
+      })
+      .refine((value) => Object.keys(value).length > 0, {
+        message: "At least one field must be provided",
+      });
+
+    export const RoleIdParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    export type Role = z.infer<typeof RoleSchema>;
+    export type GetRoleInput = z.infer<typeof GetRoleSchema>;
+    export type CreateRoleInput = z.infer<typeof CreateRoleSchema>;
+    export type UpdateRoleInput = z.infer<typeof UpdateRoleSchema>;
+  role.schemas.ts: |
+    import { z } from "zod";
+
+    export const RoleNameSchema = z
+      .string()
+      .trim()
+      .min(2, "Role name must be at least 2 characters")
+      .max(50, "Role name must be at most 50 characters");
+
+    export const RoleSchema = z.object({
+      id: z.string().uuid(),
+      name: RoleNameSchema,
+      description: z.string().trim().max(255).optional().nullable(),
+      permissions: z.array(z.string().uuid()).default([]),
+      createdAt: z.coerce.date(),
+      updatedAt: z.coerce.date(),
+    });
+
+    export const GetRoleSchema = z.object({
+      id: z.string().uuid().optional(),
+      name: z.string().trim().optional(),
+      withPermissions: z.coerce.boolean().default(false),
+      withAllPermissions: z.coerce.boolean().default(false),
+      withPermissionGroups: z.coerce.boolean().default(false),
+    });
+
+    export const CreateRoleSchema = z.object({
+      name: RoleNameSchema,
+      description: z.string().trim().max(255).optional(),
+      permissions: z.array(z.string().uuid()).default([]),
+    });
+
+    export const UpdateRoleSchema = z
+      .object({
+        name: RoleNameSchema.optional(),
+        description: z.string().trim().max(255).nullable().optional(),
+        permissions: z.array(z.string().uuid()).optional(),
+      })
+      .refine((value) => Object.keys(value).length > 0, {
+        message: "At least one field must be provided",
+      });
+
+    export const RoleIdParamsSchema = z.object({
+      id: z.string().uuid(),
+    });
+
+    export type Role = z.infer<typeof RoleSchema>;
+    export type GetRoleInput = z.infer<typeof GetRoleSchema>;
+    export type CreateRoleInput = z.infer<typeof CreateRoleSchema>;
+    export type UpdateRoleInput = z.infer<typeof UpdateRoleSchema>;
+  serviceOrder.schemas.ts: |
+    import { z } from "zod";
+
+    import { StringOrNumberSchema, UuidSchema } from "./general.schemas";
+
+    // Alternative simpler version using coerce (uncomment to use instead):
+    // export const StringOrNumberSchema = z.coerce.number();
+
+    export const timeRangeEnum = ["all", "today", "week", "month", "quarter", "year"] as const;
+    export const statusEnum = ["completed", "cancelled", "in-progress", "pending"] as const;
+
+    export type timeRangeTypesFromEnum = (typeof timeRangeEnum)[number];
+    export type statusTypesFromEnum = (typeof statusEnum)[number];
+
+    export const ServiceOrdersPaginatedSchema = z.object({
+      page: StringOrNumberSchema.optional(),
+      limit: StringOrNumberSchema.optional(),
+      search: z.string().optional(),
+      timeRange: z.enum(timeRangeEnum).optional(),
+      statuses: z.array(z.enum(statusEnum)).optional(),
+    });
+
+    /**
+     * Schema for updating a service order
+     */
+    export const ServiceOrderUpdateSchema = z.object({
+      description: z.string().min(1, "Description cannot be empty").optional(),
+      status: z.enum(statusEnum).optional(),
+      estimatedCompletion: z.string().datetime("Invalid date format").optional(),
+      assignedToId: UuidSchema.nullable().optional(),
+    });
+
+    export type ServiceOrderUpdate = z.infer<typeof ServiceOrderUpdateSchema>;
+
+    /**
+     * Schema for adding a repair to a service order
+     */
+    export const AddRepairSchema = z.object({
+      title: z.string().min(1, "Title is required").max(200, "Title too long"),
+      description: z.string().min(1, "Description is required").max(1000, "Description too long"),
+    });
+
+    export type AddRepair = z.infer<typeof AddRepairSchema>;
+
+    /**
+     * Schema for adding a part/product to a service order
+     */
+    export const AddPartSchema = z.object({
+      itemId: UuidSchema,
+      quantity: z.number().int("Quantity must be an integer").positive("Quantity must be positive"),
+    });
+
+    export type AddPart = z.infer<typeof AddPartSchema>;
+
+    /**
+     * Schema for creating a new service order.
+     * Either provide an existing customerId OR full customer details to create a new one.
+     */
+    export const ServiceOrderCreateSchema = z
+      .object({
+        // Existing customer ID (optional - if provided, uses existing customer)
+        customerId: UuidSchema.optional(),
+
+        // New customer fields (required if customerId is not provided)
+        customerFirstName: z.string().min(1, "Fornavn er påkrævet").max(100).optional(),
+        customerLastName: z.string().min(1, "Efternavn er påkrævet").max(100).optional(),
+        customerEmail: z.email("Ugyldig email").optional(),
+        customerPhone: z.string().max(20).optional(),
+
+        // Service order fields
+        description: z.string().min(1, "Beskrivelse er påkrævet").max(2000, "Beskrivelse er for lang"),
+        estimatedCompletion: z.string().datetime("Ugyldigt datoformat"),
+        assignedToId: UuidSchema.nullable().optional(),
+      })
+      .refine(
+        (data) => {
+          // Either customerId must be set, or all required customer fields must be provided
+          if (data.customerId) return true;
+          return !!data.customerFirstName && !!data.customerLastName && !!data.customerEmail;
+        },
+        {
+          message: "Enten kunde-ID eller fulde kundeoplysninger (fornavn, efternavn, email) er påkrævet",
+          path: ["customerId"],
+        },
+      );
+
+    export type ServiceOrderCreate = z.infer<typeof ServiceOrderCreateSchema>;
+
+    /**
+     * Schema for searching customers by query string
+     */
+    export const CustomerSearchSchema = z.object({
+      q: z.string().max(200).optional(),
+    });
+
+    export type CustomerSearch = z.infer<typeof CustomerSearchSchema>;
+  unit.schema.ts: |-
+    import { z } from "zod";
+
+    export const CreateUnitSchema = z.object({
+      name: z.string().min(1, "Navn er påkrævet"),
+      code: z.string().min(1, "Kode er påkrævet"),
+    });
+
+    export const EditUnitSchema = CreateUnitSchema.partial();
+
+    export type CreateUnitType = z.infer<typeof CreateUnitSchema>;
+    export type EditUnitType = z.infer<typeof EditUnitSchema>;
+  user.schemas.ts: |
+    import { z } from "zod";
+
+    import { EmailSchema, UuidSchema } from "./general.schemas";
+
+    const usernameSchema = z.string().regex(/^[a-zA-Z0-9]+$/, "Username must be alphanumeric");
+
+    export const getUserSchema = z.object({
+      id: UuidSchema.optional(),
+      username: usernameSchema.optional(),
+      email: EmailSchema.optional(),
+    });
+
+    export const createUserSchema = z.object({
+      name: z.string().min(1),
+      username: usernameSchema,
+      initials: z.string().max(6),
+      active: z.boolean().optional(),
+      password: z.string().min(8),
+      UserRoles: z.array(z.string()).optional(),
+    });
+
+    export const patchUserSchema = z.object({
+      name: z.string().min(1),
+      username: usernameSchema,
+      initials: z.string().max(6),
+      active: z.boolean(),
+      password: z.string().min(8).optional(),
+      UserRoles: z.array(z.string()).optional(),
+    });
+
+    export const updateUserSchema = z.object({
+      username: usernameSchema.optional(),
+      firstName: z.string().min(1).optional(),
+      lastName: z.string().min(1).optional(),
+      email: EmailSchema.optional(),
+      initials: z.string().max(6).optional(),
+      active: z.boolean().optional(),
+      password: z.string().min(8).optional(),
+      UserRoles: z.array(z.string()).optional(),
+    });
+
+    export const resetUserPasswordSchema = z.object({
+      password: z.string().min(8),
+    });
+  vendor.schema.ts: |
+    import { z } from "zod";
+
+    export const CreateVendorSchema = z.object({
+      name: z.string().min(1, "Navn er påkrævet"),
+      address: z.string().optional(),
+      mail: z.email("Ugyldig email").optional(),
+      phone: z.string().optional(),
+      url: z.url("Ugyldig URL").optional(),
+      description: z.string().optional(),
+    });
+
+    export const EditVendorSchema = CreateVendorSchema.partial();
+
+    export type CreateVendorType = z.infer<typeof CreateVendorSchema>;
+    export type EditVendorType = z.infer<typeof EditVendorSchema>;
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: backend
+  name: backend-cm1

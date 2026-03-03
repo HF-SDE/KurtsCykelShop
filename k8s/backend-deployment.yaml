@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: backend
+    spec:
+      containers:
+        - args:
+            - npm
+            - run
+            - dev
+          envFrom:
+            - configMapRef:
+                name: backend-env
+            - secretRef:
+                name: backend-secret
+          image: backend:latest
+          imagePullPolicy: IfNotPresent
+          name: backend
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /usr/src/app/nodemon.json
+              name: backend-nodemon
+              subPath: nodemon.json
+            - mountPath: /usr/src/app/schemas
+              name: backend-cm1
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: nodemon.json
+                path: nodemon.json
+            name: backend-nodemon
+          name: backend-nodemon
+        - configMap:
+            name: backend-cm1
+          name: backend-cm1
