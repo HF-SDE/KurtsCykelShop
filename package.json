@@ -14,9 +14,11 @@
     "seed": "cd backend && npx prisma migrate deploy && npx prisma db seed",
     "prisma:generate": "cd backend && npm run prisma:generate",
     "create-envs": "node config/environment-variables/copy-env-dev.mjs",
-    "k8s:apply": "kubectl apply -k ./k8s",
-    "k8s:dry-run": "kubectl apply -k ./k8s --dry-run=client",
-    "k8s:status": "kubectl get deployments && kubectl get pods"
+    "k8s:apply": "kubectl apply -k ./k8s/overlays/dev",
+    "k8s:apply:prod": "kubectl apply -k ./k8s/overlays/prod",
+    "k8s:dry-run": "kubectl apply -k ./k8s/overlays/dev --dry-run=client",
+    "k8s:status": "kubectl -n kurts-cykel-shop get deployments && kubectl -n kurts-cykel-shop get pods",
+    "k8s:build-backend": "docker build -f ./backend/Dockerfile.k8s -t backend:latest ."
   },
   "author": "Kurt",
   "description": "World best cykel shop",

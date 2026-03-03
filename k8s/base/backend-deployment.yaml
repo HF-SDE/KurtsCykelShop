@@ -29,6 +29,25 @@ spec:
           image: backend:latest
           imagePullPolicy: IfNotPresent
           name: backend
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 20
           ports:
             - containerPort: 5000
               protocol: TCP
@@ -36,8 +55,6 @@ spec:
             - mountPath: /usr/src/app/nodemon.json
               name: backend-nodemon
               subPath: nodemon.json
-            - mountPath: /usr/src/app/schemas
-              name: backend-cm1
       restartPolicy: Always
       volumes:
         - configMap:
@@ -46,6 +63,3 @@ spec:
                 path: nodemon.json
             name: backend-nodemon
           name: backend-nodemon
-        - configMap:
-            name: backend-cm1
-          name: backend-cm1

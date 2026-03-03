@@ -26,19 +26,30 @@ kubectl create secret generic cloudflare-tunnel-secret \
 Then apply manifests:
 
 ```powershell
-kubectl apply -k .\k8s
+kubectl apply -k .\k8s\overlays\dev
 ```
 
 ## Option B: edit placeholder files locally
 
 Update placeholder values in:
 
-- `backend-secret.yaml`
-- `db-secret.yaml`
-- `cloudflare-tunnel-secret.yaml`
+- `base/backend-secret.yaml`
+- `base/db-secret.yaml`
+- `base/cloudflare-tunnel-secret.yaml`
 
 Then apply:
 
 ```powershell
-kubectl apply -k .\k8s
+kubectl apply -k .\k8s\overlays\dev
+```
+
+## Quick commands
+
+From repo root:
+
+```powershell
+npm run k8s:build-backend
+npm run k8s:dry-run
+npm run k8s:apply
+npm run k8s:status
 ```
