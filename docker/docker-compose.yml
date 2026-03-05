@@ -55,6 +55,7 @@ services:
       - web_node_modules:/usr/src/app/node_modules
     networks:
       - internal
+      - public
 
   reverse-proxy:
     container_name: reverse-proxy

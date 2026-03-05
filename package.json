@@ -5,7 +5,7 @@
   "scripts": {
     "install": "cd backend && npm install && cd ../app && npm install",
     "dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d && docker image prune -f && cd app && npm run start",
-    "backend:dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d --build && docker image prune -f",
+    "backend:dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml run --rm web npm install && docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d --build && docker image prune -f",
     "backend": "docker compose --env-file ./config/environment-variables/.env.docker.prod -f ./docker/docker-compose.prod.yml up -d && docker image prune",
     "app:dev": "cd app && npm run start",
     "app:dev:tunnel": "cd app && npm run tunnel",
