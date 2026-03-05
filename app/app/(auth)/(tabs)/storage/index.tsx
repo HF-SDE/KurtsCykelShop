@@ -118,7 +118,7 @@ export default function Storage() {
         onBarcodeScanned={handleBarcodeScanned}
       />
 
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 mb-1">
+      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 lg:mt-5">
         <Searchbar className="h-full flex-1" placeholder="Søg i lager..." value={search} onChangeText={setSearch} />
 
         <StorageFilterDrawer
