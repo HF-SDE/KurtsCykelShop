@@ -21,7 +21,7 @@ import { Text } from "@components/ui/text";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { UserFiltersType, UsersFilterDrawer } from "@components/users/users-filter-drawer";
 import { useRouter } from "expo-router";
-import { Archive, ListFilter, Pencil } from "lucide-react-native";
+import { Archive, Filter, Pencil } from "lucide-react-native";
 
 import { UserWithRoles, useUsers } from "./ctx";
 
@@ -159,12 +159,12 @@ export default function UsersPage() {
 
   return (
     <Box className="bg-background-0 w-full flex-1 px-2">
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
+      <Box className="mb-4 lg:mt-5 h-14 w-full flex-row justify-between gap-3">
         <Searchbar className="h-full flex-1" placeholder="Søg brugere..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
           </Button>
         </ButtonGroup>
       </Box>
@@ -209,19 +209,20 @@ export default function UsersPage() {
               )}
               renderRightActions={() => (
                 <CheckPermission requiredPermission={["administrator:users:update"]}>
-                  <Button
-                    variant="outline"
-                    action="secondary"
-                    className="h-full w-[110px] rounded-none"
+                  <RectButton
                     onPress={() =>
                       router.push({
                         pathname: "/(auth)/(tabs)/admin/users/[id]/edit",
                         params: { id: item.id },
                       })
                     }
+                    style={{ width: 110, justifyContent: "center", alignItems: "center" }}
                   >
-                    <ButtonIcon as={Pencil} />
-                  </Button>
+                    <Box className="bg-primary-50 border-outline-200 h-full w-full items-center justify-center gap-1 border-l">
+                      <Icon className="text-primary-700" as={Pencil} />
+                      <Text className="text-primary-700">Rediger</Text>
+                    </Box>
+                  </RectButton>
                 </CheckPermission>
               )}
             >

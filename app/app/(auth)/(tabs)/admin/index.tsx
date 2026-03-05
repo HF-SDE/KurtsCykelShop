@@ -5,8 +5,9 @@ import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@/components/ui/but
 
 import CheckPageAccess from "@components/check-page-access";
 import { Center } from "@components/ui/center";
-import { LockIcon, UserShieldIcon } from "@components/ui/icon";
+import { LockIcon } from "@components/ui/icon";
 import { useRouter } from "expo-router";
+import { UsersRound } from "lucide-react-native";
 
 export default function Admin() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function Admin() {
           <CheckPageAccess pageName="UsersPage">
             <Button action="primary" variant="solid" size="3xl" onPress={handleUsersPress}>
               <ButtonText size="2xl">Users</ButtonText>
-              <ButtonIcon as={UserShieldIcon} size="4xl" />
+              <ButtonIcon as={UsersRound} size="4xl" />
             </Button>
           </CheckPageAccess>
         </ButtonGroup>
