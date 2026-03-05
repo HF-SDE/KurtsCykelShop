@@ -15,7 +15,7 @@ import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
 import { ListTableHeader, ListTableRow } from "@components/ui/list-table";
 import { Text } from "@components/ui/text";
 import { useRouter } from "expo-router";
-import { ListFilter, Pencil, Plus } from "lucide-react-native";
+import { Filter, Pencil, Plus } from "lucide-react-native";
 
 import { useRole } from "./ctx";
 
@@ -71,7 +71,7 @@ export default function RolesPage() {
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
           </Button>
 
           <CheckPermission requiredPermission={["administrator:role:create"]}>

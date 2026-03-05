@@ -21,7 +21,7 @@ import { Text } from "@components/ui/text";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { UserFiltersType, UsersFilterDrawer } from "@components/users/users-filter-drawer";
 import { useRouter } from "expo-router";
-import { Archive, ListFilter, Pencil } from "lucide-react-native";
+import { Archive, Filter, Pencil } from "lucide-react-native";
 
 import { UserWithRoles, useUsers } from "./ctx";
 
@@ -164,7 +164,7 @@ export default function UsersPage() {
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
           </Button>
         </ButtonGroup>
       </Box>

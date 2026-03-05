@@ -22,7 +22,7 @@ import { Text } from "@components/ui/text";
 import { Textarea, TextareaInput } from "@components/ui/textarea";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { Stack, useRouter } from "expo-router";
-import { ListFilter, Save } from "lucide-react-native";
+import { Filter, Save } from "lucide-react-native";
 
 import { useRole } from "./ctx";
 
@@ -214,7 +214,7 @@ export default function NewRolePage() {
         <Searchbar className="flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
           </Button>
         </ButtonGroup>
       </Box>
