@@ -39,11 +39,30 @@ services:
       - public
       - internal
 
+  web:
+    container_name: web
+    build:
+      context: ../web/
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    env_file:
+      - ../config/environment-variables/.env.web.dev
+    volumes:
+      - ../web:/usr/src/app
+      - web_node_modules:/usr/src/app/node_modules
+    networks:
+      - internal
+
   reverse-proxy:
     container_name: reverse-proxy
     image: nginx:alpine
     ports:
       - 80:80
+    expose:
+      - "80"
     depends_on:
       - backend
     configs:
@@ -51,6 +70,7 @@ services:
         target: /etc/nginx/nginx.conf
     networks:
       - internal
+      - public
 
   ngrok:
     container_name: ngrok
@@ -73,6 +93,7 @@ networks:
 
 volumes:
   postgres_data: {}
+  web_node_modules: {}
 
 configs:
   nginx_config:
