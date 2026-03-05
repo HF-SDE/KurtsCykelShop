@@ -66,7 +66,7 @@ export default function RolesPage() {
 
   return (
     <Box className="bg-background-0 w-full flex-1 px-2">
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
+      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 mt-1">
         <Searchbar className="h-full flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
