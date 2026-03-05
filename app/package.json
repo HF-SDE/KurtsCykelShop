@@ -5,11 +5,15 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "tunnel": "expo start --tunnel"
+    "tunnel": "expo start --tunnel",
+    "build:android": "expo prebuild && cd ./android && gradlew.bat assembleRelease",
+    "build:android:win": "scripts\\build-android-win.cmd",
+    "build:ios": "expo prebuild && cd ios && xcodebuild -workspace YourApp.xcworkspace -scheme YourApp -configuration Release -sdk iphoneos -archivePath YourApp.xcarchive archive",
+    "build:web": "expo build:web"
   },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",
@@ -54,7 +58,8 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "^0.5.2",
     "react-stately": "^3.44.0",
-    "tailwind-variants": "^0.1.20"
+    "tailwind-variants": "^0.1.20",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

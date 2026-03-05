@@ -1,5 +1,17 @@
 # Kubernetes secret setup
 
+## Current architecture diagram
+
+The current Kubernetes architecture (as defined by manifests in `k8s/base` and overlays) is documented as Mermaid in:
+
+- `k8s/architecture-current.mmd`
+
+Notes:
+
+- This diagram reflects the manifests in this repository.
+- It intentionally shows **no Ingress resource** because none is defined.
+- PostgreSQL is shown as a **Deployment** (not StatefulSet), matching `base/db-deployment.yaml`.
+
 This folder contains placeholder values in Secret manifests.
 Do not commit real secrets to git.
 
