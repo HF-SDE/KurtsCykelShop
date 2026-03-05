@@ -7,8 +7,13 @@ const config: ExpoConfig = {
   icon: "./assets/icon.png",
   scheme: "app",
   userInterfaceStyle: "automatic",
+  orientation: "default",
   newArchEnabled: true,
-  orientation: "portrait",
+  splash: {
+    image: "./assets/splash.png",
+    resizeMode: "contain",
+    backgroundColor: "#ffffff",
+  },
   ios: {
     supportsTablet: true,
     config: {
