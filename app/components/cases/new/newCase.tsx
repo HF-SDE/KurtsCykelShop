@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { Alert, Platform, ScrollView } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import { DatePickerDrawer } from "@/components/cases/DatePickerDrawer";
 import { Button, ButtonText } from "@/components/ui/button";
-import { FormControl } from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
-import { HStack } from "@/components/ui/hstack";
-import { Input, InputField } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
@@ -15,18 +12,12 @@ import { VStack } from "@/components/ui/vstack";
 
 import apiClient from "@/utils/apiClient";
 
+import { ServiceOrderCreateSchema } from "@schemas/serviceOrder.schemas";
 import { useRouter } from "expo-router";
 
 import { type CustomerData, CustomerSearchSection } from "./CustomerSearchSection";
 import { type Employee, EmployeeSelectField } from "./EmployeeSelectField";
 import { type TaskType, TaskTypeRadio } from "./TaskTypeRadio";
-
-interface FormErrors {
-  customer?: Partial<Record<keyof CustomerData, string>>;
-  description?: string;
-  estimatedCompletion?: string;
-  general?: string;
-}
 
 export function NewCase() {
   const toast = useToast();
@@ -54,84 +45,39 @@ export function NewCase() {
 
   // Form state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  /**
-   * Client-side validation before submitting
-   */
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-    let isValid = true;
-
-    // Validate customer
-    if (!customerData.id) {
-      const customerErrors: Partial<Record<keyof CustomerData, string>> = {};
-
-      if (!customerData.firstName.trim()) {
-        customerErrors.firstName = "Fornavn er påkrævet";
-        isValid = false;
-      }
-      if (!customerData.lastName.trim()) {
-        customerErrors.lastName = "Efternavn er påkrævet";
-        isValid = false;
-      }
-      if (!customerData.email.trim()) {
-        customerErrors.email = "Email er påkrævet";
-        isValid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerData.email)) {
-        customerErrors.email = "Ugyldig email-adresse";
-        isValid = false;
-      }
-
-      if (Object.keys(customerErrors).length > 0) {
-        newErrors.customer = customerErrors;
-      }
-    }
-
-    // Validate description
-    if (!description.trim()) {
-      newErrors.description = "Beskrivelse er påkrævet";
-      isValid = false;
-    }
-
-    // Validate estimated completion
-    if (!expectedCompletion) {
-      newErrors.estimatedCompletion = "Forventet færdigdato er påkrævet";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-
     const estimatedCompletionISO = expectedCompletion.toISOString();
 
+    const payload: Record<string, unknown> = {
+      description,
+      estimatedCompletion: estimatedCompletionISO,
+      assignedToId: selectedEmployee?.id ?? null,
+    };
+
+    if (customerData.id) {
+      payload.customerId = customerData.id;
+    } else {
+      payload.customerFirstName = customerData.firstName.trim();
+      payload.customerLastName = customerData.lastName.trim();
+      payload.customerEmail = customerData.email.trim();
+      if (customerData.phone?.trim()) {
+        payload.customerPhone = customerData.phone.trim();
+      }
+    }
+
+    const result = ServiceOrderCreateSchema.safeParse(payload);
+    if (!result.success) {
+      setFieldErrors(result.error.flatten().fieldErrors as Record<string, string[]>);
+      return;
+    }
+
+    setFieldErrors({});
     setIsSubmitting(true);
-    setErrors({});
 
     try {
-      const payload: Record<string, any> = {
-        description,
-        estimatedCompletion: estimatedCompletionISO,
-        assignedToId: selectedEmployee?.id || null,
-      };
-
-      // If we have an existing customer ID, use it; otherwise pass customer details
-      if (customerData.id) {
-        payload.customerId = customerData.id;
-      } else {
-        payload.customerFirstName = customerData.firstName.trim();
-        payload.customerLastName = customerData.lastName.trim();
-        payload.customerEmail = customerData.email.trim();
-        if (customerData.phone?.trim()) {
-          payload.customerPhone = customerData.phone.trim();
-        }
-      }
-
-      const response = await apiClient.post("/service-orders", payload);
+      const response = await apiClient.post("/service-orders", result.data);
 
       toast.show({
         placement: "top",
@@ -153,7 +99,7 @@ export function NewCase() {
 
       const errorMessage = error?.response?.data?.message || "Kunne ikke oprette sagen. Prøv igen.";
 
-      setErrors({ general: errorMessage });
+      setFieldErrors({ general: [errorMessage] });
 
       toast.show({
         placement: "top",
@@ -180,9 +126,9 @@ export function NewCase() {
     <ScrollView className="bg-background-50 flex-1" showsVerticalScrollIndicator={false}>
       <VStack space="lg" className="p-4 pb-8">
         {/* General error */}
-        {errors.general && (
+        {fieldErrors["general"]?.[0] && (
           <VStack className="bg-error-50 border-error-200 rounded-lg border p-3">
-            <Text className="text-error-700 text-sm font-medium">{errors.general}</Text>
+            <Text className="text-error-700 text-sm font-medium">{fieldErrors["general"][0]}</Text>
           </VStack>
         )}
 
@@ -190,7 +136,11 @@ export function NewCase() {
         <CustomerSearchSection
           customerData={customerData}
           onCustomerChange={setCustomerData}
-          errors={errors.customer}
+          errors={{
+            firstName: fieldErrors["customerFirstName"]?.[0],
+            lastName: fieldErrors["customerLastName"]?.[0],
+            email: fieldErrors["customerEmail"]?.[0],
+          }}
         />
 
         {/* Task Info Section */}
@@ -205,10 +155,12 @@ export function NewCase() {
           {/* Description */}
           <VStack space="sm">
             <Text className="text-typography-700 font-medium">Beskrivelse *</Text>
-            <Textarea size="md" isInvalid={!!errors.description}>
+            <Textarea size="md" isInvalid={!!fieldErrors["description"]?.[0]}>
               <TextareaInput placeholder="Beskriv opgaven..." value={description} onChangeText={setDescription} />
             </Textarea>
-            {errors.description && <Text className="text-error-500 text-xs">{errors.description}</Text>}
+            {fieldErrors["description"]?.[0] && (
+              <Text className="text-error-500 text-xs">{fieldErrors["description"][0]}</Text>
+            )}
           </VStack>
 
           {/* Task Type Radio */}
@@ -222,11 +174,13 @@ export function NewCase() {
               variant="outline"
               size="md"
               onPress={() => setIsDatePickerOpen(true)}
-              className={errors.estimatedCompletion ? "border-error-500" : ""}
+              className={fieldErrors["estimatedCompletion"]?.[0] ? "border-error-500" : ""}
             >
               <ButtonText>{formatDate(expectedCompletion)}</ButtonText>
             </Button>
-            {errors.estimatedCompletion && <Text className="text-error-500 text-xs">{errors.estimatedCompletion}</Text>}
+            {fieldErrors["estimatedCompletion"]?.[0] && (
+              <Text className="text-error-500 text-xs">{fieldErrors["estimatedCompletion"][0]}</Text>
+            )}
           </VStack>
 
           <DatePickerDrawer
