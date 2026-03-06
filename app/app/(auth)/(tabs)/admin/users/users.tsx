@@ -159,7 +159,7 @@ export default function UsersPage() {
 
   return (
     <Box className="bg-background-0 w-full flex-1 px-2">
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 mt-1">
+      <Box className="mb-4 lg:mt-5 h-14 w-full flex-row justify-between gap-3">
         <Searchbar className="h-full flex-1" placeholder="Søg brugere..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
@@ -209,19 +209,20 @@ export default function UsersPage() {
               )}
               renderRightActions={() => (
                 <CheckPermission requiredPermission={["administrator:users:update"]}>
-                  <Button
-                    variant="outline"
-                    action="secondary"
-                    className="h-full w-[110px] rounded-none"
+                  <RectButton
                     onPress={() =>
                       router.push({
                         pathname: "/(auth)/(tabs)/admin/users/[id]/edit",
                         params: { id: item.id },
                       })
                     }
+                    style={{ width: 110, justifyContent: "center", alignItems: "center" }}
                   >
-                    <ButtonIcon as={Pencil} />
-                  </Button>
+                    <Box className="bg-primary-50 border-outline-200 h-full w-full items-center justify-center gap-1 border-l">
+                      <Icon className="text-primary-700" as={Pencil} />
+                      <Text className="text-primary-700">Rediger</Text>
+                    </Box>
+                  </RectButton>
                 </CheckPermission>
               )}
             >

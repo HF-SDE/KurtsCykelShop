@@ -15,6 +15,7 @@ import { Text } from "@components/ui/text";
 import { PaginatedResponse } from "@hooks/usePaginatedData";
 import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";
+import { formatDate } from "@utils/formatDate";
 import { router, useRouter } from "expo-router";
 import { Filter, Plus } from "lucide-react-native";
 
@@ -25,15 +26,6 @@ const statusConfig: Record<string, { action: "success" | "warning" | "info" | "e
   cancelled: { action: "error", label: "Annuleret" },
   "in-progress": { action: "info", label: "I gang" },
   pending: { action: "warning", label: "Afventer" },
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("da-DK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 };
 
 function TableHeader() {
