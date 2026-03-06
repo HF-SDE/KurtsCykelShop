@@ -1,13 +1,17 @@
-# Backend Guide
+# 🛠️ Backend Guide
 
-## Key Locations
+## 🧭 Hierarchy
+
+[Home](Home.md) -> `Backend Guide`
+
+## 📍 Key Locations
 
 - Entry point: `backend/src/index.ts`
 - API: `backend/src/api/`
 - Prisma schema: `backend/prisma/schema.prisma`
 - Prisma client import path: `@/lib/prisma`
 
-## Development Commands
+## 💻 Development Commands
 
 From `backend/`:
 
@@ -24,7 +28,7 @@ npm run seed
 npm run prisma:generate
 ```
 
-## API Response Convention
+## 📦 API Response Convention
 
 Use `Status` enum and `APIResponse<T>` structure.
 
@@ -35,14 +39,14 @@ Controller pattern:
 3. map `Status` to HTTP code with `getHttpStatusCode`
 4. return typed response body
 
-## Prisma Notes
+## 🗄️ Prisma Notes
 
 - Use migrations for schema changes
 - Keep generated client in sync
 - Do not import default `@prisma/client` where custom path is expected
 
-## Troubleshooting
+## 🩺 Troubleshooting
 
-- tail backend logs via Docker
-- verify database connectivity and env vars
-- confirm reverse proxy and forwarded headers for auth flows
+- 📜 tail backend logs via Docker
+- 🔌 verify database connectivity and env vars
+- 🔁 confirm reverse proxy and forwarded headers for auth flows

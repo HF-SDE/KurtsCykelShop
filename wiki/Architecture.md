@@ -1,14 +1,18 @@
-# Architecture
+# 🧭 Architecture
 
-## Monorepo Layout
+## 🧭 Hierarchy
 
-- `app/`: Expo React Native app
-- `backend/`: Express API with Prisma ORM
-- `schemas/`: shared Zod validation schemas
-- `config/`, `docker/`, `k8s/`: infra and environment setup
-- `web/`: Next.js web surface
+[Home](Home.md) -> `Architecture`
 
-## High-Level Flow
+## 🗂️ Monorepo Layout
+
+- `app/`: 📱 Expo React Native app
+- `backend/`: 🛠️ Express API with Prisma ORM
+- `schemas/`: 📐 shared Zod validation schemas
+- `config/`, `docker/`, `k8s/`: ⚙️ infra and environment setup
+- `web/`: 🌐 Next.js web surface
+
+## 🔁 High-Level Flow
 
 ```text
 Expo App (app/)
@@ -19,13 +23,13 @@ Expo App (app/)
           -> PostgreSQL
 ```
 
-## Shared Contracts
+## 🤝 Shared Contracts
 
 - Schema definitions live in `schemas/`.
 - Both app and backend consume these schemas for validation and typing.
 - `permissions.d.ts` is generated and acts as permission union source of truth.
 
-## Backend Design Pattern
+## 🧩 Backend Design Pattern
 
 Routes -> Controllers -> Services
 
@@ -33,7 +37,7 @@ Routes -> Controllers -> Services
 - controllers translate HTTP into service calls
 - services contain business logic and DB access
 
-## Authentication Summary
+## 🔐 Authentication Summary
 
 - Passport local and JWT strategies
 - Access and refresh token flow

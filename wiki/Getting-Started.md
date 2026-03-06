@@ -1,13 +1,17 @@
-# Getting Started
+# ⚡ Getting Started
 
-## Prerequisites
+## 🧭 Hierarchy
+
+[Home](Home.md) -> `Getting Started`
+
+## ✅ Prerequisites
 
 - Node.js 20+
 - npm
 - Docker Desktop
 - ngrok account and token for device testing
 
-## First-Time Setup
+## 🧰 First-Time Setup
 
 From repository root:
 
@@ -24,7 +28,7 @@ Configure environment files:
 - `config/environment-variables/.env.docker.dev`
 - `app/.env`
 
-## Run The Stack
+## ▶️ Run The Stack
 
 ```bash
 npm run dev
@@ -36,13 +40,13 @@ Useful alternatives:
 - `npm run app:dev`
 - `npm run app:dev:tunnel`
 
-## Seed Data
+## 🌱 Seed Data
 
 ```bash
 npm run seed
 ```
 
-## Common Root Commands
+## 🧪 Common Root Commands
 
 - `npm run prisma:generate`: regenerate Prisma client and permissions typing
 - `npm run k8s:dry-run`: validate Kubernetes dev overlay
