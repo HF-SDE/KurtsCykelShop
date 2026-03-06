@@ -241,3 +241,4 @@ npm run prisma:generate
 
 - Backend details: [`backend/README.md`](backend/README.md)
 - Frontend details: [`app/README.md`](app/README.md)
+- Project wiki: [`wiki/Home.md`](wiki/Home.md)
