@@ -12,6 +12,7 @@ import { VStack } from "@/components/ui/vstack";
 import apiClient from "@/utils/apiClient";
 
 import CheckPermission from "@components/check-permission";
+import { formatDate, formatDateTime } from "@utils/formatDate";
 import { Calendar, Mail, Phone } from "lucide-react-native";
 
 interface Customer {
@@ -28,26 +29,6 @@ interface CustomerInfoCardProps {
   serviceOrderId: string;
   onDataUpdated?: () => void;
 }
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("da-DK", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-};
-
-const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("da-DK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 export function CustomerInfoCard({
   customer,

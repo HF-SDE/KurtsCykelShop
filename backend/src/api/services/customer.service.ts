@@ -75,7 +75,13 @@ export async function CreateCustomer(data: {
     });
 
     if (existing) {
-      return [existing, null]; // Return existing customer instead of creating duplicate
+      return [
+        null,
+        {
+          status: Status.UniqueConstraintViolation,
+          message: "Customer with this email already exists",
+        },
+      ];
     }
 
     const customer = await prisma.customer.create({
