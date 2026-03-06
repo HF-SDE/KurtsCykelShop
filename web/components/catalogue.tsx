@@ -204,7 +204,8 @@ export function Catalogue({ items }: CatalogueProps) {
         normalizedQuery.length === 0 ||
         item.name.toLowerCase().includes(normalizedQuery) ||
         item.sku.toLowerCase().includes(normalizedQuery) ||
-        item.description?.toLowerCase().includes(normalizedQuery);
+        item.description?.toLowerCase().includes(normalizedQuery) ||
+        item.barcodes?.some((barcode) => barcode.toLowerCase().includes(normalizedQuery));
 
       const matchesStock = !inStockOnly || item.quantity > 0;
       return matchesSearch && matchesStock;
