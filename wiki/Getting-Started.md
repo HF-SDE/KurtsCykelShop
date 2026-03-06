@@ -22,6 +22,7 @@ Configure environment files:
 - `config/environment-variables/.env.backend.dev`
 - `config/environment-variables/.env.grok.dev`
 - `config/environment-variables/.env.docker.dev`
+- `config/environment-variables/.env.web.dev`
 - `app/.env`
 
 ## Run The Stack
