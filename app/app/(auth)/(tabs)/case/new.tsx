@@ -97,7 +97,6 @@ export default function NewCaseScreen() {
           customerData={customerData}
           onCustomerChange={(data) => {
             setCustomerData(data);
-            console.log("💕Customer data updated:", data);
           }}
           errors={{
             firstName: fieldErrors["customerFirstName"]?.[0],

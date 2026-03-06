@@ -79,7 +79,7 @@ export async function CreateCustomer(data: {
         null,
         {
           status: Status.UniqueConstraintViolation,
-          message: "Customer with this email already exists",
+          message: "Der findes allerede en kunde med denne email",
         },
       ];
     }

@@ -48,6 +48,7 @@ export function CustomerSearchSection({ customerData, onCustomerChange, errors }
 
       const response = await apiClient.get("/customers/search", { params });
 
+      console.log("Customer search response:", response.data);
       if (response.data?.data) {
         const options: CustomerOption[] = response.data.data.map((customer: any) => ({
           id: customer.id,
@@ -156,7 +157,6 @@ export function CustomerSearchSection({ customerData, onCustomerChange, errors }
             placeholder="Fornavn"
             value={customerData.firstName}
             onChangeText={(text) => handleManualFieldChange("firstName", text)}
-            editable={!customerData.id}
           />
         </Input>
         {errors?.firstName && <Text className="text-error-500 mt-1 text-xs">{errors.firstName}</Text>}
@@ -169,7 +169,6 @@ export function CustomerSearchSection({ customerData, onCustomerChange, errors }
             placeholder="Efternavn"
             value={customerData.lastName}
             onChangeText={(text) => handleManualFieldChange("lastName", text)}
-            editable={!customerData.id}
           />
         </Input>
         {errors?.lastName && <Text className="text-error-500 mt-1 text-xs">{errors.lastName}</Text>}
@@ -184,7 +183,6 @@ export function CustomerSearchSection({ customerData, onCustomerChange, errors }
             onChangeText={(text) => handleManualFieldChange("email", text)}
             keyboardType="email-address"
             autoCapitalize="none"
-            editable={!customerData.id}
           />
         </Input>
         {errors?.email && <Text className="text-error-500 mt-1 text-xs">{errors.email}</Text>}
@@ -198,7 +196,6 @@ export function CustomerSearchSection({ customerData, onCustomerChange, errors }
             value={customerData.phone || ""}
             onChangeText={(text) => handleManualFieldChange("phone", text)}
             keyboardType="phone-pad"
-            editable={!customerData.id}
           />
         </Input>
       </FormControl>

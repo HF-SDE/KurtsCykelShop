@@ -65,6 +65,7 @@ export async function createServiceOrder(
     const response = await apiClient.post("/service-orders", result.data);
     return { success: true, id: response.data?.data?.id };
   } catch (error: any) {
+    console.log("🚀 ~ createServiceOrder ~ error:", error?.response?.data);
     const message = error?.response?.data?.message ?? "Kunne ikke oprette sagen. Prøv igen.";
     return {
       success: false,

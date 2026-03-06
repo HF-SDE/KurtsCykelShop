@@ -2,13 +2,14 @@
 
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
+import { cn } from "@/lib/utils";
 import { Item } from "@/types/Inventory/Item";
 
 import { Bike, Moon, Search, SlidersHorizontal, Sparkles, Sun } from "lucide-react";
@@ -165,6 +166,36 @@ export function Catalogue({ items }: CatalogueProps) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOption>("featured");
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [isSearchSticky, setIsSearchSticky] = useState(false);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel || typeof window === "undefined") {
+      return;
+    }
+
+    const stickyTop = 12;
+    const releaseBuffer = 12;
+
+    const updateStickyState = () => {
+      const top = sentinel.getBoundingClientRect().top;
+      setIsSearchSticky((current) => {
+        if (current) {
+          return top <= stickyTop + releaseBuffer;
+        }
+        return top <= stickyTop;
+      });
+    };
+
+    updateStickyState();
+    window.addEventListener("scroll", updateStickyState, { passive: true });
+    window.addEventListener("resize", updateStickyState);
+    return () => {
+      window.removeEventListener("scroll", updateStickyState);
+      window.removeEventListener("resize", updateStickyState);
+    };
+  }, []);
 
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -221,7 +252,13 @@ export function Catalogue({ items }: CatalogueProps) {
           </div>
         </header>
 
-        <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-xl shadow-black/5 backdrop-blur sm:p-5 dark:border-slate-700/70 dark:bg-slate-900/70 dark:shadow-black/30">
+        <div ref={stickySentinelRef} aria-hidden className="h-px" />
+        <div
+          className={cn(
+            "sticky top-3 z-30 mx-auto w-full origin-top rounded-3xl border border-slate-200/70 bg-white/85 p-4 shadow-xl shadow-black/5 backdrop-blur transition-[width,padding,box-shadow,transform] duration-300 ease-out sm:top-4 dark:border-slate-700/70 dark:bg-slate-900/70 dark:shadow-black/30",
+            isSearchSticky ? "w-2/3" : "shadow-lg",
+          )}
+        >
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
@@ -229,18 +266,36 @@ export function Catalogue({ items }: CatalogueProps) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Søg efter navn, SKU eller beskrivelse..."
-                className="h-10 border-slate-300 bg-white pl-9 dark:border-slate-700 dark:bg-slate-900"
+                className={cn(
+                  "border-slate-300 bg-white pl-9 transition-[height,font-size] duration-300 ease-out dark:border-slate-700 dark:bg-slate-900",
+                  isSearchSticky ? "h-9 text-sm" : "h-10",
+                )}
               />
             </div>
 
             <div className="grid grid-cols-[1fr_auto] gap-2 sm:flex sm:items-center">
-              <label className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              <label
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-700 transition-[height,padding] duration-300 ease-out dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200",
+                  isSearchSticky ? "h-8" : "h-9",
+                )}
+              >
                 <SlidersHorizontal className="size-4 text-slate-500 dark:text-slate-400" />
-                <span>Sortering</span>
+                <span
+                  className={cn(
+                    "overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-300 ease-out",
+                    isSearchSticky ? "max-w-0 -translate-x-1 opacity-0" : "max-w-24 translate-x-0 opacity-100",
+                  )}
+                >
+                  Sortering
+                </span>
                 <select
                   value={sort}
                   onChange={(event) => setSort(event.target.value as SortOption)}
-                  className="h-9 bg-transparent text-sm text-slate-900 outline-none dark:text-slate-100"
+                  className={cn(
+                    "bg-transparent text-sm text-slate-900 outline-none transition-[height] duration-300 ease-out dark:text-slate-100",
+                    isSearchSticky ? "h-8" : "h-9",
+                  )}
                 >
                   <option value="featured">Navn (A-Å)</option>
                   <option value="price-asc">Pris lav-høj</option>
@@ -252,7 +307,7 @@ export function Catalogue({ items }: CatalogueProps) {
               <Button
                 type="button"
                 variant={inStockOnly ? "default" : "outline"}
-                className="h-9"
+                className={cn("transition-[height,padding] duration-300 ease-out", isSearchSticky ? "h-8" : "h-9")}
                 onClick={() => setInStockOnly((current) => !current)}
               >
                 {inStockOnly ? "Kun på lager" : "Vis alle"}
@@ -313,7 +368,7 @@ export function CatelogueCard({ item, index }: CatelogueCardProps) {
         <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
           <div
             className="h-full rounded-full bg-[#FD7131] transition-all duration-500"
-            style={{ width: `${Math.min(100, Math.max(0, item.quantity * 10))}%` }}
+            style={{ width: `${Math.min(100, Math.max(0, item.quantity))}%` }}
           />
         </div>
       </CardContent>
