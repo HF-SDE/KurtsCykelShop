@@ -10,6 +10,7 @@ import { ListTableColumn } from "@/types/ui/listTable";
 
 import CheckPermission from "@components/check-permission";
 import { FoxLoader } from "@components/fox";
+import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
@@ -21,7 +22,7 @@ import { Text } from "@components/ui/text";
 import { Toast, ToastDescription, ToastTitle, useToast } from "@components/ui/toast";
 import { UserFiltersType, UsersFilterDrawer } from "@components/users/users-filter-drawer";
 import { useRouter } from "expo-router";
-import { Archive, Filter, Pencil } from "lucide-react-native";
+import { Archive, Filter, Pencil, Plus } from "lucide-react-native";
 
 import { UserWithRoles, useUsers } from "./ctx";
 
@@ -166,6 +167,12 @@ export default function UsersPage() {
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
             <ButtonIcon as={Filter} />
           </Button>
+
+          <CheckPermission requiredPermission={["administrator:users:create"]}>
+            <NavigationButton variant="outline" className="h-full" href="/admin/users/new">
+              <ButtonIcon as={Plus} />
+            </NavigationButton>
+          </CheckPermission>
         </ButtonGroup>
       </Box>
 
