@@ -15,17 +15,8 @@ import { CustomerData, CustomerSearchSection } from "@components/cases/new/Custo
 import { Employee, EmployeeSelectField } from "@components/cases/new/EmployeeSelectField";
 import { TaskType, TaskTypeRadio } from "@components/cases/new/TaskTypeRadio";
 import { createServiceOrder } from "@components/cases/new/createAction";
-import { NewCase } from "@components/cases/new/newCase";
+import { formatDate } from "@utils/formatDate";
 import { router } from "expo-router";
-import { set } from "zod";
-
-const formatDate = (date: Date): string => {
-  return date.toLocaleDateString("da-DK", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-};
 
 export default function NewCaseScreen() {
   // states

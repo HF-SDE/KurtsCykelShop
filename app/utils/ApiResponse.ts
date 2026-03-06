@@ -21,4 +21,5 @@ export enum Status {
   MissingCredentials = "MissingCredentials",
   InvalidCredentials = "InvalidCredentials",
   TooManyRequests = "TooManyRequests",
+  UniqueConstraintViolation = "UniqueConstraintViolation",
 }
