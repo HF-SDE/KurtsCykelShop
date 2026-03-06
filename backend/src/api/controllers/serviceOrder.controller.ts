@@ -107,6 +107,7 @@ export async function createServiceOrder(
 
   const [data, error] = await ServiceOrderService.CreateServiceOrder(body, userId);
 
+  console.log("🚀gjhgjhg ~ createServiceOrder ~ error:", error);
   if (error) {
     const statusCode = getHttpStatusCode(error.status || Status.Failed);
     res.status(statusCode).json({
