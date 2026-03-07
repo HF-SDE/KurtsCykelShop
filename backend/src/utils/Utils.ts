@@ -42,6 +42,10 @@ export function getHttpStatusCode(status: Status): number {
       return 401;
     case Status.TooManyRequests:
       return 429;
+    case Status.UniqueConstraintViolation:
+      return 409;
+    default:
+      return 500;
   }
 }
 

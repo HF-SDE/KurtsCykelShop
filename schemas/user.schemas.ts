@@ -11,8 +11,10 @@ export const getUserSchema = z.object({
 });
 
 export const createUserSchema = z.object({
-  name: z.string().min(1),
   username: usernameSchema,
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: EmailSchema,
   initials: z.string().max(6),
   active: z.boolean().optional(),
   password: z.string().min(8),

@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { FlatList } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ListTableColumn } from "@/types/ui/listTable";
@@ -12,10 +14,11 @@ import { RolePermissionFiltersType, RolesFilterDrawer } from "@components/roles/
 import { Searchbar } from "@components/search";
 import { Box } from "@components/ui/box";
 import { Button, ButtonGroup, ButtonIcon } from "@components/ui/button";
+import { Icon } from "@components/ui/icon";
 import { ListTableHeader, ListTableRow } from "@components/ui/list-table";
 import { Text } from "@components/ui/text";
 import { useRouter } from "expo-router";
-import { ListFilter, Pencil, Plus } from "lucide-react-native";
+import { Filter, Pencil, Plus } from "lucide-react-native";
 
 import { useRole } from "./ctx";
 
@@ -66,12 +69,12 @@ export default function RolesPage() {
 
   return (
     <Box className="bg-background-0 w-full flex-1 px-2">
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
+      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 lg:mt-5">
         <Searchbar className="h-full flex-1" placeholder="Søg roller..." value={search} onChangeText={setSearch} />
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
           </Button>
 
           <CheckPermission requiredPermission={["administrator:role:create"]}>
@@ -95,24 +98,36 @@ export default function RolesPage() {
           data={filteredRoles}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ListTableRow
-              item={item}
-              columns={roleColumns}
-              onPress={() => router.push(`/admin/roles/${item.id}/edit`)}
-              action={
+            <Swipeable
+              overshootRight={false}
+              overshootLeft={false}
+              rightThreshold={40}
+              renderRightActions={() => (
                 <CheckPermission requiredPermission={["administrator:role:update"]}>
-                  <Button variant="outline" action="secondary" className="!border-0">
-                    <ButtonIcon size="3xl" as={Pencil} />
-                  </Button>
+                  <RectButton
+                    onPress={() => router.push(`/admin/roles/${item.id}/edit`)}
+                    style={{ width: 110, justifyContent: "center", alignItems: "center" }}
+                  >
+                    <Box className="bg-primary-50 border-outline-200 h-full w-full items-center justify-center gap-1 border-l">
+                      <Icon className="text-primary-700" as={Pencil} />
+                      <Text className="text-primary-700">Rediger</Text>
+                    </Box>
+                  </RectButton>
                 </CheckPermission>
-              }
-            />
+              )}
+            >
+              <ListTableRow
+                item={item}
+                columns={roleColumns}
+                onPress={() => router.push(`/admin/roles/${item.id}/edit`)}
+              />
+            </Swipeable>
           )}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="always"
           canCancelContentTouches
           directionalLockEnabled
-          ListHeaderComponent={<ListTableHeader columns={roleColumns} action={<Box />} />}
+          ListHeaderComponent={<ListTableHeader columns={roleColumns} />}
           stickyHeaderIndices={[0]}
           onEndReachedThreshold={0.3}
         />

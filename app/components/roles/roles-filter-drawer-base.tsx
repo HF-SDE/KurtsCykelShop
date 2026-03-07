@@ -28,7 +28,7 @@ export function RolesFilterDrawerBase({ showDrawer, onClose, onReset, onApply, c
   return (
     <Drawer isOpen={showDrawer} size="lg" anchor="right" onClose={onClose}>
       <DrawerBackdrop />
-      <DrawerContent className="px-8">
+      <DrawerContent className="max-w-md px-8">
         <DrawerHeader className="mt-16">
           <Heading size="lg">Filtre</Heading>
           <DrawerCloseButton>

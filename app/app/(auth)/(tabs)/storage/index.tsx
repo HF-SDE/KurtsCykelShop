@@ -19,7 +19,7 @@ import { Spinner } from "@components/ui/spinner";
 import { Text } from "@components/ui/text";
 import apiClient from "@utils/apiClient";
 import { useRouter } from "expo-router";
-import { ListFilter, Pencil, Plus, ScanText, Trash2 } from "lucide-react-native";
+import { Filter, Pencil, Plus, ScanText, Trash2 } from "lucide-react-native";
 
 import { useStorage } from "./ctx";
 
@@ -118,7 +118,7 @@ export default function Storage() {
         onBarcodeScanned={handleBarcodeScanned}
       />
 
-      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3">
+      <Box className="mb-4 h-14 w-full flex-row justify-between gap-3 lg:mt-5">
         <Searchbar className="h-full flex-1" placeholder="Søg i lager..." value={search} onChangeText={setSearch} />
 
         <StorageFilterDrawer
@@ -130,7 +130,7 @@ export default function Storage() {
 
         <ButtonGroup className="h-full flex-row gap-2">
           <Button variant="outline" className="h-full" onPress={() => setShowFilterDrawer(true)}>
-            <ButtonIcon as={ListFilter} />
+            <ButtonIcon as={Filter} />
             {Object.keys(filters).length > 0 && (
               <Badge size="sm" className="absolute -right-2 -top-2 rounded-full" variant="solid" action="info">
                 <BadgeText>{Object.keys(filters).length}</BadgeText>

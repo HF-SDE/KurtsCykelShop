@@ -6,6 +6,7 @@ import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderD
 
 import { Badge, BadgeText } from "@components/ui/badge";
 import { Text } from "@components/ui/text";
+import { formatDate } from "@utils/formatDate";
 import { useRouter } from "expo-router";
 
 interface CasesTableProps {
@@ -17,15 +18,6 @@ const statusConfig: Record<string, { action: "success" | "warning" | "info" | "e
   cancelled: { action: "error", label: "Annuleret" },
   "in-progress": { action: "info", label: "I gang" },
   pending: { action: "warning", label: "Afventer" },
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("da-DK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 };
 
 export function CasesTable({ serviceOrders }: CasesTableProps) {

@@ -16,6 +16,7 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { formatDateTime } from "@utils/formatDate";
 
 interface DatePickerDrawerProps {
   isOpen: boolean;
@@ -81,14 +82,6 @@ export function DatePickerDrawer({
     setShowPicker(false);
   };
 
-  const formatDateDisplay = (date: Date) => {
-    return date.toLocaleDateString("da-DK", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   return (
     <Actionsheet isOpen={isOpen} onClose={onClose}>
       <ActionsheetBackdrop />
@@ -106,7 +99,7 @@ export function DatePickerDrawer({
 
             {Platform.OS === "android" && (
               <Button action="secondary" variant="outline" size="lg" onPress={() => setShowPicker(true)}>
-                <ButtonText>{formatDateDisplay(selectedDate)}</ButtonText>
+                <ButtonText>{formatDateTime(selectedDate)}</ButtonText>
               </Button>
             )}
 
@@ -123,7 +116,7 @@ export function DatePickerDrawer({
 
             {Platform.OS === "ios" && (
               <HStack className="bg-background-50 items-center justify-center rounded-lg p-3">
-                <Text className="text-typography-700 text-center font-medium">{formatDateDisplay(selectedDate)}</Text>
+                <Text className="text-typography-700 text-center font-medium">{formatDateTime(selectedDate)}</Text>
               </HStack>
             )}
           </VStack>

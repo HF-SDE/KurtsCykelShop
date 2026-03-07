@@ -39,6 +39,17 @@ export default function UsersLayout() {
           }}
         />
         <Stack.Screen
+          name="new"
+          options={{
+            headerShown: true,
+            headerTitle: () => <Text size="2xl">Ny bruger</Text>,
+            headerBackVisible: !useCustomBackButton,
+            headerLeft: useCustomBackButton
+              ? (props) => <HeaderBackButton {...props} onPress={handleBack} />
+              : undefined,
+          }}
+        />
+        <Stack.Screen
           name="[id]/edit"
           options={{
             headerShown: true,

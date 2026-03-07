@@ -128,8 +128,8 @@ export default function UserProfileScreen() {
       <Center className={`bg-background-0 flex-1 p-6`}>
         <VStack className={`flex-1 justify-between px-5`}>
           <Box className="gap-5">
-            <Avatar size="4xl" className="bg-secondary-500 border-secondary-600 border-8">
-              <AvatarFallbackText size="2xl" className="text-primary-950">
+            <Avatar size="4xl" className="bg-secondary-100 border-secondary-700 shadow-hard-2 border-8">
+              <AvatarFallbackText size="2xl" className="text-secondary-900">
                 {userProfile?.initials
                   ?.split("")
                   .map((name) => name.charAt(0))

@@ -17,6 +17,7 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
 import { AddRepairDrawer } from "@components/cases/details/AddRepairDrawer";
+import { formatDateTime } from "@utils/formatDate";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react-native";
 
 interface Repair {
@@ -35,17 +36,6 @@ interface RepairsCardProps {
   serviceOrderId: string;
   onRepairAdded?: () => void;
 }
-
-const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("da-DK", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 export function RepairsCard({ repairs, serviceOrderId, onRepairAdded }: RepairsCardProps) {
   const [showDrawer, setShowDrawer] = useState(false);

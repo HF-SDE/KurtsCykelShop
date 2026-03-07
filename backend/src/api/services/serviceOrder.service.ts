@@ -508,6 +508,7 @@ export async function CreateServiceOrder(
         phone: validData.customerPhone,
       });
 
+      console.log("🚀 ~ CreateServiceOrder ~ customerError:", customerError);
       if (customerError) {
         return [
           null,

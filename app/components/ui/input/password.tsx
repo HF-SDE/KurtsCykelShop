@@ -48,7 +48,7 @@ export default function SecretInput({
       <Input className="my-1" size="md">
         <InputField
           type={showPassword ? "text" : "password"}
-          placeholder={placeholder || "password"}
+          placeholder={placeholder || "Password"}
           value={inputValue}
           onChangeText={(text) => onChangeText && onChangeText(text)}
         />
