@@ -7,6 +7,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Modal, ModalBackdrop, ModalCloseButton, ModalContent, ModalHeader } from "@/components/ui/modal";
 
 import { cn } from "@gluestack-ui/utils/nativewind-utils";
+import { CheckIcon } from "lucide-react-native";
 
 import { Box } from "./ui/box";
 import { Text } from "./ui/text";
@@ -24,6 +25,8 @@ interface ComboboxBaseProps {
   options: ComboboxOption[];
   isDisabled?: boolean;
   onSearchChange?: (query: string) => void;
+  onCreateNew?: (name: string) => void;
+  newItems?: ComboboxOption[];
 }
 
 type SingleSelectProps = {
@@ -63,6 +66,8 @@ export function Combobox({
   values,
   onChangeValues,
   multiSelect = false,
+  onCreateNew,
+  newItems,
   isDisabled = false,
   onSearchChange,
 }: ComboboxProps) {
@@ -83,6 +88,11 @@ export function Combobox({
   );
 
   const selectedOption = multiSelect ? undefined : selectedOptions[0];
+
+  const searchOptionExists = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+    return options.some((option) => option.name.toLowerCase() === normalizedSearch);
+  }, [options, searchValue]);
 
   const filteredOptions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -240,6 +250,20 @@ export function Combobox({
                   }}
                   autoFocus
                 />
+                {onCreateNew && (
+                  <Button
+                    variant="outline"
+                    className={cn("mx-2 h-auto", {
+                      "cursor-not-allowed opacity-50": searchOptionExists || searchValue.trim() === "",
+                    })}
+                    onPress={() => {
+                      onCreateNew(searchValue.trim());
+                    }}
+                    disabled={searchOptionExists || searchValue.trim() === ""}
+                  >
+                    <ButtonText>Opret</ButtonText>
+                  </Button>
+                )}
               </Input>
             </Box>
 
@@ -252,7 +276,7 @@ export function Combobox({
                 contentContainerStyle={{ paddingBottom: 12 }}
                 renderItem={({ item }) => (
                   <Pressable
-                    className={cn("active:bg-background-100 w-full rounded-lg px-3 py-2", {
+                    className={cn("active:bg-background-100 w-full flex-row justify-between rounded-lg px-3 py-2", {
                       "bg-background-50": selectedIds.includes(item.id),
                     })}
                     onPress={() => {
@@ -271,12 +295,25 @@ export function Combobox({
                     }}
                   >
                     <Text className="text-typography-700">{item.name}</Text>
+                    {selectedIds.includes(item.id) && <Icon as={CheckIcon} className="text-primary-500" />}
                   </Pressable>
                 )}
               />
             ) : (
               <Box className="px-2 py-2">
                 <Text className="text-typography-500">{emptyStateText}</Text>
+                {onCreateNew && searchValue.trim() !== "" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onPress={() => {
+                      onCreateNew(searchValue.trim());
+                    }}
+                  >
+                    <ButtonText>{`Opret "${searchValue.trim()}"`}</ButtonText>
+                  </Button>
+                )}
               </Box>
             )}
           </ModalContent>

@@ -63,6 +63,8 @@ export function NewRender({ initialState }: NewRenderProps) {
   const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
   const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
 
+  const [newVendorName, setNewVendorName] = useState<string | undefined>();
+
   const router = useRouter();
   const navigation = useNavigation();
   const allowNavigationRef = useRef(false);
@@ -235,6 +237,12 @@ export function NewRender({ initialState }: NewRenderProps) {
               fieldType="combobox"
               selectOptions={vendors}
               isDisabled={vendorsLoading}
+              onCreateNew={(name) => {
+                const newVendorId = `new-${Date.now()}`;
+                setNewVendorName(name);
+                setFormStateValue("vendorId", newVendorId);
+              }}
+              newItems={newVendorName ? [{ id: `new-${Date.now()}`, name: newVendorName }] : undefined}
             />
           </GridItem>
 
