@@ -26,10 +26,10 @@ export function ActionSheetBarcodeScanner({ onBarcodeScanned, isOpen, onClose }:
   useEffect(() => {
     if (!permission) return;
 
-    if (!permission.granted && permission.canAskAgain) {
+    if (!permission.granted && permission.canAskAgain && isOpen) {
       requestPermission();
     }
-  }, [permission, requestPermission]);
+  }, [permission, requestPermission, isOpen]);
 
   const handleBarcodeScanned = useCallback(
     async ({ data }: BarcodeScanningResult) => {
