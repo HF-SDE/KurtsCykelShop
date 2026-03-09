@@ -4,11 +4,13 @@ import { Role } from "@/types/users/Role";
 
 import { useData } from "@hooks/useData";
 
-export const RoleContext = createContext<{ data: Role[]; setData: (data: Role[]) => void; isLoading: boolean }>({
-  data: [],
-  setData: () => {},
-  isLoading: false,
-});
+interface RoleContextValue {
+  data: Role[];
+  setData: (data: Role[]) => void;
+  isLoading: boolean;
+}
+
+export const RoleContext = createContext<RoleContextValue | undefined>(undefined);
 
 export function useRole() {
   const context = useContext(RoleContext);

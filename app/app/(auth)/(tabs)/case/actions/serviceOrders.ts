@@ -1,7 +1,6 @@
-import { CaseStatus, TimeRange } from "@/components/cases/casesFilterDrawer";
-
 import { ServiceOrderData } from "@/types/serviceOrders/Extentions/ServiceOrderData";
 
+import { CaseStatus, TimeRange } from "@components/cases/cases-filter-drawer";
 import { PaginatedResponse } from "@hooks/usePaginatedData";
 import { APIResponse } from "@utils/ApiResponse";
 import apiClient from "@utils/apiClient";

@@ -11,15 +11,13 @@ export type UserWithRoles = User & {
   }[];
 };
 
-export const UsersContext = createContext<{
+interface UsersContextValue {
   data: UserWithRoles[];
   setData: React.Dispatch<React.SetStateAction<UserWithRoles[]>>;
   isLoading: boolean;
-}>({
-  data: [],
-  setData: () => {},
-  isLoading: false,
-});
+}
+
+export const UsersContext = createContext<UsersContextValue | undefined>(undefined);
 
 export function useUsers() {
   const context = useContext(UsersContext);

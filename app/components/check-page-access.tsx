@@ -11,16 +11,22 @@ function CheckPageAccess({ pageName, children }: CheckPageAccessProps) {
   const [hasPageAccess, setHasPageAccess] = useState(false);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const checkPageAccess = async () => {
       const permissionMan = new PermissionManager();
       await permissionMan.init();
 
       // Check if the user has access to the page
-      const accessGranted = await permissionMan.hasPageAccess(pageName);
-      setHasPageAccess(accessGranted);
+      const accessGranted = permissionMan.hasPageAccess(pageName);
+      if (!isCancelled) setHasPageAccess(accessGranted);
     };
 
     checkPageAccess();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [pageName]);
 
   return hasPageAccess ? <>{children}</> : null;

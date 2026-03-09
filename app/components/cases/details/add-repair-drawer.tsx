@@ -18,8 +18,6 @@ import { VStack } from "@/components/ui/vstack";
 
 import apiClient from "@/utils/apiClient";
 
-import { cn } from "tailwind-variants";
-
 interface AddRepairDrawerProps {
   isOpen: boolean;
   onClose: () => void;

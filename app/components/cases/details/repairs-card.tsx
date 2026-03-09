@@ -16,7 +16,7 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 
-import { AddRepairDrawer } from "@components/cases/details/AddRepairDrawer";
+import { AddRepairDrawer } from "@components/cases/details/add-repair-drawer";
 import { formatDateTime } from "@utils/formatDate";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react-native";
 

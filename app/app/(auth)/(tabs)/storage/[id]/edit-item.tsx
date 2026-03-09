@@ -60,7 +60,7 @@ function EditRender({ initialState }: EditItemProps) {
   const [formState, setFormState] = useState(toFormState(initialState));
   const [units, , unitsLoading] = useData<Unit>("/units", [], cachedDataOptions);
   const [vendors, , vendorsLoading] = useData<Vendor>("/vendors", [], cachedDataOptions);
-  const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
+  const [statuses, , statusesLoading] = useData<ItemStatus>("/item-statuses", [], cachedDataOptions);
   const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
 
   const router = useRouter();

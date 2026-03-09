@@ -7,8 +7,10 @@ import { Input, InputField } from "@/components/ui/input";
 import { Modal, ModalBackdrop, ModalCloseButton, ModalContent, ModalHeader } from "@/components/ui/modal";
 
 import { cn } from "@gluestack-ui/utils/nativewind-utils";
+import { CheckIcon } from "lucide-react-native";
 
 import { Box } from "./ui/box";
+import { Divider } from "./ui/divider";
 import { Text } from "./ui/text";
 
 interface ComboboxOption {
@@ -24,6 +26,7 @@ interface ComboboxBaseProps {
   options: ComboboxOption[];
   isDisabled?: boolean;
   onSearchChange?: (query: string) => void;
+  onCreateNew?: (name: string) => void;
 }
 
 type SingleSelectProps = {
@@ -63,33 +66,39 @@ export function Combobox({
   values,
   onChangeValues,
   multiSelect = false,
+  onCreateNew,
   isDisabled = false,
   onSearchChange,
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [chipContainerWidth, setChipContainerWidth] = useState(0);
+  const [optionsWithNewItems, setOptionsWithNewItems] = useState<ComboboxOption[]>(options);
   const selectedIds = useMemo<string[]>(() => {
     if (multiSelect) {
       return values || [];
     }
-
     return value ? [value] : [];
   }, [multiSelect, value, values]);
 
   const selectedOptions = useMemo(
-    () => options.filter((option) => selectedIds.includes(option.id)),
-    [options, selectedIds],
+    () => optionsWithNewItems.filter((option) => selectedIds.includes(option.id)),
+    [optionsWithNewItems, selectedIds],
   );
 
   const selectedOption = multiSelect ? undefined : selectedOptions[0];
 
+  const searchOptionExists = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+    return optionsWithNewItems.some((option) => option.name.toLowerCase() === normalizedSearch);
+  }, [optionsWithNewItems, searchValue]);
+
   const filteredOptions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
-    if (!normalizedSearch) return options;
+    if (!normalizedSearch) return optionsWithNewItems;
 
-    return options.filter((option) => option.name.toLowerCase().includes(normalizedSearch));
-  }, [options, searchValue]);
+    return optionsWithNewItems.filter((option) => option.name.toLowerCase().includes(normalizedSearch));
+  }, [optionsWithNewItems, searchValue]);
 
   const shortName = useMemo(() => {
     if (!selectedOption) return null;
@@ -151,6 +160,19 @@ export function Combobox({
 
     return { visibleOptions, hiddenCount };
   }, [chipContainerWidth, multiSelect, selectedOptions]);
+
+  function handleCreateNew(name: string) {
+    if (!onCreateNew) return;
+
+    onCreateNew(name);
+    const newOption = { id: `new-${Date.now()}`, name };
+    setOptionsWithNewItems((prev) => [...prev, newOption]);
+    setSearchValue("");
+  }
+
+  const newItems = useMemo(() => {
+    return optionsWithNewItems.filter((option) => option.id.startsWith("new-"));
+  }, [optionsWithNewItems]);
 
   return (
     <Box>
@@ -240,8 +262,58 @@ export function Combobox({
                   }}
                   autoFocus
                 />
+                {onCreateNew && (
+                  <Button
+                    variant="outline"
+                    className={cn("mx-2 h-auto", {
+                      "cursor-not-allowed opacity-50": searchOptionExists || searchValue.trim() === "",
+                    })}
+                    onPress={() => handleCreateNew(searchValue.trim())}
+                    disabled={searchOptionExists || searchValue.trim() === ""}
+                  >
+                    <ButtonText>Opret</ButtonText>
+                  </Button>
+                )}
               </Input>
             </Box>
+
+            {newItems && newItems.length > 0 && (
+              <>
+                <Text className="text-typography-500 px-1 text-xs uppercase">Nye elementer</Text>
+                <FlatList
+                  data={newItems}
+                  keyExtractor={(option) => option.id}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="interactive"
+                  contentContainerStyle={{ paddingBottom: 12 }}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      className={cn("active:bg-background-100 w-full flex-row justify-between rounded-lg px-3 py-2", {
+                        "bg-background-50": selectedIds.includes(item.id),
+                      })}
+                      onPress={() => {
+                        if (multiSelect) {
+                          const nextValues = selectedIds.includes(item.id)
+                            ? selectedIds.filter((selectedId) => selectedId !== item.id)
+                            : [...selectedIds, item.id];
+
+                          onChangeValues?.(nextValues);
+                          return;
+                        }
+
+                        onChange?.(item.id);
+                        setIsOpen(false);
+                        setSearchValue("");
+                      }}
+                    >
+                      <Text className="text-typography-700">{item.name}</Text>
+                      {selectedIds.includes(item.id) && <Icon as={CheckIcon} className="text-primary-500" />}
+                    </Pressable>
+                  )}
+                />
+                <Divider className="my-4" />
+              </>
+            )}
 
             {filteredOptions.length > 0 ? (
               <FlatList
@@ -252,7 +324,7 @@ export function Combobox({
                 contentContainerStyle={{ paddingBottom: 12 }}
                 renderItem={({ item }) => (
                   <Pressable
-                    className={cn("active:bg-background-100 w-full rounded-lg px-3 py-2", {
+                    className={cn("active:bg-background-100 w-full flex-row justify-between rounded-lg px-3 py-2", {
                       "bg-background-50": selectedIds.includes(item.id),
                     })}
                     onPress={() => {
@@ -271,12 +343,23 @@ export function Combobox({
                     }}
                   >
                     <Text className="text-typography-700">{item.name}</Text>
+                    {selectedIds.includes(item.id) && <Icon as={CheckIcon} className="text-primary-500" />}
                   </Pressable>
                 )}
               />
             ) : (
               <Box className="px-2 py-2">
                 <Text className="text-typography-500">{emptyStateText}</Text>
+                {onCreateNew && searchValue.trim() !== "" && !searchOptionExists && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onPress={() => handleCreateNew(searchValue.trim())}
+                  >
+                    <ButtonText>{`Opret "${searchValue.trim()}"`}</ButtonText>
+                  </Button>
+                )}
               </Box>
             )}
           </ModalContent>

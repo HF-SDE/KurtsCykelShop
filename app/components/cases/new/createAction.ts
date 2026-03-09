@@ -1,8 +1,8 @@
 import { ServiceOrderCreateSchema } from "@schemas/serviceOrder.schemas";
 import apiClient from "@utils/apiClient";
 
-import type { CustomerData } from "./CustomerSearchSection";
-import type { Employee } from "./EmployeeSelectField";
+import type { CustomerData } from "./customer-search-section";
+import type { Employee } from "./employee-select-field";
 
 export interface CreateServiceOrderInput {
   description: string;

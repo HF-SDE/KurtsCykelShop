@@ -16,11 +16,11 @@ interface PermissionsContextValue {
 
 export const PermissionContext = createContext<PermissionsContextValue | undefined>(undefined);
 
-export function UsePermissions() {
+export function usePermissions() {
   const context = useContext(PermissionContext);
 
   if (!context) {
-    throw new Error("UsePermissions must be used within a <PermissionsProvider />");
+    throw new Error("usePermissions must be used within a <PermissionsProvider />");
   }
 
   return context;

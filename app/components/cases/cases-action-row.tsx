@@ -1,5 +1,3 @@
-import { Input } from "@components/ui/input";
-
 import { Button } from "../ui/button";
 import { HStack } from "../ui/hstack";
 import { Text } from "../ui/text/index";

@@ -67,7 +67,7 @@ const config: ExpoConfig = {
     reactCompiler: true,
   },
   extra: {
-    EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL ?? "https://10.130.54.94/api",
+    EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000/api",
   },
 };
 

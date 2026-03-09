@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import { Combobox } from "@/components/combobox";
-import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";

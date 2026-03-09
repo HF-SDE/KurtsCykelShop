@@ -1,32 +1,30 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import apiClient from "@/utils/apiClient";
 
 import { useStorageState } from "@hooks/useStorageState";
 import { Buffer } from "buffer";
 
-const AuthContext = React.createContext<{
+interface SessionContextValue {
   signIn: (username: string, password: string) => Promise<string>;
   signOut: () => void;
   session?: string | null;
   isLoading: boolean;
-}>({
-  signIn: async () => "false",
-  signOut: async () => null,
-  session: null,
-  isLoading: false,
-});
+}
+
+const AuthContext = React.createContext<SessionContextValue | undefined>(undefined);
 
 // This hook can be used to access the user info.
 export function useSession() {
-  const value = React.useContext(AuthContext);
-  if (process.env.NODE_ENV !== "production") {
-    if (!value) {
+  const context = useContext(AuthContext);
+
+  // if (process.env.NODE_ENV !== "production") {
+    if (!context) {
       throw new Error("useSession must be wrapped in a <SessionProvider />");
     }
-  }
+  // }
 
-  return value;
+  return context;
 }
 
 export default function SessionProvider(props: React.PropsWithChildren) {
