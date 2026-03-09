@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Alert, ScrollView } from "react-native";
 
 import { Button, ButtonText } from "@/components/ui/button";
@@ -59,9 +59,14 @@ export function NewRender({ initialState }: NewRenderProps) {
 
   const [formState, setFormState] = useState(toFormState(initialState));
   const [units, , unitsLoading] = useData<Unit>("/units", [], cachedDataOptions);
-  const [vendors, , vendorsLoading] = useData<Vendor>("/vendors", [], cachedDataOptions);
-  const [statuses, , statusesLoading] = useData<ItemStatus>("item-statuses", [], cachedDataOptions);
-  const [locations, , locationsLoading] = useData<Location>("/locations", [], cachedDataOptions);
+  const [vendors, , vendorsLoading, refreshVendors] = useData<Vendor>("/vendors", [], cachedDataOptions);
+  const [statuses, , statusesLoading] = useData<ItemStatus>("/item-statuses", [], cachedDataOptions);
+  const [locations, , locationsLoading, refreshLocations] = useData<Location>("/locations", [], cachedDataOptions);
+
+  const [newVendorName, setNewVendorName] = useState<string | undefined>();
+  const [newLocationName, setNewLocationName] = useState<string | undefined>();
+
+  const statusOptions = useMemo(() => statuses.map((status) => ({ id: status.id, name: status.code })), [statuses]);
 
   const router = useRouter();
   const navigation = useNavigation();
@@ -114,6 +119,50 @@ export function NewRender({ initialState }: NewRenderProps) {
     );
 
     if (validationResult.success) {
+      if (validationResult.data.vendorId?.startsWith("new-") && newVendorName) {
+        try {
+          const response = await apiClient.post<APIResponse<Vendor>>("/vendors", { name: newVendorName });
+          if (!response.data.data || !response.data.data.id) {
+            throw new Error("Invalid response from server");
+          }
+
+          validationResult.data.vendorId = response.data.data.id;
+          refreshVendors();
+        } catch (error) {
+          console.error("Error creating new vendor:", error);
+          toast.show({
+            render: ({ id }) => (
+              <Box className="rounded-md bg-red-500 px-4 py-2">
+                <Text className="text-white">Fejl ved oprettelse af leverandør!</Text>
+              </Box>
+            ),
+          });
+          return;
+        }
+      }
+
+      if (validationResult.data.locationId?.startsWith("new-") && newLocationName) {
+        try {
+          const response = await apiClient.post<APIResponse<Location>>("/locations", { name: newLocationName });
+          if (!response.data.data || !response.data.data.id) {
+            throw new Error("Invalid response from server");
+          }
+
+          validationResult.data.locationId = response.data.data.id;
+          refreshLocations();
+        } catch (error) {
+          console.error("Error creating new location:", error);
+          toast.show({
+            render: ({ id }) => (
+              <Box className="rounded-md bg-red-500 px-4 py-2">
+                <Text className="text-white">Fejl ved oprettelse af lokation!</Text>
+              </Box>
+            ),
+          });
+          return;
+        }
+      }
+
       const response = await apiClient.post<APIResponse<Item>>("/items", validationResult.data);
 
       const newItem = response.data.data;
@@ -235,6 +284,11 @@ export function NewRender({ initialState }: NewRenderProps) {
               fieldType="combobox"
               selectOptions={vendors}
               isDisabled={vendorsLoading}
+              onCreateNew={(name) => {
+                const newVendorId = `new-${Date.now()}`;
+                setNewVendorName(name);
+                setFormStateValue("vendorId", newVendorId);
+              }}
             />
           </GridItem>
 
@@ -245,7 +299,7 @@ export function NewRender({ initialState }: NewRenderProps) {
               formStateValue={formState.statusId}
               onChange={(id) => setFormStateValue("statusId", id)}
               fieldType="combobox"
-              selectOptions={statuses.map((status) => ({ id: status.id, name: status.code }))}
+              selectOptions={statusOptions}
               isDisabled={statusesLoading}
             />
           </GridItem>
@@ -259,6 +313,11 @@ export function NewRender({ initialState }: NewRenderProps) {
               fieldType="combobox"
               selectOptions={locations}
               isDisabled={locationsLoading}
+              onCreateNew={(name) => {
+                const newLocationId = `new-${Date.now()}`;
+                setNewLocationName(name);
+                setFormStateValue("locationId", newLocationId);
+              }}
             />
           </GridItem>
 

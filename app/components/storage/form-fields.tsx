@@ -69,6 +69,7 @@ interface StorageFieldBaseProps<T> {
   isDisabled?: boolean;
   isTextArea?: boolean;
   selectOptions?: { id: string; name: string }[];
+  onCreateNew?: (name: string) => void;
 }
 
 export function StorageField<T>({
@@ -81,6 +82,7 @@ export function StorageField<T>({
   isDisabled = false,
   isTextArea = false,
   selectOptions,
+  onCreateNew,
 }: StorageFieldBaseProps<T>) {
   const { value, errors } = formStateValue;
 
@@ -168,6 +170,7 @@ export function StorageField<T>({
           value={value as string}
           onChange={(id) => onChange(id as T)}
           isDisabled={isDisabled}
+          onCreateNew={onCreateNew}
         />
       ) : null}
 
