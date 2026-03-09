@@ -4,7 +4,7 @@ import { Item } from "@/types/Inventory/Item";
 
 import { UsePaginatedDataResult, usePaginatedData } from "@hooks/usePaginatedData";
 
-export const StorageContext = createContext<UsePaginatedDataResult<Item>>({} as UsePaginatedDataResult<Item>);
+export const StorageContext = createContext<UsePaginatedDataResult<Item> | undefined>(undefined);
 
 export function useStorage() {
   const context = useContext(StorageContext);
