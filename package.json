@@ -19,7 +19,7 @@
     "k8s:dry-run": "kubectl apply -k ./k8s/overlays/dev --dry-run=client",
     "k8s:status": "kubectl -n kurts-cykel-shop get deployments && kubectl -n kurts-cykel-shop get pods",
     "k8s:build-backend": "docker build -f ./backend/Dockerfile.k8s -t backend:latest .",
-    "k8s:build-web": "docker build -f ./web/Dockerfile -t web:latest ./web"
+    "k8s:build-web": "docker build -f ./web/Dockerfile -t web:latest ."
   },
   "author": "Kurt",
   "description": "World best cykel shop",
