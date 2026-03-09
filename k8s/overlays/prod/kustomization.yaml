@@ -19,6 +19,13 @@ patches:
         value: 2
   - target:
       kind: Deployment
+      name: web
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
       name: cloudflare-tunnel
     patch: |-
       - op: replace

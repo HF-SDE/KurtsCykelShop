@@ -8,6 +8,9 @@ resources:
   - backend-nodemon-configmap.yaml
   - backend-deployment.yaml
   - backend-service.yaml
+  - web-env-configmap.yaml
+  - web-deployment.yaml
+  - web-service.yaml
   - db-env-configmap.yaml
   - db-secret.yaml
   - db-deployment.yaml

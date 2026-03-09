@@ -116,6 +116,7 @@ From repo root:
 
 ```powershell
 npm run k8s:build-backend
+npm run k8s:build-web
 npm run k8s:dry-run
 npm run k8s:apply
 npm run k8s:status
