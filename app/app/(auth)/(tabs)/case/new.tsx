@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
-import { DatePickerDrawer } from "@/components/cases/DatePickerDrawer";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Spinner } from "@/components/ui/spinner";
@@ -11,10 +10,11 @@ import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
 import { VStack } from "@/components/ui/vstack";
 
-import { CustomerData, CustomerSearchSection } from "@components/cases/new/CustomerSearchSection";
-import { Employee, EmployeeSelectField } from "@components/cases/new/EmployeeSelectField";
-import { TaskType, TaskTypeRadio } from "@components/cases/new/TaskTypeRadio";
+import { DatePickerDrawer } from "@components/cases/date-picker-drawer";
 import { createServiceOrder } from "@components/cases/new/createAction";
+import { CustomerData, CustomerSearchSection } from "@components/cases/new/customer-search-section";
+import { Employee, EmployeeSelectField } from "@components/cases/new/employee-select-field";
+import { TaskType, TaskTypeRadio } from "@components/cases/new/task-type-radio";
 import { formatDate } from "@utils/formatDate";
 import { router } from "expo-router";
 

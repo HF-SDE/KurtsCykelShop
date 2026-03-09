@@ -9,7 +9,7 @@ import { VStack } from "@/components/ui/vstack";
 
 import { ServicePartsUsedWithItem } from "@/types/serviceOrders/Extentions/ServicePartsUsedWithItem";
 
-import { AddProductDrawer } from "@components/cases/details/AddProductDrawer";
+import { AddProductDrawer } from "@components/cases/details/add-product-drawer";
 import { Plus } from "lucide-react-native";
 
 interface ProductsCardProps {
