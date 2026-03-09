@@ -30,25 +30,30 @@ This folder contains placeholder values in Secret manifests.
 Run from repo root:
 
 ```powershell
+$NAMESPACE = "kurts-cykel-shop"
+
 kubectl create secret generic backend-secret `
+  -n $NAMESPACE `
   --from-literal=ACCESS_TOKEN_SECRET="<access-secret>" `
   --from-literal=REFRESH_TOKEN_SECRET="<refresh-secret>" `
   --from-literal=DATABASE_URL="postgresql://<user>:<password>@db:5432/KurtsCykelShop" `
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n $NAMESPACE -f -
 
 kubectl create secret generic db-secret `
+  -n $NAMESPACE `
   --from-literal=POSTGRES_PASSWORD="<postgres-password>" `
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n $NAMESPACE -f -
 
 kubectl create secret generic cloudflare-tunnel-secret `
+  -n $NAMESPACE `
   --from-literal=CLOUDFLARE_TUNNEL_TOKEN="<cloudflare-tunnel-token>" `
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n $NAMESPACE -f -
 ```
 
 Then apply manifests:
 
 ```powershell
-kubectl apply -k .\k8s\overlays\dev
+kubectl apply -n $NAMESPACE -k .\k8s\overlays\dev
 ```
 
 ## 🅱️ Option B: Edit Placeholder Files Locally
@@ -78,37 +83,40 @@ Run from repository root in a Linux shell (`bash`/`zsh`).
 ### 2) Create/Update Secrets
 
 ```bash
+NAMESPACE="kurts-cykel-shop"
+
 kubectl create secret generic backend-secret \
+  -n "$NAMESPACE" \
   --from-literal=ACCESS_TOKEN_SECRET="<access-secret>" \
   --from-literal=REFRESH_TOKEN_SECRET="<refresh-secret>" \
   --from-literal=DATABASE_URL="postgresql://<user>:<password>@db:5432/KurtsCykelShop" \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n "$NAMESPACE" -f -
 
 kubectl create secret generic db-secret \
+  -n "$NAMESPACE" \
   --from-literal=POSTGRES_PASSWORD="<postgres-password>" \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n "$NAMESPACE" -f -
 
 kubectl create secret generic cloudflare-tunnel-secret \
+  -n "$NAMESPACE" \
   --from-literal=CLOUDFLARE_TUNNEL_TOKEN="<cloudflare-tunnel-token>" \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | kubectl apply -n "$NAMESPACE" -f -
 ```
 
 ### 3) Apply Kubernetes Manifests
 
 ```bash
-kubectl apply -k ./k8s/overlays/dev
+kubectl apply -n "$NAMESPACE" -k ./k8s/overlays/dev
 ```
 
 ### 4) Verify Deployment
 
 ```bash
-kubectl get deployments
-kubectl get pods
-kubectl get services
-kubectl get ingress
+kubectl get deployments -n "$NAMESPACE"
+kubectl get pods -n "$NAMESPACE"
+kubectl get services -n "$NAMESPACE"
+kubectl get ingress -n "$NAMESPACE"
 ```
-
-If your kube context/namespace is not default, append `-n <namespace>` to the commands above.
 
 ## ⚡ Quick Commands
 
