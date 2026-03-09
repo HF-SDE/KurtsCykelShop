@@ -148,9 +148,13 @@ export default function UserProfileScreen() {
 
           <Center>
             <VStack className={"w-full gap-2.5"}>
-              <NavigationButton href="/(auth)/(tabs)/color-preview" size="xl">
-                <ButtonText>Preview colors</ButtonText>
+              <NavigationButton href="/(auth)/(tabs)/management" size="xl">
+                <ButtonText>Management</ButtonText>
               </NavigationButton>
+
+              {/* <NavigationButton href="/(auth)/(tabs)/color-preview" size="xl">
+                <ButtonText>Preview colors</ButtonText>
+              </NavigationButton> */}
 
               <Button size="xl" onPress={() => setIsModalVisible(true)}>
                 <ButtonText>Reset Password</ButtonText>

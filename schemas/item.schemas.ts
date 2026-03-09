@@ -6,8 +6,8 @@ export const ItemFiltersSchema = z.object({
     .transform((val) => (val === "true" ? true : val === "false" ? false : undefined))
     .optional(),
   statusId: z.uuid().optional(),
-  locationId: z.uuid().optional(),
-  vendorId: z.uuid().optional(),
+  locationId: z.string().optional(),
+  vendorId: z.string().optional(),
 });
 
 export const CreateItemSchema = z.object({
@@ -19,9 +19,9 @@ export const CreateItemSchema = z.object({
   isPublic: z.boolean(),
   price: z.coerce.number().positive("Pris skal være et positivt tal"),
   purchasePrice: z.coerce.number().positive("Indkøbspris skal være et positivt tal"),
-  vendorId: z.uuid("Leverandør er påkrævet"),
+  vendorId: z.string("Leverandør er påkrævet"),
   statusId: z.uuid("Status er påkrævet"),
-  locationId: z.uuid("Lokation er påkrævet"),
+  locationId: z.string("Lokation er påkrævet"),
   barcodes: z.array(z.string()).optional(),
 });
 
