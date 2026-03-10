@@ -1,0 +1,46 @@
+flowchart LR
+  %% Kurt's Cykel Shop - Kubernetes architecture (current manifests)
+
+  subgraph NS[Namespace: kurts-cykel-shop]
+    Client[Client\nBrowser / Mobile]
+    CFTunnel[Deployment: cloudflare-tunnel\ncloudflared]
+    CFTSecret[Secret: cloudflare-tunnel-secret\nCLOUDFLARE_TUNNEL_TOKEN]
+
+    RPService[Service: reverse-proxy\nClusterIP :80]
+    RPDeploy[Deployment: reverse-proxy\nnginx:alpine :80]
+    NginxCfg[ConfigMap: nginx-config\nnginx.conf]
+
+    BService[Service: backend\nClusterIP :5000]
+    BDeploy[Deployment: backend\nNode.js :5000]
+    BEnv[ConfigMap: backend-env\nNODE_ENV, TZ]
+    BSecret[Secret: backend-secret\nDATABASE_URL, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET]
+    BNodemon[ConfigMap: backend-nodemon\nnodemon.json]
+
+    DBService[Service: db\nClusterIP :5432]
+    DBDeploy[Deployment: db\nbitnami/postgresql :5432]
+    DBEnv[ConfigMap: db-env\nPOSTGRES_DB, POSTGRES_USER]
+    DBSecret[Secret: db-secret\nPOSTGRES_PASSWORD]
+    DBPVC[PVC: postgres-data\nRWO 100Mi]
+  end
+
+  Client -->|HTTPS to Cloudflare| CFTunnel
+  CFTunnel -->|HTTP :80| RPService
+  RPService --> RPDeploy
+  RPDeploy -->|/api -> http://backend:5000| BService
+  BService --> BDeploy
+  BDeploy -->|DATABASE_URL -> db:5432| DBService
+  DBService --> DBDeploy
+
+  CFTSecret -.->|envFrom| CFTunnel
+  NginxCfg -.->|volumeMount /etc/nginx/nginx.conf| RPDeploy
+
+  BEnv -.->|envFrom| BDeploy
+  BSecret -.->|envFrom| BDeploy
+  BNodemon -.->|volumeMount /usr/src/app/nodemon.json| BDeploy
+
+  DBEnv -.->|envFrom| DBDeploy
+  DBSecret -.->|envFrom| DBDeploy
+  DBPVC -.->|volumeMount /var/lib/postgresql/data| DBDeploy
+
+  NoteNoIngress[No Ingress resource is defined in k8s/base or overlays]
+  NoteNoIngress -.->|info| RPService

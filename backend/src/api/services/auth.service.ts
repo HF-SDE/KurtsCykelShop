@@ -1,3 +1,4 @@
+//import { JwtPayload } from 'jsonwebtoken';
 import { UserToken } from "@api-types/JWTToken";
 import {
   AccessResult,
@@ -7,8 +8,8 @@ import {
   TokenRequestBody,
 } from "@api-types/auth.types";
 import { APIResponse, Status } from "@api-types/general.types";
-//import { JwtPayload } from 'jsonwebtoken';
 import config from "@config";
+import { type Permission } from "@permission-types";
 import prisma from "@prisma-instance";
 import { Session } from "@prisma/client";
 import { LoginSchema, TokenSchema } from "@schemas/auth.schemas";
@@ -24,12 +25,7 @@ import passport from "passport";
  * @param {string} secret - The secret key used to sign the JWT.
  * @returns {string} The generated JWT token.
  */
-function generateToken(
-  user: UserToken,
-  ip: string | null,
-  expiration: string,
-  secret: string,
-): string {
+function generateToken(user: UserToken, ip: string | null, expiration: string, secret: string): string {
   return jwt.sign(user, secret + (ip || ""), {
     expiresIn: expiration,
   } as jwt.SignOptions);
@@ -50,28 +46,22 @@ export async function generateUserTokens(
 ): Promise<AccessResult> {
   const newId = crypto.randomUUID();
 
-  const userPermissions = await prisma.userPermissions.findMany({
-    where: {
-      userId: user.sub,
-    },
-    select: {
-      Permission: {
-        select: {
-          code: true,
-        },
-      },
-    },
+  const userWithRoles = await prisma.user.findFirst({
+    where: { id: user.sub },
+    include: { roles: { include: { permissions: true } } },
   });
 
-  const permissionCodes = userPermissions.map((perm) => perm.Permission.code);
+  const permissionCodes = (userWithRoles?.roles.flatMap((role) => role.permissions.map((perm) => perm.code)) ||
+    []) as Permission[];
 
   const newAccessToken = generateToken(
     {
       jti: newId,
       sub: user.sub,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       username: user.username,
-      permissions: permissionCodes,
+      permissions: permissionCodes || [],
       initials: user.initials,
     },
     ip,
@@ -150,9 +140,7 @@ export async function invalidateSession(token: string): Promise<void> {
  * @param {string} userId - The unique identifier of the user whose tokens should be invalidated.
  * @returns {Promise<void>} A promise that resolves once the tokens have been invalidated.
  */
-export async function invalidateAllTokensForUser(
-  userId: string,
-): Promise<void> {
+export async function invalidateAllTokensForUser(userId: string): Promise<void> {
   await prisma.session.deleteMany({ where: { userId: userId } });
 }
 
@@ -162,17 +150,13 @@ export async function invalidateAllTokensForUser(
  * @returns {Promise<RefreshResult | null>} A promise that resolves to an object containing the refresh token if valid, or `null` if the access token is invalid or expired.
  * @throws {Error} If there is an error during token verification or database operations.
  */
-export async function getRefreshToken(tokenBody: TokenRequestBody) {
+export async function getRefreshToken(tokenBody: TokenRequestBody): Promise<RefreshResult | null> {
   let user;
 
   try {
-    user = jwt.verify(
-      tokenBody.token,
-      config.ACCESS_TOKEN_SECRET + tokenBody.ip,
-      {
-        ignoreExpiration: true,
-      },
-    );
+    user = jwt.verify(tokenBody.token, config.ACCESS_TOKEN_SECRET + tokenBody.ip, {
+      ignoreExpiration: true,
+    });
   } catch (error) {
     // If there's an error in the token verification (e.g., invalid signature), return null
     console.error("Invalid token signature or other error:", error);
@@ -226,16 +210,11 @@ export async function getRefreshToken(tokenBody: TokenRequestBody) {
  * @returns {Promise<object | null>} A promise that resolves to an object containing the new tokens if valid, or `null` if the token is invalid or expired.
  * @throws {Error} If there is an error during the token verification or database operations.
  */
-export async function refreshUserTokens(
-  tokenBody: TokenRequestBody,
-): Promise<AccessResult | null> {
+export async function refreshUserTokens(tokenBody: TokenRequestBody): Promise<AccessResult | null> {
   // Verify the refresh token with the user's IP address as a secret key
   let userTemp: UserToken | null = null;
   try {
-    userTemp = jwt.verify(
-      tokenBody.token,
-      config.REFRESH_TOKEN_SECRET + tokenBody.ip,
-    ) as unknown as UserToken;
+    userTemp = jwt.verify(tokenBody.token, config.REFRESH_TOKEN_SECRET + tokenBody.ip) as unknown as UserToken;
   } catch {
     // Handle the verification failure gracefully
     return null;
@@ -270,10 +249,7 @@ export async function refreshUserTokens(
   });
 
   // Check if the refresh token in the database matches the provided one
-  if (
-    newestRefreshToken &&
-    newestRefreshToken.refreshToken === tokenBody.token
-  ) {
+  if (newestRefreshToken && newestRefreshToken.refreshToken === tokenBody.token) {
     const result = generateUserTokens(
       {
         sub: user?.sub || "",
@@ -312,10 +288,7 @@ function getCacheKey(username: string, ipAddress: string): string {
  * @param {string} ipAddress - The IP address from which the login attempt is made.
  * @returns {Promise<void>}
  */
-async function addFailedAttempt(
-  username: string,
-  ipAddress: string,
-): Promise<void> {
+async function addFailedAttempt(username: string, ipAddress: string): Promise<void> {
   const key = getCacheKey(username, ipAddress);
 
   const now = new Date();
@@ -328,9 +301,7 @@ async function addFailedAttempt(
 
     // Filter out old attempts outside the time window
     loginAttempts[key] = loginAttempts[key].filter(
-      (attemptTime) =>
-        now.getTime() - attemptTime.getTime() <
-        config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+      (attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
     );
 
     // Add the new failed attempt
@@ -344,10 +315,7 @@ async function addFailedAttempt(
  * @param {string} ipAddress - The IP address from which the successful login is made.
  * @returns {Promise<void>}
  */
-async function clearFailedAttempts(
-  username: string,
-  ipAddress: string,
-): Promise<void> {
+async function clearFailedAttempts(username: string, ipAddress: string): Promise<void> {
   const key = getCacheKey(username, ipAddress);
 
   await mutex.runExclusive(() => {
@@ -375,9 +343,7 @@ function isAccountLocked(username: string, ipAddress: string): boolean {
   if (Object.prototype.hasOwnProperty.call(loginAttempts, key)) {
     // eslint-disable-next-line security/detect-object-injection
     loginAttempts[key] = loginAttempts[key].filter(
-      (attemptTime) =>
-        now.getTime() - attemptTime.getTime() <
-        config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+      (attemptTime) => now.getTime() - attemptTime.getTime() < config.ATTEMPT_WINDOW_MINUTES * 60 * 1000,
     );
   }
 
@@ -394,11 +360,9 @@ function isAccountLocked(username: string, ipAddress: string): boolean {
  * either authentication tokens upon success, or an error message if authentication fails.
  * @throws {Error} If an unexpected error occurs during the authentication process.
  */
-export async function login(
-  userData: LoginRequestBody,
-): Promise<APIResponse<AccessResult>> {
+export async function login(userData: LoginRequestBody): Promise<APIResponse<AccessResult>> {
   try {
-    const validate = LoginSchema.validate({
+    const validate = LoginSchema.safeParse({
       username: userData.username,
       password: userData.password,
     });
@@ -424,44 +388,42 @@ export async function login(
     // Wrap passport authentication in a Promise to return an APIResponse
     return new Promise((resolve) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      passport.authenticate(
-        "local",
-        async (err: any, user: Express.User | false) => {
-          if (err || !user) {
-            await addFailedAttempt(userData.username, userData.ip);
-            return resolve({
-              status: Status.InvalidCredentials,
-              message: "Wrong username or password",
-            });
-          }
+      passport.authenticate("local", async (err: any, user: Express.User | false) => {
+        if (err || !user) {
+          await addFailedAttempt(userData.username, userData.ip);
+          return resolve({
+            status: Status.InvalidCredentials,
+            message: "Wrong username or password",
+          });
+        }
 
-          // Proceed with login and token generation
-          try {
-            await clearFailedAttempts(userData.username, userData.ip);
-            const result: AccessResult = await generateUserTokens(
-              {
-                sub: user.id,
-                username: user.username,
-                name: user.name,
-                initials: user.initials,
-              },
-              userData.ip,
-            );
+        // Proceed with login and token generation
+        try {
+          await clearFailedAttempts(userData.username, userData.ip);
+          const result: AccessResult = await generateUserTokens(
+            {
+              sub: user.id,
+              username: user.username,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              initials: user.initials,
+            },
+            userData.ip,
+          );
 
-            resolve({
-              data: result,
-              status: Status.Success,
-              message: "Login successful",
-            });
-          } catch (tokenError) {
-            console.error("Token generation error: " + tokenError);
-            resolve({
-              status: Status.Failed,
-              message: "Failed to generate tokens",
-            });
-          }
-        },
-      )({ body: { username: userData.username, password: decodedPassword } });
+          resolve({
+            data: result,
+            status: Status.Success,
+            message: "Login successful",
+          });
+        } catch (tokenError) {
+          console.error("Token generation error: " + tokenError);
+          resolve({
+            status: Status.Failed,
+            message: "Failed to generate tokens",
+          });
+        }
+      })({ body: { username: userData.username, password: decodedPassword } });
     });
   } catch (error) {
     console.error("Login error: " + error);
@@ -478,10 +440,10 @@ export async function login(
  * @returns {Promise<APIResponse>} A promise that resolves to an API response object containing the result of the logout operation.
  * @throws {Error} Throws an error if something goes wrong during the process, logging the issue and returning a generic error message.
  */
-export async function logout(token: TokenRequestBody): Promise<APIResponse> {
+export async function logout(token: TokenRequestBody): Promise<APIResponse<void>> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {
@@ -518,12 +480,10 @@ export async function logout(token: TokenRequestBody): Promise<APIResponse> {
  * @returns {Promise<APIResponse<AccessResult>>} A promise that resolves to an API response object containing the result of the logout operation.
  * @throws {Error} Throws an error if something goes wrong during the process, logging the issue and returning a generic error message.
  */
-export async function accessToken(
-  token: TokenRequestBody,
-): Promise<APIResponse<AccessResult>> {
+export async function accessToken(token: TokenRequestBody): Promise<APIResponse<AccessResult>> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {
@@ -567,12 +527,10 @@ export async function accessToken(
  * @returns {Promise<APIResponse<RefreshResult>>} A promise that resolves to an API response object containing the result of the logout operation.
  * @throws {Error} Throws an error if something goes wrong during the process, logging the issue and returning a generic error message.
  */
-export async function refreshToken(
-  token: TokenRequestBody,
-): Promise<APIResponse<RefreshResult>> {
+export async function refreshToken(token: TokenRequestBody): Promise<APIResponse<RefreshResult>> {
   try {
     // Validate the token using TokenSchema
-    const validate = TokenSchema.validate({ token: token.token });
+    const validate = TokenSchema.safeParse({ token: token.token });
 
     // If validation fails, return an error response
     if (validate.error) {

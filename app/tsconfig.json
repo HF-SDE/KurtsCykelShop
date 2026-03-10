@@ -3,9 +3,17 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "@schemas/*": ["../../schemas/*"]
+      "@schemas/*": ["../schemas/*"],
+      "@permissions": ["../permissions.ts"],
+      "@permission-types": ["../permissions.d.ts"],
+      "@hooks/*": ["./hooks/*"],
+      "tailwind.config": ["./tailwind.config.js"],
+      "@components/*": ["./components/*"],
+      "@utils/*": ["./utils/*"],
+      "@assets/*": ["./assets/*"],
+      "@api-types/*": ["./types/*"],
+      "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
 }

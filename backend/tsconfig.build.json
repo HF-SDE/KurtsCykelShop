@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "Node16",
+    "module": "Node20",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -15,27 +15,24 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
-      "*": ["node_modules/*"],
+      "@/*": ["./*"],
+      "@prisma": ["generated/prisma/client"],
+      "@schemas/*": ["../schemas/*"],
       "@routes/*": ["api/routes/*"],
       "@controllers/*": ["api/controllers/*"],
       "@services/*": ["api/services/*"],
-      "@api-types/*": ["api/types/*"],
-      "@utils/*": ["api/utils/*"],
-      "@config": ["config"],
-      "@passport": ["passport"],
-      "@prisma-instance": ["prisma"],
+      "@api-types/*": ["types/*"],
+      "@utils/*": ["utils/*"],
+      "@config": ["lib/config"],
+      "@passport": ["lib/passport"],
+      "@prisma-instance": ["lib/prisma"],
       "@middlewares/*": ["middleware/*"],
-      "@schemas/*": ["../schemas/*"]
+      "@lib/*": ["lib/*"],
+      "@permissions": ["../../permissions.ts"],
+      "@permission-types": ["../../permissions.d.ts"]
     },
     "allowJs": true
   },
-  "include": [
-    "*",
-    "src/index.ts",
-    "src/config.ts",
-    "src/**/*",
-    "schemas",
-    "src/passport.ts",
-    "eslint.config.mjs"
-  ]
+  "include": ["src/**/*", "../schemas/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

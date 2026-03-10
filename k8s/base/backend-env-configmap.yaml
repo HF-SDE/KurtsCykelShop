@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: backend
+  name: backend-env
+data:
+  NODE_ENV: development
+  TZ: Europe/Copenhagen

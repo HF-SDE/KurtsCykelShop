@@ -1,0 +1,131 @@
+import React, { useEffect, useState } from "react";
+import { Platform } from "react-native";
+
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+} from "@/components/ui/actionsheet";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { HStack } from "@/components/ui/hstack";
+import { Input, InputField } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
+
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { formatDateTime } from "@utils/formatDate";
+
+interface DatePickerDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentDate?: string | Date; // ISO 8601 string or Date object (defaults to today)
+  onDateChange: (newDate: Date) => void;
+  title?: string;
+  subtitle?: string;
+  confirmLabel?: string;
+  minimumDate?: Date;
+}
+
+export function DatePickerDrawer({
+  isOpen,
+  onClose,
+  currentDate,
+  onDateChange,
+  title = "Vælg dato",
+  subtitle = "Valgt dato",
+  confirmLabel = "Bekræft",
+  minimumDate = new Date(),
+}: DatePickerDrawerProps) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const parsedDate = currentDate instanceof Date ? currentDate : currentDate ? new Date(currentDate) : new Date();
+
+        if (isNaN(parsedDate.getTime())) {
+          console.error("Invalid date format received:", currentDate);
+          setSelectedDate(new Date());
+        } else {
+          setSelectedDate(parsedDate);
+        }
+      } catch (error) {
+        console.error("Error parsing date:", error);
+        setSelectedDate(new Date());
+      }
+
+      // Auto-show picker on iOS
+      if (Platform.OS === "ios") {
+        setShowPicker(true);
+      }
+    }
+  }, [isOpen, currentDate]);
+
+  const handleDateChangeNative = (event: any, date?: Date) => {
+    if (Platform.OS === "android") {
+      setShowPicker(false);
+      if (event.type === "set" && date) {
+        setSelectedDate(date);
+      }
+    } else if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  const handleConfirm = () => {
+    onDateChange(selectedDate);
+    onClose();
+    setShowPicker(false);
+  };
+
+  return (
+    <Actionsheet isOpen={isOpen} onClose={onClose}>
+      <ActionsheetBackdrop />
+      <ActionsheetContent>
+        <ActionsheetDragIndicatorWrapper>
+          <ActionsheetDragIndicator />
+        </ActionsheetDragIndicatorWrapper>
+        <VStack space="lg" className="w-full p-6 pb-8">
+          <Heading size="lg" className="text-typography-900">
+            {title}
+          </Heading>
+
+          <VStack space="sm">
+            <Text className="text-typography-700 font-medium">{subtitle}</Text>
+
+            {Platform.OS === "android" && (
+              <Button action="secondary" variant="outline" size="lg" onPress={() => setShowPicker(true)}>
+                <ButtonText>{formatDateTime(selectedDate)}</ButtonText>
+              </Button>
+            )}
+
+            {(Platform.OS === "ios" || showPicker) && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={handleDateChangeNative}
+                minimumDate={minimumDate}
+                locale="da-DK"
+              />
+            )}
+
+            {Platform.OS === "ios" && (
+              <HStack className="bg-background-50 items-center justify-center rounded-lg p-3">
+                <Text className="text-typography-700 text-center font-medium">{formatDateTime(selectedDate)}</Text>
+              </HStack>
+            )}
+          </VStack>
+
+          <Button action="primary" variant="solid" size="lg" onPress={handleConfirm}>
+            <ButtonText>{confirmLabel}</ButtonText>
+          </Button>
+        </VStack>
+      </ActionsheetContent>
+    </Actionsheet>
+  );
+}

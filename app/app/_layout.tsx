@@ -1,5 +1,55 @@
-import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { Keyboard, Pressable } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+
+import SessionProvider from "@/app/ctx";
+import PermissionsProvider from "@/contexts/permissions.ctx";
+import "@/global.css";
+
+import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+
+export const unstable_settings = {
+  initialRouteName: "login",
+};
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  return <Stack />;
+  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  return <RootLayoutNav />;
+}
+
+function RootLayoutNav() {
+  const colorMode = "system";
+
+  useEffect(() => {
+    // Hide the splash screen once the app is ready
+    SplashScreen.hideAsync();
+  }, []);
+
+  return (
+    <SessionProvider>
+      <GestureHandlerRootView className="flex-1">
+        <GluestackUIProvider mode={colorMode}>
+          <SafeAreaProvider>
+            <KeyboardProvider>
+              <ThemeProvider>
+                <PermissionsProvider>
+                  <Pressable className="flex-1" onPress={Keyboard.dismiss}>
+                    <Slot />
+                  </Pressable>
+                </PermissionsProvider>
+              </ThemeProvider>
+            </KeyboardProvider>
+          </SafeAreaProvider>
+        </GluestackUIProvider>
+      </GestureHandlerRootView>
+    </SessionProvider>
+  );
 }

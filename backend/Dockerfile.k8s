@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1.4
+FROM node:24-alpine AS base
+
+RUN apk add -U tzdata
+RUN cp /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
+
+WORKDIR /usr/src/app
+
+COPY backend/package.json ./
+RUN npm install
+
+COPY backend/ ./
+COPY schemas ./schemas
+COPY permissions.d.ts /usr/src/permissions.d.ts
+
+RUN npx prisma generate
+RUN chmod +x ./entrypoint.sh
+
+EXPOSE 5000
+ENTRYPOINT ["./entrypoint.sh"]

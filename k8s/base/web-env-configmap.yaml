@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: web
+  name: web-env
+data:
+  BACKEND_URL: http://backend:5000

@@ -1,24 +1,25 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
+import customerRoutes from "@routes/customer.routes";
+import { itemRoutes } from "@routes/item.routes";
+import { itemStatusRoutes } from "@routes/itemStatuses.routes";
+import { locationRoutes } from "@routes/locations.routes";
 import manageRoutes from "@routes/manage.routes";
-import menuRoutes from "@routes/menu.routes";
-import orderRoutes from "@routes/order.routes";
 import profileRoutes from "@routes/profile.routes";
-import reservationRoutes from "@routes/reservation.routes";
-import statsRoutes from "@routes/stats.routes";
-import stockRoutes from "@routes/stock.routes";
-import stripeRoutes from "@routes/stripe.routes";
-import tableRoutes from "@routes/table.routes";
+import serviceOrderRoutes from "@routes/serviceOrder.routes";
+import { unitRoutes } from "@routes/unit.routes";
+import userRoutes from "@routes/user.routes";
+import { vendorRoutes } from "@routes/vendor.routes";
 import bodyParser from "body-parser";
 import cors from "cors";
+import express from "express";
 import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import passport from "passport";
-import express from "express";
+
+import "./lib/passport";
 
 const app = express();
-
-import "./passport";
 
 const limiter = rateLimit({
   windowMs: config.RATE_LIMIT_RESET_MINUTES * 60 * 1000, // 60 minutes
@@ -37,16 +38,23 @@ app.use(bodyParser.json({}));
 app.use(passport.initialize());
 app.use(limiter);
 
+app.use((req, res, next) => {
+  console.info(`${req.method} ${req.path}`);
+  next();
+});
+
 //Insert all routes here
 app.use(`/`, authRoutes);
-app.use(`/stock`, stockRoutes);
-app.use(`/table`, tableRoutes);
-app.use(`/reservation`, reservationRoutes);
-app.use(`/order`, orderRoutes);
-app.use(`/manage`, manageRoutes);
 app.use(`/profile`, profileRoutes);
-app.use(`/menu`, menuRoutes);
-app.use(`/stats`, statsRoutes);
+app.use(`/manage`, manageRoutes);
+app.use(`/service-orders`, serviceOrderRoutes);
+app.use(`/customers`, customerRoutes);
+app.use("/units", unitRoutes);
+app.use("/items", itemRoutes);
+app.use("/user", userRoutes);
+app.use("/vendors", vendorRoutes);
+app.use("/locations", locationRoutes);
+app.use("/item-statuses", itemStatusRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });

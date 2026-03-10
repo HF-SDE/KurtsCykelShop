@@ -1,0 +1,103 @@
+name: Validate Version Bump
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get git diff
+        id: git-diff
+        run: |
+          git fetch origin main
+
+          # Check if version in package.json was modified
+          PACKAGE_MODIFIED=$(git diff origin/main...HEAD -- package.json | grep -c '^+.*"version":' || true)
+          echo "package_modified=$PACKAGE_MODIFIED" >> $GITHUB_OUTPUT
+
+          # Get old version from main branch
+          git show origin/main:package.json > package_main.json || echo "{}" > package_main.json
+          OLD_VERSION=$(jq -r '.version' package_main.json 2>/dev/null || echo "Unknown")
+          echo "old_version=$OLD_VERSION" >> $GITHUB_OUTPUT
+
+          # Get new version from current branch
+          NEW_VERSION=$(jq -r '.version' package.json 2>/dev/null || echo "Unknown")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Prepare validation results
+        id: validation
+        run: |
+          SUCCESS=true
+          STATUS=""
+
+          # Check version update
+          if [ "${{ steps.git-diff.outputs.package_modified }}" -eq "0" ]; then
+            STATUS="${STATUS}❌ **ERROR:** Version in package.json has not been updated.\n\n"
+            SUCCESS=false
+          else
+            STATUS="${STATUS}✅ **SUCCESS:** Version updated from \`${{ steps.git-diff.outputs.old_version }}\` to \`${{ steps.git-diff.outputs.new_version }}\`.\n\n"
+          fi
+
+          # Build the comment body
+          EOF_MARKER="EOF_$(date +%s%N)"
+          {
+            echo "body<<$EOF_MARKER"
+            echo "### 🔍 Release Validation Results"
+            echo ""
+            echo -e "$STATUS"
+
+            if [ "$SUCCESS" = true ]; then
+              echo "✅ **All release requirements satisfied.**"
+            else
+              echo "❌ **Release requirements not satisfied. Please fix the issues above.**"
+            fi
+
+            echo "$EOF_MARKER"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "success=$SUCCESS" >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        id: find-comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "Release Validation Results"
+
+      # Create new comment if none found
+      - name: Create PR comment
+        if: ${{ steps.find-comment.outputs.comment-id == '' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ steps.validation.outputs.body }}
+
+      # Update existing comment if found
+      - name: Update PR comment
+        if: ${{ steps.find-comment.outputs.comment-id != '' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: ${{ steps.validation.outputs.body }}
+          edit-mode: replace
+
+      - name: Fail if validation unsuccessful
+        if: steps.validation.outputs.success != 'true'
+        run: |
+          echo "Release validation failed. See the PR comment for details."
+          exit 1

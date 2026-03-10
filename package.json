@@ -1,19 +1,25 @@
 {
   "name": "kurts-cykel-shop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
-    "install": "cd backend && npm install && cd ../app && npm install && cd ../client && npm install && cd ../admin && npm install",
+    "install": "cd backend && npm install && cd ../app && npm install && cd ../web && npm install",
     "dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d && docker image prune -f && cd app && npm run start",
-    "backend:dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d && docker image prune -f",
+    "backend:dev": "docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml run --rm web npm install && docker compose --env-file ./config/environment-variables/.env.docker.dev -f ./docker/docker-compose.yml up -d --build && docker image prune -f",
     "backend": "docker compose --env-file ./config/environment-variables/.env.docker.prod -f ./docker/docker-compose.prod.yml up -d && docker image prune",
     "app:dev": "cd app && npm run start",
     "app:dev:tunnel": "cd app && npm run tunnel",
     "build:dev": "docker compose -f ./docker/docker-compose.yml build",
     "build": "docker compose -f ./docker/docker-compose.prod.yml build",
     "seed": "cd backend && npx prisma migrate deploy && npx prisma db seed",
-    "prisma:generate": "cd backend && npx prisma generate",
-    "create-envs": "cd config/environment-variables && bash create-envs.sh"
+    "prisma:generate": "cd backend && npm run prisma:generate",
+    "create-envs": "node config/environment-variables/copy-env-dev.mjs",
+    "k8s:apply": "kubectl apply -k ./k8s/overlays/dev",
+    "k8s:apply:prod": "kubectl apply -k ./k8s/overlays/prod",
+    "k8s:dry-run": "kubectl apply -k ./k8s/overlays/dev --dry-run=client",
+    "k8s:status": "kubectl -n kurts-cykel-shop get deployments && kubectl -n kurts-cykel-shop get pods",
+    "k8s:build-backend": "docker build -f ./backend/Dockerfile.k8s -t backend:latest .",
+    "k8s:build-web": "docker build -f ./web/Dockerfile -t web:latest ./web"
   },
   "author": "Kurt",
   "description": "World best cykel shop",
@@ -22,6 +28,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "eslint-plugin-jsdoc": "^62.7.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "terser": "^5.36.0"

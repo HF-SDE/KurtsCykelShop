@@ -17,6 +17,7 @@ datasource db {
 
 model User {
   id        String  @id @default(uuid()) @db.Uuid
+  username  String  @unique
   firstName String
   lastName  String
   initials  String  @unique @db.Char(3)
@@ -28,12 +29,14 @@ model User {
   updatedAt DateTime @updatedAt
 
   roles                 Role[]
-  refreshTokens         RefreshToken[]
-  accessTokens          AccessToken[]
   assignedOrders        ServiceOrder[]         @relation("AssignedTo")
   OrdersAssigned        ServiceOrder[]         @relation("AssignedBy")
   inventoryTransactions InventoryTransaction[]
   saleLogs              SaleLog[]
+  sessions              Session[]
+  serviceRepairs        ServiceRepair[]
+
+  @@unique([firstName, lastName])
 }
 
 model Role {
@@ -49,41 +52,42 @@ model Role {
 }
 
 model Permission {
-  id          String  @id @default(uuid()) @db.Uuid
-  code        String  @unique
-  description String?
+  id                String  @id @default(uuid()) @db.Uuid
+  code              String  @unique
+  description       String?
+  permissionGroupId String  @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  roles Role[]
+  roles           Role[]
+  permissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id])
 }
 
-model RefreshToken {
-  id        String  @id @default(uuid()) @db.Uuid
-  token     String  @unique
-  userId    String  @db.Uuid
-  sessionId String? @unique
-
+model PermissionGroup {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessTokens AccessToken[]
+  Permissions Permission[]
 }
 
-model AccessToken {
-  id             String  @id @default(uuid()) @db.Uuid
-  token          String  @unique
-  refreshTokenId String? @db.Uuid
-  userId         String  @db.Uuid
-  sessionId      String  @unique
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     Token[]
+  expiresAt DateTime
+}
 
-  createdAt DateTime @default(now())
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshToken RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
+model Token {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionId    String   @db.Uuid
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  accessToken  String   @unique
+  refreshToken String   @unique
+  createdAt    DateTime @default(now())
 }
 
 // Customer
@@ -126,6 +130,7 @@ model ServiceOrder {
   completedAt         DateTime?
   assignedToId        String?   @db.Uuid
   assignedById        String    @db.Uuid
+  status              String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -137,6 +142,7 @@ model ServiceOrder {
   serviceOrderInvoice ServiceOrderInvoice?
   servicePartsUsed    ServicePartsUsed[]
   serviceOrderLogs    ServiceOrderLog[]
+  serviceRepairs      ServiceRepair[]
 
   @@index([customerId, createdAt])
 }
@@ -182,6 +188,20 @@ model ServiceOrderLog {
   serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
 }
 
+model ServiceRepair {
+  id             String @id @default(uuid()) @db.Uuid
+  serviceOrderId String @db.Uuid
+  title          String
+  description    String
+  createdById    String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceOrder ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+}
+
 // Storage
 
 model Item {
@@ -192,6 +212,8 @@ model Item {
   quantity        Int
   minSellQuantity Int
   price           Int // Pris i øre
+  purchasePrice   Int // Indkøbspris i øre
+  isPublic        Boolean @default(false)
   unitId          String  @db.Uuid
   statusId        String  @db.Uuid
   locationId      String  @db.Uuid

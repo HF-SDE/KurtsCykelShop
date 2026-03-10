@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kurts-cykel-shop
+resources:
+  - namespace.yaml
+  - backend-env-configmap.yaml
+  - backend-secret.yaml
+  - backend-nodemon-configmap.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - web-env-configmap.yaml
+  - web-deployment.yaml
+  - web-service.yaml
+  - db-env-configmap.yaml
+  - db-secret.yaml
+  - db-deployment.yaml
+  - db-service.yaml
+  - postgres-data-persistentvolumeclaim.yaml
+  - nginx-config-configmap.yaml
+  - reverse-proxy-deployment.yaml
+  - reverse-proxy-service.yaml
+  - cloudflare-tunnel-secret.yaml
+  - cloudflare-tunnel-deployment.yaml
