@@ -3,6 +3,7 @@ import { Icon } from "@/components/ui/icon";
 
 import { ImpactFeedbackStyle, triggerHapticFeedback } from "@/utils/hapticFeedback";
 
+import { useSession } from "@/app/ctx";
 import { usePermissions } from "@/contexts/permissions.ctx";
 
 import { FoxLoader } from "@components/fox";
@@ -10,6 +11,7 @@ import { Tabs } from "expo-router";
 import { BookText, CircleUserRound, Package, UserRoundCog } from "lucide-react-native";
 
 export default function TabLayout() {
+  const { session } = useSession();
   const { hasPageAccess, isLoading } = usePermissions();
 
   if (isLoading) return <FoxLoader />;
@@ -76,7 +78,7 @@ export default function TabLayout() {
           }}
         />
       )}
-      {hasPageAccess("ManagementPage") && (
+      {session && (
         <Tabs.Screen
           name="index"
           options={{

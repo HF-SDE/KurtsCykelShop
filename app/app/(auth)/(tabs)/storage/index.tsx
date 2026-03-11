@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { Alert, AlertButton, FlatList } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { usePermissions } from "@/contexts/permissions.ctx";
 import { Item } from "@/types/Inventory/Item";
 import { ListTableColumn } from "@/types/ui/listTable";
 
+import CheckPermission from "@components/check-permission";
 import { FoxLoader } from "@components/fox";
 import { NavigationButton } from "@components/navigation-button";
 import { Searchbar } from "@components/search";
@@ -52,6 +54,8 @@ export default function Storage() {
     loadMore,
   } = useStorage();
 
+  const { hasPermission } = usePermissions();
+
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [isBarcodeDrawerOpen, setIsBarcodeDrawerOpen] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -68,15 +72,22 @@ export default function Storage() {
         return;
       }
 
-      Alert.alert("Stregkode ikke fundet", "Ingen vare med denne stregkode blev fundet. Vil du oprette en ny vare?", [
-        {
+      const canCreate = hasPermission("storage:item:create");
+
+      const alertOptions: AlertButton[] = [
+        { text: "Scan igen", onPress: () => setIsBarcodeDrawerOpen(true) },
+        { text: "Annuller", onPress: () => {}, style: "cancel" },
+      ];
+
+      if (canCreate) {
+        alertOptions.unshift({
           text: "Opret",
           style: "default",
           onPress: () => router.push({ pathname: "/storage/new-item", params: { barcode } }),
-        },
-        { text: "Scan igen", onPress: () => setIsBarcodeDrawerOpen(true) },
-        { text: "Annuller", onPress: () => {}, style: "cancel" },
-      ]);
+        });
+      }
+
+      Alert.alert("Stregkode ikke fundet", "Ingen vare med denne stregkode blev fundet.", alertOptions);
     } catch (error) {
       console.error("Error fetching item by barcode:", error);
       Alert.alert("Fejl", "Kunne ikke slå stregkoden op. Prøv igen.");
@@ -142,9 +153,11 @@ export default function Storage() {
             <ButtonIcon as={ScanText} />
           </Button>
 
-          <NavigationButton variant="outline" className="h-full" href="/storage/new-item">
-            <ButtonIcon as={Plus} />
-          </NavigationButton>
+          <CheckPermission requiredPermission={["storage:item:create"]}>
+            <NavigationButton variant="outline" className="h-full" href="/storage/new-item">
+              <ButtonIcon as={Plus} />
+            </NavigationButton>
+          </CheckPermission>
         </ButtonGroup>
       </Box>
 

@@ -202,7 +202,7 @@ const roles = [
   {
     name: "Medarbejder",
     description: "Almindelig medarbejder",
-    permissionCodes: ["storage:item:view"],
+    permissionCodes: ["storage:item:view", "storage:vendor:view", "storage:location:view", "storage:unit:view"],
   },
   {
     name: "BundenAfFødekæden",
