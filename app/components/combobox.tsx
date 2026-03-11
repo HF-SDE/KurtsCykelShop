@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, Pressable } from "react-native";
 
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
@@ -74,6 +74,14 @@ export function Combobox({
   const [searchValue, setSearchValue] = useState("");
   const [chipContainerWidth, setChipContainerWidth] = useState(0);
   const [optionsWithNewItems, setOptionsWithNewItems] = useState<ComboboxOption[]>(options);
+
+  // Sync when external options change (e.g. after async fetch), preserving locally created items
+  useEffect(() => {
+    setOptionsWithNewItems((prev) => {
+      const newItems = prev.filter((o) => o.id.startsWith("new-"));
+      return [...options, ...newItems];
+    });
+  }, [options]);
   const selectedIds = useMemo<string[]>(() => {
     if (multiSelect) {
       return values || [];
