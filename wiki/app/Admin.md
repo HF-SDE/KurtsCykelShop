@@ -18,6 +18,7 @@ To access the admin page, follow these steps:
 - Assign roles to users
 
 ## Navigation
+
 To access the user management features, navigate to the "Users" section within the admin page.
 
 <img src="https://raw.githubusercontent.com/HF-SDE/KurtsCykelShop/refs/heads/main/.github/images/wiki/admin%20nav%20users.png" height="500">
@@ -31,6 +32,7 @@ See [User Management Page](User-Management) for more details on how to manage us
 - Edit existing roles and their associated permissions
 
 ## Navigation
+
 To access the Role management features, navigate to the "Roles" section within the admin page.
 
 <img src="https://raw.githubusercontent.com/HF-SDE/KurtsCykelShop/refs/heads/main/.github/images/wiki/admin%20nav%20roles.png" height="500">
