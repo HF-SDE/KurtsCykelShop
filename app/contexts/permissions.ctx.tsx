@@ -9,7 +9,7 @@ interface PermissionsContextValue {
   hasPermission: (permission: Permission) => boolean;
   hasAnyPermission: (permissions: readonly Permission[]) => boolean;
   hasAllPermissions: (permissions: readonly Permission[]) => boolean;
-  hasPageAccess: (page: string) => boolean;
+  hasPageAccess: (page: Page) => boolean;
   getAccessiblePages: () => string[];
   isLoading: boolean;
 }
@@ -72,7 +72,7 @@ export default function PermissionsProvider({ children }: { children: React.Reac
     [permissionSet],
   );
 
-  const hasPageAccess = useCallback((page: string) => accessiblePageSet.has(page), [accessiblePageSet]);
+  const hasPageAccess = useCallback((page: Page) => accessiblePageSet.has(page), [accessiblePageSet]);
 
   const getAccessiblePages = useCallback(() => [...accessiblePages], [accessiblePages]);
 
@@ -106,7 +106,17 @@ function decodeJwt(token: string): { permissions?: unknown } | null {
   }
 }
 
-const permissionsToPages: Record<Permission, string[]> = {
+type Page =
+  | "ManagementPage"
+  | "UsersPage"
+  | "PermissionPage"
+  | "PermissionGroupPage"
+  | "RolesPage"
+  | "StockPage"
+  | "CasePage"
+  | "ProfilePage";
+
+const permissionsToPages: Record<Permission, Page[]> = {
   "administrator:users:view": ["ManagementPage", "UsersPage"],
   "administrator:users:update": ["ManagementPage", "UsersPage"],
   "administrator:users:create": ["ManagementPage", "UsersPage"],
