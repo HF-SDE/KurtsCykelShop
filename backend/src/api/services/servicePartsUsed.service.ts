@@ -1,4 +1,5 @@
-import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
+// import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
+import { err, ok } from "@api-types/error.types";
 import { Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { ServicePartsUsed } from "@prisma/client";
@@ -14,46 +15,33 @@ import z from "zod";
  * @param {any} createdById - The ID of the user creating the entry
  * @returns {Promise<EitherDataOrError<ServicePartsUsed, ValidationError | AppError>>} Tuple of [data, error] for clean destructuring
  */
-export async function createServicePartUsed(
-  serviceOrderId: any,
-  data: any,
-  createdById: any,
-): Promise<EitherDataOrError<ServicePartsUsed, ValidationError | AppError>> {
+export async function createServicePartUsed(serviceOrderId: any, data: any, createdById: any) {
   // Validate serviceOrderId
   const serviceOrderIdValidation = UuidSchema.safeParse(serviceOrderId);
   if (!serviceOrderIdValidation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid service order ID",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid service order ID",
+    });
   }
 
   // Validate createdById
   const createdByIdValidation = UuidSchema.safeParse(createdById);
   if (!createdByIdValidation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid user ID",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid user ID",
+    });
   }
 
   // Validate the part data
   const validation = AddPartSchema.safeParse(data);
   if (!validation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid part data",
-        fieldErrors: z.flattenError(validation.error).fieldErrors,
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid part data",
+      fieldErrors: z.flattenError(validation.error).fieldErrors,
+    });
   }
 
   const { itemId, quantity } = validation.data;
@@ -65,13 +53,10 @@ export async function createServicePartUsed(
     });
 
     if (!serviceOrder) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "Service order not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "Service order not found",
+      });
     }
 
     // Check if the item exists and get its details
@@ -80,24 +65,18 @@ export async function createServicePartUsed(
     });
 
     if (!item) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "Item not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "Item not found",
+      });
     }
 
     // Check if item has sufficient quantity
     if (item.quantity < quantity) {
-      return [
-        null,
-        {
-          status: Status.Failed,
-          message: `Insufficient inventory. Available: ${item.quantity}, Requested: ${quantity}`,
-        },
-      ];
+      return err({
+        status: Status.Failed,
+        message: `Insufficient inventory. Available: ${item.quantity}, Requested: ${quantity}`,
+      });
     }
 
     // Get user details for performedByName
@@ -107,13 +86,10 @@ export async function createServicePartUsed(
     });
 
     if (!user) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "User not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "User not found",
+      });
     }
 
     // Get or create ReferenceType for ServiceOrder
@@ -166,16 +142,13 @@ export async function createServicePartUsed(
       return servicePartUsed;
     });
 
-    return [result, null];
+    return ok(result);
   } catch (error) {
     console.error("Error creating service part used:", error);
-    return [
-      null,
-      {
-        status: Status.Failed,
-        message: "Failed to create service part used entry",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.Failed,
+      message: "Failed to create service part used entry",
+      details: error,
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { AppError, EitherDataOrError, ValidationError } from "@api-types/error.types";
+import { err, ok } from "@api-types/error.types";
 import { PaginatedData, Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Customer, Item, Prisma, ServiceOrder, ServicePartsUsed, ServiceRepair, User } from "@prisma/client";
@@ -28,9 +28,7 @@ export interface ServiceOrdersData extends ServiceOrder {
   serviceRepairs: ServiceRepair[];
 }
 
-export async function GetAllServiceOrdersPaginated(
-  params: GetAllServiceOrdersPaginatedParams,
-): Promise<EitherDataOrError<PaginatedData<ServiceOrdersData>, AppError | ValidationError>> {
+export async function GetAllServiceOrdersPaginated(params: GetAllServiceOrdersPaginatedParams) {
   // convert params.statuses to array
   if (params.statuses && typeof params.statuses === "string") {
     params.statuses = params.statuses.split(",").map((s: string) => s.trim());
@@ -39,14 +37,11 @@ export async function GetAllServiceOrdersPaginated(
   const parseResult = ServiceOrdersPaginatedSchema.safeParse({ ...params });
 
   if (!parseResult.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: parseResult.error.message,
-        fieldErrors: z.flattenError(parseResult.error).fieldErrors,
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid query parameters",
+      fieldErrors: z.flattenError(parseResult.error).fieldErrors,
+    });
   }
 
   const { search, statuses, timeRange, page = 1, limit = 20 } = parseResult.data;
@@ -141,25 +136,20 @@ export async function GetAllServiceOrdersPaginated(
       prisma.serviceOrder.count({ where: whereQuery }),
     ]);
 
-    return [
-      {
-        data: serviceOrders,
-        total,
-        page,
-        hasMore: skip + serviceOrders.length < total,
-      },
-      null,
-    ];
+    const data = {
+      data: serviceOrders,
+      total,
+      page,
+      hasMore: skip + serviceOrders.length < total,
+    };
+    return ok(data);
   } catch (error) {
     console.error("Error fetching paginated service orders:", error);
-    return [
-      null,
-      {
-        status: Status.Failed,
-        message: "Failed to fetch paginated service orders",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.Failed,
+      message: "Failed to fetch paginated service orders",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 interface ServicePartsUsedWithItem extends ServicePartsUsed {
@@ -179,17 +169,14 @@ export interface GetServiceOrderByIdResponse extends ServiceOrder {
  * @param {string} id - The service order ID (UUID)
  * @returns {Promise<EitherDataOrError<GetServiceOrderByIdResponse, AppError>>} Tuple of [data, error] for clean destructuring
  */
-export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<GetServiceOrderByIdResponse, AppError>> {
+export async function GetServiceOrderById(id: any) {
   const parseResult = z.uuid().safeParse(id);
 
   if (!parseResult.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid service order ID",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid service order ID",
+    });
   }
 
   try {
@@ -207,13 +194,10 @@ export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<Ge
     });
 
     if (!serviceOrder) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "Service order not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "Service order not found",
+      });
     }
 
     // Process data...
@@ -230,17 +214,14 @@ export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<Ge
       })),
     };
 
-    return [response, null];
+    return ok(response);
   } catch (error) {
     console.error("Error fetching service order by ID:", error);
-    return [
-      null,
-      {
-        status: Status.Failed,
-        message: "Failed to fetch service order from db- " + (error instanceof Error ? error.message : String(error)),
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.Failed,
+      message: "Failed to fetch service order from db- " + (error instanceof Error ? error.message : String(error)),
+      details: error,
+    });
   }
 }
 
@@ -251,46 +232,33 @@ export async function GetServiceOrderById(id: any): Promise<EitherDataOrError<Ge
  * @param {any} userId - The ID of the user making the change
  * @returns {Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>>} Tuple of [data, error] for clean destructuring
  */
-export async function UpdateServiceOrder(
-  id: any,
-  data: any,
-  userId: any,
-): Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>> {
+export async function UpdateServiceOrder(id: any, data: any, userId: any) {
   // Validate id
   const idValidation = UuidSchema.safeParse(id);
   if (!idValidation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid service order ID",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid service order ID",
+    });
   }
 
   // Validate userId
   const userIdValidation = UuidSchema.safeParse(userId);
   if (!userIdValidation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid user ID",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid user ID",
+    });
   }
 
   // Validate update data
   const validation = ServiceOrderUpdateSchema.safeParse(data);
   if (!validation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid update data",
-        fieldErrors: z.flattenError(validation.error).fieldErrors,
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid update data",
+      fieldErrors: z.flattenError(validation.error).fieldErrors,
+    });
   }
 
   try {
@@ -300,13 +268,10 @@ export async function UpdateServiceOrder(
     });
 
     if (!existingServiceOrder) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "Service order not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "Service order not found",
+      });
     }
 
     // Get the user making the change for logging
@@ -316,13 +281,10 @@ export async function UpdateServiceOrder(
     });
 
     if (!changingUser) {
-      return [
-        null,
-        {
-          status: Status.NotFound,
-          message: "User not found",
-        },
-      ];
+      return err({
+        status: Status.NotFound,
+        message: "User not found",
+      });
     }
 
     const changedByName = `${changingUser.firstName} ${changingUser.lastName}`;
@@ -334,13 +296,10 @@ export async function UpdateServiceOrder(
       });
 
       if (!user) {
-        return [
-          null,
-          {
-            status: Status.NotFound,
-            message: "Assigned user not found",
-          },
-        ];
+        return err({
+          status: Status.NotFound,
+          message: "Assigned user not found",
+        });
       }
     }
 
@@ -425,17 +384,14 @@ export async function UpdateServiceOrder(
       return updated;
     });
 
-    return [updatedServiceOrder, null];
+    return ok(updatedServiceOrder);
   } catch (error) {
     console.error("Error updating service order:", error);
-    return [
-      null,
-      {
-        status: Status.Failed,
-        message: "Failed to update service order",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.Failed,
+      message: "Failed to update service order",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -447,34 +403,25 @@ export async function UpdateServiceOrder(
  * @param userId - The ID of the user creating the order (assignedBy)
  * @returns {Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>>}
  */
-export async function CreateServiceOrder(
-  data: any,
-  userId: any,
-): Promise<EitherDataOrError<ServiceOrder, AppError | ValidationError>> {
+export async function CreateServiceOrder(data: any, userId: any) {
   // Validate userId
   const userIdValidation = UuidSchema.safeParse(userId);
   if (!userIdValidation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid user ID",
-        fieldErrors: { userId: ["Invalid UUID format"] },
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid user ID",
+      fieldErrors: { userId: ["Invalid UUID format"] },
+    });
   }
 
   // Validate creation data
   const validation = ServiceOrderCreateSchema.safeParse(data);
   if (!validation.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid service order data",
-        fieldErrors: z.flattenError(validation.error).fieldErrors,
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid service order data",
+      fieldErrors: z.flattenError(validation.error).fieldErrors,
+    });
   }
 
   const validData = validation.data;
@@ -489,34 +436,27 @@ export async function CreateServiceOrder(
       });
 
       if (!existingCustomer) {
-        return [
-          null,
-          {
-            status: Status.NotFound,
-            message: "Customer not found",
-          },
-        ];
+        return err({
+          status: Status.NotFound,
+          message: "Customer not found",
+        });
       }
 
       customerId = existingCustomer.id;
     } else {
       // Create new customer
-      const [newCustomer, customerError] = await CustomerService.CreateCustomer({
+      const [customerError, newCustomer] = await CustomerService.CreateCustomer({
         firstName: validData.customerFirstName!,
         lastName: validData.customerLastName!,
         email: validData.customerEmail!,
         phone: validData.customerPhone,
       });
 
-      console.log("🚀 ~ CreateServiceOrder ~ customerError:", customerError);
       if (customerError) {
-        return [
-          null,
-          {
-            status: customerError.status,
-            message: customerError.message,
-          },
-        ];
+        return err({
+          status: customerError.status,
+          message: customerError.message,
+        });
       }
 
       customerId = newCustomer.id;
@@ -529,13 +469,10 @@ export async function CreateServiceOrder(
       });
 
       if (!assignedUser) {
-        return [
-          null,
-          {
-            status: Status.NotFound,
-            message: "Assigned user not found",
-          },
-        ];
+        return err({
+          status: Status.NotFound,
+          message: "Assigned user not found",
+        });
       }
     }
 
@@ -559,16 +496,13 @@ export async function CreateServiceOrder(
       },
     });
 
-    return [serviceOrder, null];
+    return ok(serviceOrder);
   } catch (error) {
     console.error("Error creating service order:", error);
-    return [
-      null,
-      {
-        status: Status.CreationFailed,
-        message: "Failed to create service order",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.CreationFailed,
+      message: "Failed to create service order",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }

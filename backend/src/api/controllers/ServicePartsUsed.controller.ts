@@ -22,7 +22,7 @@ export async function createServicePartUsed(
   const partData = req.body;
   const createdById = req.user?.id;
 
-  const [data, error] = await ServicePartsUsedService.createServicePartUsed(serviceOrderId, partData, createdById);
+  const [error, data] = await ServicePartsUsedService.createServicePartUsed(serviceOrderId, partData, createdById);
 
   if (error) {
     res.status(getHttpStatusCode(error.status || Status.Failed)).json({

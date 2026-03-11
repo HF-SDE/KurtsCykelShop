@@ -18,7 +18,8 @@ export async function searchCustomers(
 ): Promise<void> {
   const query = req.query.q;
 
-  const [data, error] = await CustomerService.SearchCustomers(query);
+  const [error, data] = await CustomerService.SearchCustomers(query);
+  console.log("🚀ll ~ searchCustomers ~ data:", data);
 
   if (error) {
     res.status(getHttpStatusCode(error.status || Status.Failed)).json({

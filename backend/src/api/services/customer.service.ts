@@ -1,4 +1,4 @@
-import { AppError, EitherDataOrError } from "@api-types/error.types";
+import { err, ok } from "@api-types/error.types";
 import { Status } from "@api-types/general.types";
 import prisma from "@prisma-instance";
 import { Customer } from "@prisma/client";
@@ -9,17 +9,14 @@ import { CustomerSearchSchema } from "@schemas/serviceOrder.schemas";
  * @param {any} query - The search query string
  * @returns {Promise<EitherDataOrError<Customer[], AppError>>}
  */
-export async function SearchCustomers(query: any): Promise<EitherDataOrError<Customer[], AppError>> {
+export async function SearchCustomers(query: any) {
   const parseResult = CustomerSearchSchema.safeParse({ q: query });
 
   if (!parseResult.success) {
-    return [
-      null,
-      {
-        status: Status.InvalidDetails,
-        message: "Invalid search query",
-      },
-    ];
+    return err({
+      status: Status.InvalidDetails,
+      message: "Invalid search query",
+    });
   }
 
   const searchTerm = (parseResult.data.q ?? "").trim();
@@ -43,17 +40,14 @@ export async function SearchCustomers(query: any): Promise<EitherDataOrError<Cus
       orderBy: { firstName: "asc" },
     });
 
-    return [customers, null];
+    return ok(customers);
   } catch (error) {
     console.error("Error searching customers:", error);
-    return [
-      null,
-      {
-        status: Status.Failed,
-        message: "Failed to search customers",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.Failed,
+      message: "Failed to search customers",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -62,12 +56,7 @@ export async function SearchCustomers(query: any): Promise<EitherDataOrError<Cus
  * @param data - Customer creation data
  * @returns {Promise<EitherDataOrError<Customer, AppError>>}
  */
-export async function CreateCustomer(data: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-}): Promise<EitherDataOrError<Customer, AppError>> {
+export async function CreateCustomer(data: { firstName: string; lastName: string; email: string; phone?: string }) {
   try {
     // Check if customer with email already exists
     const existing = await prisma.customer.findUnique({
@@ -75,13 +64,10 @@ export async function CreateCustomer(data: {
     });
 
     if (existing) {
-      return [
-        null,
-        {
-          status: Status.UniqueConstraintViolation,
-          message: "Der findes allerede en kunde med denne email",
-        },
-      ];
+      return err({
+        status: Status.UniqueConstraintViolation,
+        message: "Der findes allerede en kunde med denne email",
+      });
     }
 
     const customer = await prisma.customer.create({
@@ -93,16 +79,13 @@ export async function CreateCustomer(data: {
       },
     });
 
-    return [customer, null];
+    return ok(customer);
   } catch (error) {
     console.error("Error creating customer:", error);
-    return [
-      null,
-      {
-        status: Status.CreationFailed,
-        message: "Failed to create customer",
-        details: error,
-      },
-    ];
+    return err({
+      status: Status.CreationFailed,
+      message: "Failed to create customer",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
 }

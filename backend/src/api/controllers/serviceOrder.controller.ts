@@ -34,7 +34,7 @@ export async function getAllServiceOrdersPaginated(
   const page = req.query.page;
   const limit = req.query.limit;
 
-  const [data, error] = await ServiceOrderService.GetAllServiceOrdersPaginated({
+  const [error, data] = await ServiceOrderService.GetAllServiceOrdersPaginated({
     page,
     limit,
     search,
@@ -68,7 +68,7 @@ export async function getServiceOrderById(
   const id = req.params.id;
 
   // Get service order by id
-  const [data, error] = await ServiceOrderService.GetServiceOrderById(id);
+  const [error, data] = await ServiceOrderService.GetServiceOrderById(id);
 
   if (error) {
     res.status(getHttpStatusCode(error.status || Status.Failed)).json({
@@ -105,7 +105,7 @@ export async function createServiceOrder(
   const userId = req.user?.id;
   const body = req.body;
 
-  const [data, error] = await ServiceOrderService.CreateServiceOrder(body, userId);
+  const [error, data] = await ServiceOrderService.CreateServiceOrder(body, userId);
 
   console.log("🚀gjhgjhg ~ createServiceOrder ~ error:", error);
   if (error) {
@@ -142,7 +142,7 @@ export async function updateServiceOrder(
   const userId = req.user?.id;
 
   // Update service order
-  const [data, error] = await ServiceOrderService.UpdateServiceOrder(id, updateData, userId);
+  const [error, data] = await ServiceOrderService.UpdateServiceOrder(id, updateData, userId);
 
   if (error) {
     res.status(getHttpStatusCode(error.status || Status.Failed)).json({
