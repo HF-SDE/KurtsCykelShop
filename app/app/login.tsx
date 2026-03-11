@@ -72,10 +72,7 @@ export default function Index() {
             <Logo width={340} height={340} />
           </View>
           <Text bold={true} size="xl">
-            Medarbejder kan erstattes.
-          </Text>
-          <Text bold={true} size="xl">
-            Det kan vare ikke.
+            Din cykel fortjener bedre
           </Text>
           <VStack style={styles.formContainer}>
             <FormControl isInvalid={isInvalid} size="md" isDisabled={false} isReadOnly={false} isRequired={false}>
