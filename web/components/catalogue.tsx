@@ -34,11 +34,13 @@ const ShaderGradient = dynamic(() => import("@shadergradient/react").then((modul
 });
 
 function formatPrice(value: number) {
+  const priceInDkk = value / 100;
+
   return new Intl.NumberFormat("da-DK", {
     style: "currency",
     currency: "DKK",
-    maximumFractionDigits: 0,
-  }).format(value);
+    maximumFractionDigits: 2,
+  }).format(priceInDkk);
 }
 
 function getStockLabel(quantity: number) {
