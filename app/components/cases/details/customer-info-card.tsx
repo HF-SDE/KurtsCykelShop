@@ -51,7 +51,7 @@ export function CustomerInfoCard({
         render: ({ id }) => (
           <Toast nativeID={id} action="success" variant="solid">
             <ToastTitle>Dato opdateret</ToastTitle>
-            <ToastDescription>Kunden vil modtage en e-mail</ToastDescription>
+            <ToastDescription>Kunden vil modtage en email</ToastDescription>
           </Toast>
         ),
       });

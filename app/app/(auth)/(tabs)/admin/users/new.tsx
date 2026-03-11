@@ -72,8 +72,8 @@ export default function NewUserPage() {
         placement: "top",
         render: ({ id }) => (
           <Toast nativeID={id} action="error" variant="solid">
-            <ToastTitle>Ugyldigt password</ToastTitle>
-            <ToastDescription>Password skal være mindst 8 tegn</ToastDescription>
+            <ToastTitle>Ugyldig adgangskode</ToastTitle>
+            <ToastDescription>Adgangskoden skal være mindst 8 tegn</ToastDescription>
           </Toast>
         ),
       });
@@ -85,8 +85,8 @@ export default function NewUserPage() {
         placement: "top",
         render: ({ id }) => (
           <Toast nativeID={id} action="error" variant="solid">
-            <ToastTitle>Passwords matcher ikke</ToastTitle>
-            <ToastDescription>Kontroller begge password-felter</ToastDescription>
+            <ToastTitle>Adgangskoderne matcher ikke</ToastTitle>
+            <ToastDescription>Kontroller begge adgangskodefelter</ToastDescription>
           </Toast>
         ),
       });
@@ -250,17 +250,21 @@ export default function NewUserPage() {
           <SecretInput
             inputValue={password}
             onChangeText={setPassword}
-            placeholder="Password"
+            placeholder="Adgangskode"
             HelperText="Mindst 8 tegn"
           />
 
-          <SecretInput inputValue={confirmPassword} onChangeText={setConfirmPassword} placeholder="Bekræft password" />
+          <SecretInput
+            inputValue={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Bekræft adgangskode"
+          />
 
           <FormControlLabel>
             <FormControlLabelText>Roller</FormControlLabelText>
           </FormControlLabel>
           <Combobox
-            placeholder="Vælge rolle"
+            placeholder="Vælg rolle"
             searchPlaceholder="Søg roller..."
             emptyStateText="Ingen roller fundet"
             options={roleOptions}

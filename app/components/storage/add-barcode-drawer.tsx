@@ -56,7 +56,7 @@ export function AddBarcode({
   return (
     <Drawer isOpen={isOpen} size="md" anchor="right" onClose={() => setIsOpen(false)}>
       <DrawerBackdrop />
-      <DrawerContent className="items-center pb-10 pt-20 max-w-md">
+      <DrawerContent className="max-w-md items-center pb-10 pt-20">
         <DrawerHeader>
           <Heading size="lg">{headerText || "Tilføj stregkode"}</Heading>
         </DrawerHeader>

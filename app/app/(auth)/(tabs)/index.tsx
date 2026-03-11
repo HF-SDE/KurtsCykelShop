@@ -8,6 +8,7 @@ import { Text } from "@/components/ui/text";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 import { useSession } from "@/app/ctx";
+import { usePermissions } from "@/contexts/permissions.ctx";
 
 import { NavigationButton } from "@components/navigation-button";
 import { Avatar, AvatarFallbackText } from "@components/ui/avatar";
@@ -32,8 +33,10 @@ import { InfoIcon } from "lucide-react-native";
 
 export default function UserProfileScreen() {
   const { userProfile, isLoading, resetPassword } = useUserProfile();
-  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const { signOut, session } = useSession();
+  const { hasPageAccess } = usePermissions();
+
+  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [againPassword, setAgainPassword] = useState("");
@@ -44,17 +47,17 @@ export default function UserProfileScreen() {
   const toast = useToast();
   const [toastId, setToastId] = useState("0");
 
-  if (isLoading) return <Text> Loading...</Text>;
+  if (isLoading) return <Text>Indlæser...</Text>;
 
   async function handleReset() {
     if (!currentPassword || !password || !againPassword) {
-      setErrorMessage("Please fill out all fields!");
+      setErrorMessage("Udfyld alle felter!");
       setError(true);
       setConfirmNewPasswordError(false);
       return;
     }
     if (password !== againPassword) {
-      setErrorMessage("Passwords does not match!");
+      setErrorMessage("Adgangskoderne matcher ikke!");
       setConfirmNewPasswordError(true);
       return;
     }
@@ -70,15 +73,15 @@ export default function UserProfileScreen() {
         setAgainPassword("");
         handleToast();
       } else {
-        setErrorMessage(JSON.parse(response)[0].message || "An error occurred.");
-        // setErrorMessage(response || "An error occurred.");
+        setErrorMessage(JSON.parse(response)[0].message || "Der opstod en fejl.");
+        // setErrorMessage(response || "Der opstod en fejl.");
         setConfirmNewPasswordError(false);
         setError(true);
       }
     } catch (error) {
       console.error(error);
 
-      setErrorMessage("An error occurred while changing password.");
+      setErrorMessage("Der opstod en fejl ved ændring af adgangskode.");
       setError(true);
     }
   }
@@ -108,8 +111,8 @@ export default function UserProfileScreen() {
             <HStack space="md">
               <Icon as={InfoIcon} className="stroke-success-500 mt-0.5" />
               <VStack space="xs">
-                <ToastTitle className="text-success-500 font-semibold">Success!</ToastTitle>
-                <ToastDescription size="sm">Password changed successfully.</ToastDescription>
+                <ToastTitle className="text-success-500 font-semibold">Succes!</ToastTitle>
+                <ToastDescription size="sm">Adgangskoden blev ændret.</ToastDescription>
               </VStack>
             </HStack>
             <HStack className="gap-1 min-[450px]:gap-3">
@@ -138,30 +141,32 @@ export default function UserProfileScreen() {
             </Avatar>
             <Box>
               <Text size="2xl" bold>
-                Hi, {userProfile?.firstName || "N/A"} {userProfile?.lastName || ""}
+                Hej, {userProfile?.firstName || "Ikke angivet"} {userProfile?.lastName || ""}
               </Text>
               <Text size="md" className="mb-1.5">
-                Email: {userProfile?.email || "N/A"}
+                Email: {userProfile?.email || "Ikke angivet"}
               </Text>
             </Box>
           </Box>
 
           <Center>
             <VStack className={"w-full gap-2.5"}>
-              <NavigationButton href="/(auth)/(tabs)/management" size="xl">
-                <ButtonText>Management</ButtonText>
-              </NavigationButton>
+              {hasPageAccess("StockPage") && (
+                <NavigationButton href="/(auth)/(tabs)/management" size="xl">
+                  <ButtonText>Administration</ButtonText>
+                </NavigationButton>
+              )}
 
               {/* <NavigationButton href="/(auth)/(tabs)/color-preview" size="xl">
                 <ButtonText>Preview colors</ButtonText>
               </NavigationButton> */}
 
               <Button size="xl" onPress={() => setIsModalVisible(true)}>
-                <ButtonText>Reset Password</ButtonText>
+                <ButtonText>Nulstil adgangskode</ButtonText>
               </Button>
 
               <Button size="xl" onPress={signOut}>
-                <ButtonText>Sign Out</ButtonText>
+                <ButtonText>Log ud</ButtonText>
               </Button>
             </VStack>
           </Center>
@@ -177,7 +182,7 @@ export default function UserProfileScreen() {
           <ModalBackdrop />
           <ModalContent>
             <ModalHeader>
-              <Heading size="lg">Change Password</Heading>
+              <Heading size="lg">Skift adgangskode</Heading>
               <ModalCloseButton>
                 <Icon as={CloseIcon} />
               </ModalCloseButton>
@@ -188,22 +193,22 @@ export default function UserProfileScreen() {
                 onChangeText={setCurrentPassword}
                 isInvalid={error}
                 errorMessage={errorMessage}
-                placeholder="Current Password"
+                placeholder="Nuværende adgangskode"
               />
               <SecretInput
                 inputValue={password}
                 onChangeText={setPassword}
                 className="mb-2"
-                placeholder="New Password"
-                HelperText="Must be at least 6 characters."
+                placeholder="Ny adgangskode"
+                HelperText="Skal være mindst 6 tegn."
               />
               <SecretInput
                 inputValue={againPassword}
                 onChangeText={setAgainPassword}
                 isInvalid={newConfirmPasswordError}
                 errorMessage={errorMessage}
-                placeholder="Confirm New Password"
-                HelperText='Must be the same as "New Password".'
+                placeholder="Bekræft ny adgangskode"
+                HelperText='Skal være den samme som "Ny adgangskode".'
               />
             </ModalBody>
             <ModalFooter>
@@ -215,14 +220,14 @@ export default function UserProfileScreen() {
                   setIsModalVisible(false);
                 }}
               >
-                <ButtonText>Cancel</ButtonText>
+                <ButtonText>Annuller</ButtonText>
               </Button>
               <Button
                 onPress={() => {
                   handleReset();
                 }}
               >
-                <ButtonText>Change</ButtonText>
+                <ButtonText>Skift</ButtonText>
               </Button>
             </ModalFooter>
           </ModalContent>

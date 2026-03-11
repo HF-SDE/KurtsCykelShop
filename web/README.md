@@ -17,15 +17,15 @@ The web app provides:
 
 ### 📂 Folder Structure
 
-| Path                  | Purpose                                              |
-| --------------------- | ---------------------------------------------------- |
-| `app/page.tsx`        | Server-rendered home page fetching catalogue data    |
-| `app/layout.tsx`      | Root layout, metadata, fonts, theme provider wiring  |
-| `components/`         | Feature and reusable UI components                   |
-| `components/ui/`      | shadcn-based primitives (`Button`, `Card`, `Input`) |
-| `lib/apiClient.ts`    | Axios instance configured from `BACKEND_URL`         |
-| `types/`              | Domain types (inventory, service orders, users, UI) |
-| `app/globals.css`     | Tailwind v4 theme tokens, dark mode, animations      |
+| Path               | Purpose                                             |
+| ------------------ | --------------------------------------------------- |
+| `app/page.tsx`     | Server-rendered home page fetching catalogue data   |
+| `app/layout.tsx`   | Root layout, metadata, fonts, theme provider wiring |
+| `components/`      | Feature and reusable UI components                  |
+| `components/ui/`   | shadcn-based primitives (`Button`, `Card`, `Input`) |
+| `lib/apiClient.ts` | Axios instance configured from `BACKEND_URL`        |
+| `types/`           | Domain types (inventory, service orders, users, UI) |
+| `app/globals.css`  | Tailwind v4 theme tokens, dark mode, animations     |
 
 ### 🔄 Data Flow
 
@@ -87,12 +87,12 @@ Then open `http://localhost` (served by Nginx -> `web`), with API at `http://loc
 
 From `web/`:
 
-| Command         | Purpose                     |
-| --------------- | --------------------------- |
-| `npm run dev`   | Start Next.js dev server    |
-| `npm run build` | Create production build     |
-| `npm run start` | Run production server       |
-| `npm run lint`  | Run ESLint                  |
+| Command         | Purpose                  |
+| --------------- | ------------------------ |
+| `npm run dev`   | Start Next.js dev server |
+| `npm run build` | Create production build  |
+| `npm run start` | Run production server    |
+| `npm run lint`  | Run ESLint               |
 
 ## 🐳 Docker Notes
 
