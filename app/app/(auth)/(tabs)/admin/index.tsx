@@ -28,13 +28,13 @@ export default function Admin() {
         <ButtonGroup>
           <CheckPageAccess pageName="RolesPage">
             <Button action="primary" variant="solid" size="3xl" onPress={handleRolesPress}>
-              <ButtonText size="2xl">Roles</ButtonText>
+              <ButtonText size="2xl">Roller</ButtonText>
               <ButtonIcon as={LockIcon} size="4xl" />
             </Button>
           </CheckPageAccess>
           <CheckPageAccess pageName="UsersPage">
             <Button action="primary" variant="solid" size="3xl" onPress={handleUsersPress}>
-              <ButtonText size="2xl">Users</ButtonText>
+              <ButtonText size="2xl">Brugere</ButtonText>
               <ButtonIcon as={UsersRound} size="4xl" />
             </Button>
           </CheckPageAccess>

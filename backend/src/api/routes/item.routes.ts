@@ -1,9 +1,9 @@
 import {
   createOne,
   deleteOne,
-  getAllPublic,
   getAll,
   getAllPaginated,
+  getAllPublic,
   getByBarcode,
   getById,
   getBySearchQuery,

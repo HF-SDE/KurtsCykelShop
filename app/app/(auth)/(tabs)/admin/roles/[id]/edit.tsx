@@ -194,7 +194,7 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
       </Heading>
 
       <Textarea className="mb-4 w-full">
-        <TextareaInput placeholder="Description" value={description} onChangeText={setDescription} />
+        <TextareaInput placeholder="Beskrivelse" value={description} onChangeText={setDescription} />
       </Textarea>
 
       <Box className="mb-3 flex-row items-center gap-3">
@@ -215,8 +215,8 @@ function EditRolePageContent({ roleId }: { roleId: string }) {
 
       <Box className="border-outline-200 flex-1 overflow-hidden rounded-2xl border">
         <Box className="border-outline-200 bg-background-50 flex-row border-b px-4 py-3">
-          <Text className="text-typography-800 flex-[1.3] text-base font-bold">Name</Text>
-          <Text className="text-typography-800 flex-[1.5] text-base font-bold">Description</Text>
+          <Text className="text-typography-800 flex-[1.3] text-base font-bold">Navn</Text>
+          <Text className="text-typography-800 flex-[1.5] text-base font-bold">Beskrivelse</Text>
         </Box>
 
         <ScrollView keyboardShouldPersistTaps="handled">

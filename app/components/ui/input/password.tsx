@@ -43,12 +43,12 @@ export default function SecretInput({
       isRequired={false}
     >
       <FormControlLabel>
-        <FormControlLabelText>{placeholder || "Password"}</FormControlLabelText>
+        <FormControlLabelText>{placeholder || "Adgangskode"}</FormControlLabelText>
       </FormControlLabel>
       <Input className="my-1" size="md">
         <InputField
           type={showPassword ? "text" : "password"}
-          placeholder={placeholder || "Password"}
+          placeholder={placeholder || "Adgangskode"}
           value={inputValue}
           onChangeText={(text) => onChangeText && onChangeText(text)}
         />

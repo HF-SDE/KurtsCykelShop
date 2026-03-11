@@ -1,7 +1,8 @@
-When you first open the app you will see a login screen. 
+When you first open the app you will see a login screen.
 ![Login](.github/images/wiki/profile.png)
 
-You can log in with your username and password combination, but for testing purposes you can use the following credentials: 
+You can log in with your username and password combination, but for testing purposes you can use the following credentials:
+
 - Username: `admin`
 - Password: `admin`
 

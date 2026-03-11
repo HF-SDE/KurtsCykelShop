@@ -59,9 +59,12 @@ export default function ManagementScreen() {
   );
   const [units, setUnits, unitsLoading, refreshUnits] = useData<Unit>("/units", [], cachedDataOptions);
 
-  const currentItems: ManageableEntity[] = activeType === "vendors" ? vendors : activeType === "locations" ? locations : units;
-  const isLoading = activeType === "vendors" ? vendorsLoading : activeType === "locations" ? locationsLoading : unitsLoading;
-  const refresh = activeType === "vendors" ? refreshVendors : activeType === "locations" ? refreshLocations : refreshUnits;
+  const currentItems: ManageableEntity[] =
+    activeType === "vendors" ? vendors : activeType === "locations" ? locations : units;
+  const isLoading =
+    activeType === "vendors" ? vendorsLoading : activeType === "locations" ? locationsLoading : unitsLoading;
+  const refresh =
+    activeType === "vendors" ? refreshVendors : activeType === "locations" ? refreshLocations : refreshUnits;
   const emptyStateText =
     activeType === "vendors"
       ? "Ingen leverandorer fundet."
@@ -284,11 +287,7 @@ export default function ManagementScreen() {
                 columns={columns}
                 onPress={() => openEditModal(activeType, item)}
                 action={
-                  <Button
-                    variant="outline"
-                    action="secondary"
-                    className="!border-0"
-                  >
+                  <Button variant="outline" action="secondary" className="!border-0">
                     <ButtonIcon size="3xl" as={Pencil} />
                   </Button>
                 }
@@ -380,12 +379,20 @@ export default function ManagementScreen() {
             )}
 
             <HStack className="mt-4 justify-end gap-2">
-              <Button variant="outline" action="secondary" className="mr-3" onPress={closeCreateModal} isDisabled={isCreating}>
+              <Button
+                variant="outline"
+                action="secondary"
+                className="mr-3"
+                onPress={closeCreateModal}
+                isDisabled={isCreating}
+              >
                 <ButtonText>Annuller</ButtonText>
               </Button>
               <Button
                 onPress={handleCreateItem}
-                isDisabled={isCreating || createName.trim() === "" || (activeType === "units" && createCode.trim() === "")}
+                isDisabled={
+                  isCreating || createName.trim() === "" || (activeType === "units" && createCode.trim() === "")
+                }
               >
                 <ButtonText>{isCreating ? "Opretter..." : "Opret"}</ButtonText>
               </Button>

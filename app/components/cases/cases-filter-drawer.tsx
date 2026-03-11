@@ -98,7 +98,7 @@ export function CasesFilterDrawer({
   return (
     <Drawer isOpen={showDrawer} size="lg" anchor="right" onClose={handleClose}>
       <DrawerBackdrop />
-      <DrawerContent className="px-8 max-w-md">
+      <DrawerContent className="max-w-md px-8">
         <DrawerHeader className="mt-16">
           <Heading size="lg">Filtre</Heading>
           <DrawerCloseButton>

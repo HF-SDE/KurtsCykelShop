@@ -7,12 +7,14 @@ Express + Prisma API for Kurts Cykel Shop.
 The backend provides:
 
 - 🔐 authentication (`/login`, `/logout`, `/refreshToken`, `/accessToken`)
+- 📚 Swagger docs (`/docs`, no trailing-slash redirect)
 - 👤 profile endpoints (`/profile`)
 - 🔧 service order workflows (`/service-orders`)
 - 📦 inventory/storage APIs (`/items`, `/vendors`, `/locations`, `/units`, `/item-statuses`)
 - 👥 admin management (`/manage` users/roles/permissions)
 
 The API runs on port `5000` and exposes health at `/health`.
+Swagger UI is available at `/docs` when you hit the backend directly, or `/api/docs` through the bundled Nginx proxy.
 
 ## 🏗️ Architecture
 

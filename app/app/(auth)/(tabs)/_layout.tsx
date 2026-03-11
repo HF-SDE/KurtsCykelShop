@@ -80,7 +80,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Profile",
+            title: "Profil",
             tabBarItemStyle: { display: "flex" },
             tabBarIcon: ({ focused }) => (
               <Icon

@@ -19,9 +19,9 @@ export function useSession() {
   const context = useContext(AuthContext);
 
   // if (process.env.NODE_ENV !== "production") {
-    if (!context) {
-      throw new Error("useSession must be wrapped in a <SessionProvider />");
-    }
+  if (!context) {
+    throw new Error("useSession must be wrapped in a <SessionProvider />");
+  }
   // }
 
   return context;
@@ -39,7 +39,7 @@ export default function SessionProvider(props: React.PropsWithChildren) {
 
             if (!isUsernameValid || !isPasswordValid) {
               setToken(null);
-              return "Please fill out username and password";
+              return "Udfyld brugernavn og adgangskode";
             }
 
             const encodedPassword = Buffer.from(password).toString("base64");
@@ -69,7 +69,7 @@ export default function SessionProvider(props: React.PropsWithChildren) {
             return "authenticated";
           } catch {
             setToken(null);
-            return "Something went wrong on our end. Please contact support";
+            return "Noget gik galt hos os. Kontakt support";
           }
         },
         signOut: async () => {

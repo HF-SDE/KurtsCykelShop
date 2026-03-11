@@ -155,18 +155,20 @@ export async function createUser(body: CreateUserInput): Promise<APIResponse<Use
 
   console.log("Creating user with data:", validation.data);
 
-  const data = await prisma.user.create({ data: {
-    username: validation.data.username,
-    firstName: validation.data.firstName,
-    lastName: validation.data.lastName,
-    email: validation.data.email,
-    initials: validation.data.initials,
-    isActive: validation.data.active ?? true,
-    password: await hash(validation.data.password),
-    roles: {
-      connect: validation.data.UserRoles?.map((roleId) => ({ id: roleId })) ?? [],
+  const data = await prisma.user.create({
+    data: {
+      username: validation.data.username,
+      firstName: validation.data.firstName,
+      lastName: validation.data.lastName,
+      email: validation.data.email,
+      initials: validation.data.initials,
+      isActive: validation.data.active ?? true,
+      password: await hash(validation.data.password),
+      roles: {
+        connect: validation.data.UserRoles?.map((roleId) => ({ id: roleId })) ?? [],
+      },
     },
-  } });
+  });
 
   return {
     status: Status.Created,

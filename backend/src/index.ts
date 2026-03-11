@@ -1,6 +1,7 @@
 import config from "@config";
 import authRoutes from "@routes/auth.routes";
 import customerRoutes from "@routes/customer.routes";
+import docsRoutes from "@routes/docs.routes";
 import { itemRoutes } from "@routes/item.routes";
 import { itemStatusRoutes } from "@routes/itemStatuses.routes";
 import { locationRoutes } from "@routes/locations.routes";
@@ -44,6 +45,7 @@ app.use((req, res, next) => {
 });
 
 //Insert all routes here
+app.use("/docs", docsRoutes);
 app.use(`/`, authRoutes);
 app.use(`/profile`, profileRoutes);
 app.use(`/manage`, manageRoutes);

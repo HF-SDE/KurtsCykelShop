@@ -27,28 +27,42 @@ spec:
           envFrom:
             - configMapRef:
                 name: web-env
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=768"
           image: web:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           name: web
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
+              cpu: "250m"
               memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          startupProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 18
           readinessProbe:
             httpGet:
               path: /
               port: 3000
             initialDelaySeconds: 20
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 45
+            initialDelaySeconds: 90
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           ports:
             - containerPort: 3000
               protocol: TCP
