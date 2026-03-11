@@ -28,7 +28,7 @@ export function useUserProfile() {
 
         setUserProfile(response.data.data);
       } catch (err: any) {
-        setError(err.code || "Failed to load profile data");
+        setError(err.code || "Kunne ikke indlæse profildata");
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +49,7 @@ export function useUserProfile() {
       });
       return response.status === 200 ? "success" : response.data.message;
     } catch {
-      return "Something went wrong on our end. Please contact support";
+      return "Noget gik galt hos os. Kontakt support";
     }
   }
   return { userProfile, isLoading, error, resetPassword };

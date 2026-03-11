@@ -41,7 +41,7 @@ export default function EditItem() {
 
   if (!item) {
     Alert.alert("Genstand ikke fundet", "Den genstand du prøver at redigere kunne ikke findes.", [
-      { text: "OK", onPress: () => router.back() },
+      { text: "Luk", onPress: () => router.back() },
     ]);
 
     return null;

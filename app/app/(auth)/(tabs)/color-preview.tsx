@@ -16,10 +16,10 @@ function getGroupName(token: string) {
   const parts = name.split("-");
 
   if (parts[0] === "background" && parts.length > 1 && Number.isNaN(Number(parts[1]))) {
-    return "background-special";
+    return "baggrund-special";
   }
 
-  return parts[0] ?? "other";
+  return parts[0] ?? "øvrig";
 }
 
 function sortByToken(a: PaletteEntry, b: PaletteEntry) {
@@ -79,11 +79,11 @@ export default function ColorPreviewScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[2]}>
-        <Text style={styles.screenTitle}>Theme Color Preview</Text>
-        <Text style={styles.screenSubtitle}>From gluestack-ui-provider/config.ts</Text>
+        <Text style={styles.screenTitle}>Temafarveoversigt</Text>
+        <Text style={styles.screenSubtitle}>Fra gluestack-ui-provider/config.ts</Text>
         <View className="bg-primary-0 flex-row justify-between">
-          <Text style={styles.modeTitle}>LIGHT</Text>
-          <Text style={styles.modeTitle}>DARK</Text>
+          <Text style={styles.modeTitle}>LYS</Text>
+          <Text style={styles.modeTitle}>MØRK</Text>
         </View>
         <View style={styles.columns}>
           <PaletteSection mode="light" />

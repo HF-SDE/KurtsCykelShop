@@ -190,12 +190,12 @@ function EditUserPageContent({ userId }: { userId: string }) {
     }
 
     if (trimmedNewPassword.length < 8) {
-      setPasswordModalError("Password skal være mindst 8 tegn");
+      setPasswordModalError("Adgangskoden skal være mindst 8 tegn");
       return;
     }
 
     if (trimmedNewPassword !== confirmNewPassword.trim()) {
-      setPasswordModalError("Passwords matcher ikke");
+      setPasswordModalError("Adgangskoderne matcher ikke");
       return;
     }
 
@@ -215,15 +215,15 @@ function EditUserPageContent({ userId }: { userId: string }) {
         placement: "top",
         render: ({ id }) => (
           <Toast nativeID={id} action="success" variant="solid">
-            <ToastTitle>Password nulstillet</ToastTitle>
-            <ToastDescription>Brugerens password er opdateret</ToastDescription>
+            <ToastTitle>Adgangskode nulstillet</ToastTitle>
+            <ToastDescription>Brugerens adgangskode er opdateret</ToastDescription>
           </Toast>
         ),
       });
     } catch (error) {
       console.error("Error while resetting password:", error);
 
-      setPasswordModalError("Kunne ikke nulstille password");
+      setPasswordModalError("Kunne ikke nulstille adgangskode");
     } finally {
       setIsResettingPassword(false);
     }
@@ -368,7 +368,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
             action="secondary"
             onPress={() => setIsResetPasswordModalOpen(true)}
           >
-            <ButtonText>Nulstil password</ButtonText>
+            <ButtonText>Nulstil adgangskode</ButtonText>
           </Button>
 
           <Button
@@ -378,7 +378,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
             onPress={() => setIsAccountStatusModalOpen(true)}
             isDisabled={isUpdatingAccountStatus}
           >
-            <ButtonText>{isActive ? "Disable" : "Active"}</ButtonText>
+            <ButtonText>{isActive ? "Deaktiver" : "Aktiver"}</ButtonText>
           </Button>
         </ButtonGroup>
       </ScrollView>
@@ -394,7 +394,7 @@ function EditUserPageContent({ userId }: { userId: string }) {
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
-            <Heading size="lg">Change Password</Heading>
+            <Heading size="lg">Skift adgangskode</Heading>
             <ModalCloseButton>
               <Icon as={CloseIcon} />
             </ModalCloseButton>

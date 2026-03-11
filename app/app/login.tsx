@@ -53,7 +53,7 @@ export default function Index() {
       setIsLoading(false);
     } else {
       await triggerHapticFeedback(NotificationFeedbackType.Error);
-      setErrorMessage("Please fill out username and password");
+      setErrorMessage("Udfyld brugernavn og adgangskode");
       setIsInvalid(true);
     }
   };
@@ -100,11 +100,11 @@ export default function Index() {
             {isLoading ? (
               <Button className="mt-4" size="lg" variant="solid">
                 <ButtonSpinner />
-                <ButtonText>Please wait...</ButtonText>
+                <ButtonText>Vent venligst...</ButtonText>
               </Button>
             ) : (
               <Button className="mt-4" size="lg" variant="solid" onPress={handleLogin}>
-                <ButtonText>Login</ButtonText>
+                <ButtonText>Log ind</ButtonText>
               </Button>
             )}
           </VStack>

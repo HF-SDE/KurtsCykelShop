@@ -83,8 +83,8 @@ function ThemeToggleClient() {
       size="icon"
       className="size-9 hover:bg-white dark:text-slate-100"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Skift til light mode" : "Skift til dark mode"}
-      title={isDark ? "Skift til light mode" : "Skift til dark mode"}
+      aria-label={isDark ? "Skift til lyst tema" : "Skift til mørkt tema"}
+      title={isDark ? "Skift til lyst tema" : "Skift til mørkt tema"}
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </Button>
