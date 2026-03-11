@@ -8,6 +8,7 @@ import { Text } from "@/components/ui/text";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
 import { useSession } from "@/app/ctx";
+import { usePermissions } from "@/contexts/permissions.ctx";
 
 import { NavigationButton } from "@components/navigation-button";
 import { Avatar, AvatarFallbackText } from "@components/ui/avatar";
@@ -32,8 +33,10 @@ import { InfoIcon } from "lucide-react-native";
 
 export default function UserProfileScreen() {
   const { userProfile, isLoading, resetPassword } = useUserProfile();
-  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const { signOut, session } = useSession();
+  const { hasPageAccess } = usePermissions();
+
+  const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [againPassword, setAgainPassword] = useState("");
@@ -148,9 +151,11 @@ export default function UserProfileScreen() {
 
           <Center>
             <VStack className={"w-full gap-2.5"}>
-              <NavigationButton href="/(auth)/(tabs)/management" size="xl">
-                <ButtonText>Management</ButtonText>
-              </NavigationButton>
+              {hasPageAccess("StockPage") && (
+                <NavigationButton href="/(auth)/(tabs)/management" size="xl">
+                  <ButtonText>Management</ButtonText>
+                </NavigationButton>
+              )}
 
               {/* <NavigationButton href="/(auth)/(tabs)/color-preview" size="xl">
                 <ButtonText>Preview colors</ButtonText>
