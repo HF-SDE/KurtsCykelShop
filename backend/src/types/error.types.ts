@@ -2,24 +2,23 @@
 import { Status } from "./general.types";
 
 // // For validation errors with field-specific messages
-// export interface ValidationError {
-//   status: Status;
-//   message: string;
-//   fieldErrors: {
-//     [field: string]: string[];
-//   };
-// }
+export interface ValidationError {
+  status: Status;
+  message: string;
+  fieldErrors: {
+    [field: string]: string[];
+  };
+}
 
-// // For general application errors
-// export interface AppError {
-//   status: Status;
-//   message: string;
-//   details?: unknown;
-// }
+// For general application errors
+export interface AppError {
+  status: Status;
+  message: string;
+  details?: unknown;
+}
 
-// // Result tuple type for service layer - enables [data, error] destructuring
-// export type EitherDataOrError<T, E = AppError> =
-// [data: T, error: null] | [data: null, error: E];
+// Result tuple type for service layer - enables [data, error] destructuring
+export type EitherDataOrError<T, E = AppError> = [data: T, error: null] | [data: null, error: E];
 
 type Result<E extends { status: Status }, S> = [E, null] | [null, S];
 
